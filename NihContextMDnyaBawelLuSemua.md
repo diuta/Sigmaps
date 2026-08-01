@@ -180,8 +180,7 @@ Wajib terlihat pengguna. Empat titik AI, semuanya punya input–proses–output 
 |---|---|---|---|---|
 | 1 | **Klasifikasi arketipe** | prompt teks ide bisnis | LLM → 1 dari 3 arketipe + ekstraksi jam operasi, segmen, luas, kategori | preset bobot terpilih (ditampilkan ke pengguna, bisa disunting manual) |
 | 2 | **Normalisasi teks menu & merchant** | teks menu Menu Go, nama merchant Struk Go | pencocokan kemiripan teks → kategori usaha terstandar | penghitungan kompetitor yang konsisten |
-| 3 | **OCR foto struk & banner** | foto Struk Go / Properti Go | ekstraksi teks | pengayaan atribut — **opsional, bukan jalur kritis** |
-| 4 | **AI Area Insight** | hasil skoring per stasiun/sel | *data-to-text* NLG bertemplat | ringkasan naratif kelebihan/kekurangan kawasan, terkait langsung ke objek peta |
+| 3 | **AI Area Insight** | hasil skoring per stasiun/sel | *data-to-text* NLG bertemplat | ringkasan naratif kelebihan/kekurangan kawasan, terkait langsung ke objek peta |
 
 **Prinsip:** AI menerjemahkan dan meringkas, **tidak** mengarang angka. Semua nilai yang muncul di narasi harus bisa ditelusuri ke sel H3 atau baris data.
 
@@ -205,9 +204,9 @@ Ini menjawab syarat lomba "AI harus explainable + validatable" tanpa perlu menga
 ## 11. Data
 
 **Data Mission (MAPID)** — inti analisis:
-- `Struk Go` — transaksi riil: merchant, kategori, **tanggal/waktu**, **metode bayar**, foto struk, koordinat. → sinyal permintaan & ritme kawasan.
+- `Struk Go` — transaksi riil: merchant, kategori, **tanggal/waktu**, **metode bayar**, koordinat. → sinyal permintaan & ritme kawasan. Kolom foto struk tidak digunakan.
 - `Menu Go` — jenis tempat makan, menu andalan, **harga rata-rata**, **kondisi ramai/sepi**, koordinat. → kompetitor F&B, proxy daya beli, label validasi.
-- `Properti Go` — kategori, jenis, alamat, foto, koordinat. → katalog ketersediaan (**tanpa variabel harga**).
+- `Properti Go` — kategori, jenis, alamat, koordinat. → katalog ketersediaan (**tanpa variabel harga**). Kolom foto banner tidak digunakan.
 
 **Data sekunder (MAPID Data Catalogue):** batas administrasi & kepadatan penduduk Jabodetabek; POI fasilitas & ritel eksis; simpul transportasi publik.
 
@@ -245,7 +244,10 @@ Ini menjawab syarat lomba "AI harus explainable + validatable" tanpa perlu menga
 ## 14. Aturan Penulisan untuk Semua Anggota
 
 1. **Nol data fiktif.** Tidak ada angka yang tidak bisa ditelusuri ke dataset atau sumber resmi. Kalau belum punya angkanya, tulis metodenya, bukan hasilnya.
-2. **Tidak ada estimasi harga properti.** Sekali muncul, kredibilitas seluruh proposal jatuh.
+2. **Tiga hal yang tidak dipakai sama sekali** — keputusan tim, final, jangan dihidupkan lagi di draf manapun:
+   - **Data Community Maps** — SIGMAPS memenuhi syarat lewat 3 dataset Data Mission.
+   - **Variabel harga properti** — tidak tersedia sebagai data terstruktur; estimasi apa pun bersifat generatif.
+   - **OCR foto struk & banner** — dihapus dari lingkup. Seluruh analisis hanya memakai kolom terstruktur.
 3. **Nyatakan keterbatasan secara terbuka** (kurva U-terbalik, ko-lokasi data, bobot yang belum dikalibrasi). Juri lebih menghargai batasan yang diakui daripada peta mulus yang tidak jujur.
 4. **Bahasa lugas dan teknis**, tanpa *fluff* dan tanpa narasi berlebihan.
 5. **Terminologi konsisten** dengan dokumen ini. Jangan bikin istilah baru sendiri — kalau perlu istilah baru, tambahkan ke dokumen ini dulu.
@@ -258,6 +260,5 @@ Ini menjawab syarat lomba "AI harus explainable + validatable" tanpa perlu menga
 Catat di sini kalau ada yang mengganjal, jangan diputuskan sepihak di draf bab:
 
 - [ ] Berapa stasiun prioritas untuk survei — 5 atau 6? Koridor mana?
-- [ ] Apakah OCR (AI #3) dimasukkan ke proposal atau disimpan sebagai rencana pengembangan?
 - [ ] Cakupan operator di tahap proposal — keempatnya, atau fokus KRL dulu lalu perluas?
 - [ ] Pembagian penulis per bab.
