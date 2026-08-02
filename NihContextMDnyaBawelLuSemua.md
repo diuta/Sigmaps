@@ -236,7 +236,7 @@ Ini menjawab syarat lomba "AI harus explainable + validatable" tanpa perlu menga
 | 3 | Latar Belakang Masalah | maks 1–2 hal | 3 problem statement §3, didukung konteks Jabodetabek |
 | 4 | Solusi yang Diusulkan | — | deskripsi, data & visualisasi, analisis spasial (§5–8), peran AI (§9), output insight, sistem end-to-end |
 | 5 | Potensi WebGIS dan Manfaat | maks 1 hal | manfaat bagi pelaku usaha, pemilik aset, perkembangan TOD / ekonomi kawasan stasiun |
-| 6 | Kelayakan Teknis | maks 1–2 hal | tech stack, rencana survei, **risiko data §11**, validasi §10 |
+| 6 | Kelayakan Teknis | maks 1–2 hal | tech stack, alur pengolahan data, peran AI, ketersediaan data §10 |
 | 7 | Kesimpulan | maks 1 hal | — |
 
 ---
