@@ -21,7 +21,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [106.81966900942757, -6.201446635103822]
+        "coordinates": [106.82171821705732, -6.201414636943112]
       },
       "properties": { "name": "bni-city" }
     },
@@ -29,7 +29,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [106.81543282292022, -6.200181938320194]
+        "coordinates": [106.81654318748998, -6.20028543846977]
       },
       "properties": { "name": "karet" }
     }
