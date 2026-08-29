@@ -1,0 +1,724 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64149370235509,
+          -6.324662550066432
+        ]
+      },
+      "properties": {
+        "_id": "6a9277f63f59e23bb8628b20",
+        "title": "Stasiun Cisauk WeekEnd",
+        "description": "Pada hari libur, Stasiun Cisauk terpantau cukup padat dengan pergerakan penumpang yang konstan, di mana tercatat sekitar 20 hingga 50 orang melakukan aktivitas naik dan turun kereta pada setiap keberangkatan. #Cook\n",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/000ceffd-971e-411a-85f5-3269b0fe40ad_1787983861025.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-29T06:11:02.051Z",
+        "likes": [],
+        "user_name": "mumu02",
+        "user_full_name": "Samuel",
+        "user_profile_picture": {
+          "name": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "url": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "name_compressed": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg",
+          "url_compressed": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg"
+        },
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.63999245448827,
+          -6.3257492911955575
+        ]
+      },
+      "properties": {
+        "_id": "6a92729952d86e03b51d4d5f",
+        "title": "Angkutan Kota KRL Cisauk",
+        "description": "Angkutan kota di dekat pintu keluar Stasiun Cisauk terpantau sepi penumpang, seiring banyaknya pengguna KRL yang beralih menggunakan ojek online dan taksi online. #Cook",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/859e3a90-e3c2-4c6a-b5a4-9c73f5c50691_1787982488627.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-29T05:48:09.360Z",
+        "likes": [],
+        "user_name": "mumu02",
+        "user_full_name": "Samuel",
+        "user_profile_picture": {
+          "name": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "url": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "name_compressed": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg",
+          "url_compressed": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg"
+        },
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64324222142494,
+          -6.321648638701365
+        ]
+      },
+      "properties": {
+        "_id": "6a926de252d86e03b51d4873",
+        "title": "Parkiran Intermoda",
+        "description": "Parkiran Pasar Intermoda tergolong ramai pada hari libur, banyak pengunjung lainya yang menggunakan transportasi umum baik KRL maupun bis menjadikan pasar intermoda salah destinasi favorit dihari libur. #Cook",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/18e9e4ae-8c4a-4b3e-8da5-ef39a376ad26_map_798E908A-4683-4ABA-A218-BAE5362792ED.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/0d60c9bd-262b-49c8-a0a5-64ef70c86034_1787981281766.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/cad19e20-63bd-4d0e-bdf5-469a05a7b98a_1787981281805.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-29T05:28:02.748Z",
+        "likes": [],
+        "user_name": "mumu02",
+        "user_full_name": "Samuel",
+        "user_profile_picture": {
+          "name": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "url": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "name_compressed": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg",
+          "url_compressed": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg"
+        },
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64276615856238,
+          -6.323434848960537
+        ]
+      },
+      "properties": {
+        "_id": "6a8ede4152d86e03b51ba363",
+        "title": "Kondisi stasiun Cisauk malam",
+        "description": "19.32 WIB, cukup ramai di stasiun Cisauk karena orang sedang pulang dari kerja namun masih cukup kondusif #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/fe56aad5-1052-422c-aa6d-812cb353a9ab_map_D2520826-F928-4C3B-BB6C-30C703DBFB77.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/baf7503b-f48e-4f9c-a42e-9abd6cbfd9c5_1787747904632.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-26T12:38:25.560Z",
+        "likes": [],
+        "user_name": "clementnth",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.6407530986408,
+          -6.324871288845723
+        ]
+      },
+      "properties": {
+        "_id": "6a8e9d7652d86e03b51b5f74",
+        "title": "Situasi Gerbong Cisauk-Tanah Abang",
+        "description": "Cukup ramai, tempat duduk tidak tersisa terlalu banyak, 15.01 WIB, 26 Agustus 2026 #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/b4c6b127-b9af-4193-b49b-8206c3b7689b_map_314CBCAA-4060-47D7-A54F-53D2D800CCBF.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/30ac7246-4938-4c39-94d7-a402d20f03b3_1787731316220.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-26T08:01:58.283Z",
+        "likes": [
+          {
+            "_id": "6a8e9ed246690fc6c68da6e0",
+            "user_name": "amrique",
+            "full_name": "Amrique M. Wafiroh",
+            "profile_picture": {
+              "name": "general_image/amrique/1783270474265_1000321198.jpg",
+              "url": "https://mapidstorage.cdn.mapid.io/general_image/amrique/1783270474265_1000321198.jpg",
+              "name_compressed": "general_image/amrique/1783270474265_1000321198_compressed.jpeg",
+              "url_compressed": "https://mapidstorage.cdn.mapid.io/general_image/amrique/1783270474265_1000321198_compressed.jpeg"
+            },
+            "created_at": "2026-08-26T08:07:46.396Z"
+          }
+        ],
+        "user_name": "clementnth",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64133589466587,
+          -6.324693588521582
+        ]
+      },
+      "properties": {
+        "_id": "6a8e9bda52d86e03b51b5d80",
+        "title": "Kondisi Keramaian KRL Cisauk - Tanah Abang",
+        "description": "#KAMEHAMEHA Tanggal 26 Agustus 2026 Pukul 14.53, kondisi area tunggu peron KRL Cisauk - Tanah Abang cukup kondusif dan sepi terlihat di foto. ",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/b6bb6cc7-ea0c-4b9d-bf67-2ca50a90792d_1787730905313.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-26T07:55:06.010Z",
+        "likes": [],
+        "user_name": "clarawita",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64189092282868,
+          -6.324226030558944
+        ]
+      },
+      "properties": {
+        "_id": "6a8e9a4b46690fc6c68da216",
+        "title": "Akses dari Intermoda ke Cisauk",
+        "description": "Lorong dari intermoda ke stasiun KA Cisauk yang panjang terasa sangat panas dan pengap karena tidak ada kipas angin atau ventilasi aktif #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/8f756b16-3627-406e-a783-902b5b3ee399_map_C7DA021D-50E7-42E4-8B8B-427266E703CC.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/186ac472-a594-4d6d-9d1b-29eec7f965a7_1787730505019.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-26T07:48:27.921Z",
+        "likes": [],
+        "user_name": "clementnth",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64370157751398,
+          -6.322550312486434
+        ]
+      },
+      "properties": {
+        "_id": "6a8e996252d86e03b51b5ad1",
+        "title": "Pembangunan Wonder Alley, \"Blok M\" BSD di stasiun Intermoda BSD",
+        "description": "Terdapat pembangunan Wonder Alley tepat di depan pintu masuk stasiun intermoda BSD. Wonder Alley ini merupakan commercial hub yang akan dipenuhi banyak ruko dengan target pasar para komuter dari stasiun. #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/fba5bc4a-4e8d-4a91-9baf-01f003e77725_map_68B9260F-507F-46C7-96A8-CCB49EE4FCD9.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/d8255f4d-b369-4ec9-a48b-879d3943a14e_1787730273615.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/505ce17a-ee81-4a66-a3dd-c8777542cba6_1787730273665.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/31a2d71b-3e28-489e-9010-4bad3a9b8272_1787730273694.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-26T07:44:34.923Z",
+        "likes": [],
+        "user_name": "clarissa",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64355671043194,
+          -6.321879392495679
+        ]
+      },
+      "properties": {
+        "_id": "6a8e98d946690fc6c68da0bc",
+        "title": "Intermoda Accessibility dekat Stasiun Cisauk",
+        "description": "Terdapat akses khusus kursi roda untuk turun  #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/378e837d-4648-4aae-8958-57b6352da3ee_map_1FB7EA59-067F-42A9-855D-E78ED9C223C6.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/139ad711-a0e5-4b50-a611-83015b9f9102_1787730137195.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-26T07:42:17.935Z",
+        "likes": [],
+        "user_name": "clementnth",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64349942677035,
+          -6.322121137294686
+        ]
+      },
+      "properties": {
+        "_id": "6a8d3f4d52d86e03b51a96f6",
+        "title": "Halte BSD LINK Cisauk Intermoda",
+        "description": "#KAMEHAMEHA Tanggal 25 Agustus 2026 pukul 14.06 terdapat halte bsd link yang tidak dipungut biaya untuk transit ke kota bsd. kondisi halte cukup sepi.",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/f772c148-437c-40bf-ad4e-1c7d806c3815_map_B1AB7E00-F009-48B3-9587-CA6ABCF7776D.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/c9ec3d39-fac9-4393-9c29-50989e7ccdf6_1787641676709.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/5bcfceda-91f2-41cd-80de-bb421673822d_1787641676747.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-25T07:07:57.580Z",
+        "likes": [],
+        "user_name": "clarawita",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64346267996336,
+          -6.323150513276659
+        ]
+      },
+      "properties": {
+        "_id": "6a8d3e3deca288692ef3a90b",
+        "title": "Stall Gorengan di skywalk KRL Cisauk - Intermoda",
+        "description": "#KAMEHAMEHA Tanggal 25 Agustus 2026 Pukul 14.01, terlihat banyak stall gorengan dan makanan kecil yang dijual di sekitar skywalk KRL Cisauk - Intermoda. beberapa toko masih belum buka dan sepi.",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/4dac49a6-f8ee-44db-b026-48ce1a7c50d5_map_7C308F1F-7BCD-4DBB-8ABC-AE095102C8CD.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/4cb85709-8a8e-49a7-b5fe-a02b39be31f6_1787641404224.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-25T07:03:25.161Z",
+        "likes": [],
+        "user_name": "clarawita",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64304427226,
+          -6.3234059829604385
+        ]
+      },
+      "properties": {
+        "_id": "6a8d3d6052d86e03b51a94ad",
+        "title": "Jembatan Intermoda - Stasiun Cisauk",
+        "description": "Jembatan penghubung (*skywalk*) Intermoda Cisauk ini ukurannya terbilang besar dan lebar, bikin akses jalan kaki dari stasiun ke terminal bus maupun area Pasar Modern BSD terasa lega. Di jam segini, jalurnya lumayan sepi dari lalu lalang orang. Karena fisiknya yang luas dan kondisinya lagi lengang, jalan melintasi jembatan ini jadi terasa santai banget tanpa perlu desak-desakan atau buru-buru sama komuter lain. Disekitarnya juga banyak stan makanan #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/3de573b9-4d74-442e-9f8e-e168f8e5b2e4_map_C9C3BD96-091F-4A94-87CC-1F29C0914376.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/50c4a497-aa05-4399-9253-663b55ce2bec_1787641170767.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/8980759f-bee9-45e0-b6f2-067fec8ee73a_1787641170907.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/60f6f729-683e-43a4-bff3-5fbddd17226a_1787641171060.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-25T06:59:44.634Z",
+        "likes": [],
+        "user_name": "william",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.6415957697518,
+          -6.3244355655953495
+        ]
+      },
+      "properties": {
+        "_id": "6a8d3c1b52d86e03b51a9231",
+        "title": "Ketersediaan Musholla di KRL Cisauk",
+        "description": "Tanggal 25 Agustus pukul 13.52, di dalam KRL Cisauk terdapat fasilitas Musala untuk beribadah. lokasi musala cukup mudah diakses dan leluasa. #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/e9b88689-12a2-45fd-8496-6f2c57c79717_map_41C8DE9E-FA1E-4594-8CB7-CA69986D955F.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/61f83412-0ce9-418e-9e28-a4a9f8aae77b_1787640859281.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-25T06:54:19.833Z",
+        "likes": [],
+        "user_name": "clarawita",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64003278445739,
+          -6.325791326817537
+        ]
+      },
+      "properties": {
+        "_id": "6a8d3c0752d86e03b51a91de",
+        "title": "PKL Sekitar Cisauk Point",
+        "description": "Di area pintu keluar-masuk Cisauk Point, pedagang kaki lima berjejer cukup banyak di sepanjang area pejalan kaki. Gerobak-gerobak ini jualan aneka jajanan praktis, mulai dari gorengan, batagor, telur gulung, sampai es teh dan kopi cup. Suasananya khas tempat transit, di mana para komuter atau warga apartemen sekitar sering berhenti sebentar buat beli cemilan cepat sebelum lanjut jalan. #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/86c47211-94d1-4d59-939a-7d5a64621ec3_map_BA5170B5-E633-4656-A61F-16B51EA55F85.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/52c374f5-bf33-4321-a8a8-ccce36616d24_1787640836452.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/83374f44-5a63-4d52-b438-f834eb981c27_1787640836642.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/2ce5fc63-46e5-44a8-beca-0dcaa041eba2_1787640836794.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-25T06:53:59.088Z",
+        "likes": [],
+        "user_name": "william",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64161345983916,
+          -6.324397481675277
+        ]
+      },
+      "properties": {
+        "_id": "6a8d3bbf52d86e03b51a9148",
+        "title": "Accessibility Cisauk Point",
+        "description": "Aksesibilitas di Cisauk Point sudah ada, tapi waktu tempuhnya lumayan memakan hampir 2x lipat daripada jalur utama karena jalurnya agak memutar #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/67e33e8a-7ba3-4747-b63a-d0ff0c557db7_map_3B5BBE30-B1EF-4D62-B58C-5BE4D4A3A541.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/b5c614c2-9c5e-40f9-8e90-7fd9de28b08b_1787640764660.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/9ab4a0e9-275b-477f-a911-9d7dd54b9b87_1787640764867.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/e4281483-6d0a-4acf-a998-a7f8b162932e_1787640765040.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-25T06:52:47.969Z",
+        "likes": [],
+        "user_name": "william",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64049991939032,
+          -6.3252630405478705
+        ]
+      },
+      "properties": {
+        "_id": "6a8d3b4ceca288692ef3a31d",
+        "title": "Stall Makanan di Jembatan Cisauk",
+        "description": "Tanggal 25 Agustus 2026 pukul 13.49 terdapat banyak stall makanan di sepanjang jembatan cisauk menuju ke KRL cisauk. terdapat beberapa penumpang yang juga mampir di stall makanan tersebut. #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/02e50598-a8be-460e-9785-41403f7657cf_map_C1FA82B1-84B3-47AC-A5C7-91681B1839D1.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/db1420a0-953a-450e-ab51-fd913cd5dea7_1787640651395.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/ee6b4d8a-b5b8-42ad-9daf-46e6c598b938_1787640651431.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-25T06:50:52.540Z",
+        "likes": [],
+        "user_name": "clarawita",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.6400957542125,
+          -6.32566331795971
+        ]
+      },
+      "properties": {
+        "_id": "6a8d38ececa288692ef39f99",
+        "title": "Gerbang Stasiun Cisauk (Cisauk Point)",
+        "description": "Tanggal 25 Agustus 2026 Pukul 13.38, di gerbang stasiun cisauk terdapat banyak angkot/bemo/taksi yang parkir. memudahkan penumpang untuk transit setelah cisauk. #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/593f418a-d816-4039-b67b-74377eff7a1d_map_C1FA82B1-84B3-47AC-A5C7-91681B1839D1.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/b7fc3c9f-e0db-4012-b8c0-8f023086f223_1787640043242.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/cfb54133-7ca8-4ec3-a4a2-45e775d2f355_1787640043280.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/baf33425-76e3-4c9e-bfa9-ecf67a24c4a1_1787640043300.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/d4ab4513-64eb-4b8c-b5dd-aa7727be2136_1787640043315.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-25T06:40:44.786Z",
+        "likes": [],
+        "user_name": "clarawita",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64159321805175,
+          -6.324614471607646
+        ]
+      },
+      "properties": {
+        "_id": "6a8d366452d86e03b51a8782",
+        "title": "Stasiun Cisauk",
+        "description": "Suasana di Stasiun Cisauk jam segini terasa sangat lengang dan menenangkan, jauh dari hiruk-pikuk ribuan komuter yang biasanya memadati peron pada jam-jam sibuk. Hanya terlihat segelintir penumpang yang duduk santai di area tunggu atau berjalan melintasi jembatan penghubung tanpa perlu berdesakan. Tidak ada antrean mengular di gerbang tiket maupun derap langkah terburu-buru; peron tampak lapang dan teratur, menyajikan ritme stasiun yang santai serta memberikan suasana yang pas untuk menikmati perjalanan tanpa dorong-dorongan. #KAMEHAMEHA",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/85665456-5a8f-4e1b-94f3-b449e7fd699d_map_4AAF10F6-C2C1-4136-BE2C-515BE48EB47A.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/17ca3426-3702-4f6a-9c6a-a34335dc6871_1787639392215.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/23a8beb4-d9ed-4676-91a2-408cc499a3c7_1787639392371.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-25T06:29:56.009Z",
+        "likes": [],
+        "user_name": "william",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64165257694305,
+          -6.3243734763768815
+        ]
+      },
+      "properties": {
+        "_id": "6a82e6e59870dcf66e45d344",
+        "title": "Stasiun Cisauk",
+        "description": "Stasiun Cisauk menyediakan beberapa fasilitas untuk mendukung kenyamanan dan aksesibilitas penumpang. Terdapat bangku untuk tempat duduk serta atap yang melindungi penumpang dari hujan, meskipun jumlah bangku masih tergolong minim sehingga masih banyak penumpang yang harus berdiri, terutama pada jam sibuk. Untuk mendukung aksesibilitas, tersedia guiding block di area peron dekat kereta yang membantu penyandang tunanetra dalam berpindah tempat. Selain itu, stasiun menyediakan layanan peminjaman kursi roda dan lift yang dapat digunakan oleh penyandang disabilitas.\n\nDi dalam area stasiun juga terdapat beberapa tempat kuliner yang dapat dimanfaatkan penumpang. Stasiun dilengkapi dengan jembatan penyeberangan untuk menghubungkan area di dalam stasiun. Kondisi stasiun cukup ramai pada sekitar pukul 17.30. Fasilitas lainnya meliputi area parkir untuk sepeda motor dan mobil serta mushola yang dapat digunakan oleh penumpang Muslim untuk beribadah. #Cook",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/9ccacf53-71c2-480f-86f8-105723fca8c3_map_00D48715-2A60-41AC-972B-AE9FA570E99A.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/967ba952-05ae-46b6-9475-f674122eb76c_1786963671400.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/fec304e9-8b38-471e-b550-cd3056ad726a_1786963671542.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/9ffab5f4-3fd0-4441-9d4b-5ee7bd6a2aa8_1786963671638.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/c877e13d-d406-4fc8-b3e6-19b0b51d6f31_1786963671673.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/48512f4d-f15f-4b65-9ae2-7cd3a4d8f216_1786963671708.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/438b8403-bb18-4d1a-8f65-34536c191fa4_1786963671799.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/4154d2b3-082c-4d15-883a-1e0873554c41_1786963671840.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/ec58708e-c3e5-4d59-9ef9-ca1cd4bec5c6_1786963671879.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/8a677a0e-e159-498b-b5fa-bcca4b44c97a_1786963671974.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/352e0773-37c5-4124-813f-44e0f2ff2e83_1786963672066.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/1f80c73d-4184-46f7-a1b2-7ad4c3e4abf2_1786963672175.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-17T10:48:05.791Z",
+        "likes": [],
+        "user_name": "mumu02",
+        "user_full_name": "Samuel",
+        "user_profile_picture": {
+          "name": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "url": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "name_compressed": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg",
+          "url_compressed": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg"
+        },
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64354053335882,
+          -6.322521781554745
+        ]
+      },
+      "properties": {
+        "_id": "6a82e2f338bb192425f4fcb4",
+        "title": "Jembatan Terminal Intermoda - Stasiun Cisauk",
+        "description": "Jembatan penghubung antara Terminal Intermoda dan Stasiun KRL Cisauk memiliki kondisi lantai yang bersih dan terawat. Jembatan ini dilengkapi dengan atap serta penutup pada sisi kiri dan kanan yang berfungsi melindungi pengguna dari paparan angin dan hujan, sehingga memberikan kenyamanan dan keamanan selama perjalanan menuju stasiun. #Cook",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/810de4a7-6201-4dc3-8789-b6bd4299799c_map_CBEAEA89-AE85-44AF-ABC4-2CA1A4DBE57C.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/ffcba9ac-ac2c-49f3-b611-bbf274dddf64_1786962674110.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/34be8d47-8227-4936-aa3b-01f92acaf95e_1786962674148.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/5e94f3cf-e336-42c0-a064-cd8cec65807a_1786962674167.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/98225eac-94ea-47c0-8fed-86f1568dac88_1786962674181.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-17T10:31:15.157Z",
+        "likes": [],
+        "user_name": "mumu02",
+        "user_full_name": "Samuel",
+        "user_profile_picture": {
+          "name": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "url": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "name_compressed": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg",
+          "url_compressed": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg"
+        },
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64349128648388,
+          -6.321171767108879
+        ]
+      },
+      "properties": {
+        "_id": "6a82e07b4fd70be4125d2b53",
+        "title": "Terminal Intermoda - Cisauk",
+        "description": "Terminal Intermoda merupakan titik keberangkatan awal bus BSD Link yang dilengkapi dengan fasilitas tempat duduk yang memadai bagi penumpang serta atap sebagai pelindung dari panas dan hujan. Halte ini juga memiliki akses yang terintegrasi dengan Stasiun KRL Cisauk, yang dapat dicapai dengan berjalan kaki kurang dari lima menit. Selain itu, Terminal Intermoda terhubung langsung dengan kawasan Pasar Intermoda, sehingga memudahkan mobilitas masyarakat dalam mengakses berbagai fasilitas di sekitarnya. #Cook",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/fd83b9d3-6d89-4d1b-8041-da5b936ae1e3_map_F6CE8D9D-68BD-4333-A636-2E976B4DB42C.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/02f0175c-4ed3-4b5c-ae85-d4af3624eb76_1786962042686.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/07563209-bded-4183-a960-c7a87e1a587c_1786962042723.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-17T10:20:43.657Z",
+        "likes": [],
+        "user_name": "mumu02",
+        "user_full_name": "Samuel",
+        "user_profile_picture": {
+          "name": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "url": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "name_compressed": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg",
+          "url_compressed": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg"
+        },
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.63404806609651,
+          -6.32280778901671
+        ]
+      },
+      "properties": {
+        "_id": "6a827bf838bb192425f480b3",
+        "title": "Badminton",
+        "description": "Olahraga badminton di Three Code. Lapangan banyak tempat duduk oke, ada cafe n gym dibawah \ud83d\ude4c",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/8a96545c-b398-4063-9e50-6bd1ae5a72cb_map_BFDD6276-607C-4BC7-99F6-8CC2CB08D860.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/c13b1491-c45d-48e7-8354-60136b89cfca_1786936312226.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-17T03:11:52.800Z",
+        "likes": [],
+        "user_name": "mumu02",
+        "user_full_name": "Samuel",
+        "user_profile_picture": {
+          "name": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "url": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "name_compressed": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg",
+          "url_compressed": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg"
+        },
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.63405083226604,
+          -6.322786843003156
+        ]
+      },
+      "properties": {
+        "_id": "6a8279e070c999b67933d37a",
+        "title": "Badminton",
+        "description": "Olahraga pagi main badminton",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/1881897f-18e5-47f7-a8cb-4d6d3d6091b1_map_68D9DE69-5F5F-4213-ABD1-34B91F022E52.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/a2f529b0-5d39-412c-950c-d83112d02f53_1786935775523.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-08-17T03:02:56.158Z",
+        "likes": [],
+        "user_name": "mumu02",
+        "user_full_name": "Samuel",
+        "user_profile_picture": {
+          "name": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "url": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307.jpg",
+          "name_compressed": "general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg",
+          "url_compressed": "https://mapidstorage.cdn.mapid.io/general_image/mumu02/1785652920809_image_picker_1F6606A0-CC5D-4918-8AA5-E109598C6E2B-3446-000000ABD5A79307_compressed.jpeg"
+        },
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64367332564422,
+          -6.322217745378213
+        ]
+      },
+      "properties": {
+        "_id": "6a586dccd3c4db9141a8169e",
+        "title": "Ada warung disini",
+        "description": "",
+        "medias": [
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/93cc3435-c9ef-4e03-88a8-efec77b34f23_map_8FF2F615-45D3-41A5-A445-D6C87B7D8399.jpg",
+          "https://mapid-app-chat.cdn.mapid.io/692d03413a0cf54ea6633e89/ce5a0e24-1f17-4897-82ce-ee5675908810_1784180171187.jpg"
+        ],
+        "total_comment": 0,
+        "created_at": "2026-07-16T05:36:12.139Z",
+        "likes": [],
+        "user_name": "clarissa",
+        "community_name": "CONNECTED FUTURE \ud83c\udf0f",
+        "community_picture": "https://mapidstorage.cdn.mapid.io/general_image/mapid-apps/communities/Connected%20Future/1764853240583_AbJHst8Sjz.jpg",
+        "community_description": "MAPID \ud835\udd4f Apps for #ConnectedCommunity and #ConnectedSurvey"
+      }
+    }
+  ]
+}
