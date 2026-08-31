@@ -11,15 +11,7 @@ HEADERS = {
     "x-api-key": API_KEY
 }
 
-POLYGON_CISAUK = [
-    [
-        [106.6326, -6.3332], 
-        [106.6506, -6.3332], 
-        [106.6506, -6.3152], 
-        [106.6326, -6.3152], 
-        [106.6326, -6.3332]
-    ]
-]
+POLYGON_COORDINATES = [] #ambil data dari polygons.json
 
 def fetchApi(url):
     offset = 0
@@ -31,7 +23,7 @@ def fetchApi(url):
         body = {
             "feature": {
                 "type": "Polygon",
-                "coordinates": POLYGON_CISAUK
+                "coordinates": POLYGON_COORDINATES
             },
             "offset": offset
         }
@@ -98,4 +90,3 @@ with open("./etl/cisauk-menugo.geojson", "w") as file:
 activity_data = fetchApi("https://server.mapid.io/web/competition/activities")
 with open("./etl/cisauk-activity.geojson", "w") as file:
     json.dump(activity_data, file, indent=2)
-
