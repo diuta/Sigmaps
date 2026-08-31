@@ -173,7 +173,7 @@ aturan serupa — beda angka, tapi bukan konflik substansial, PRD yang final (20
 | Isokron | **MAPID Isochrone Tool** (profil `foot`, mode batch "Pilih Layer", satuan menit **dan** meter bisa diatur, nilai **300 & 600 detik**) | ✅ **OSMnx dicoret permanen** — dikonfirmasi ulang 30 Agustus. PRD masih menyebut OSMnx di Timeline M2 — **itu bagian PRD yang perlu direvisi tim product**, bukan rencana teknis yang berlaku. |
 | Kalibrasi jarak jalan kaki | **MAPID Routing Tool**, 15–20 pasang rute kalibrasi, kecepatan acuan **4,4 km/jam**, faktor detour = median(jarak jaringan/jarak garis lurus), nilai wajar 1,2–1,4 | Routing Tool tidak punya mode batch — hanya untuk kalibrasi, bukan komputasi massal per properti. |
 | Unit agregasi | **Uber H3**, `h3-py` | — |
-| Resolusi H3 | 🔶 **Rekomendasi: 10** (PRD saat ini masih tertulis 9) | Resolusi 9 cuma hasilkan 9–11 sel/isokron 10 menit — terlalu kasar untuk k-ring smoothing, persentil ke-75, dan bandwidth KDE 250 m. Resolusi 10 (±65–75 sel/isokron 10 menit, ~900 sel total) tetap ringan dihitung. **Keputusan akhir tetap di Jalur 2.** |
+| Resolusi H3 | ✅ **9 — final, dikonfirmasi koordinator 31 Agustus 2026** | Sempat ada rekomendasi pindah ke resolusi 10 (alasan: resolusi 9 cuma hasilkan 9–11 sel/isokron 10 menit, dianggap kasar untuk k-ring smoothing, persentil ke-75, dan bandwidth KDE 250 m). **Rekomendasi itu ditolak** — tim tetap pakai resolusi 9 sesuai PRD. Jangan diubah lagi tanpa keputusan baru dari koordinator/Jalur 2. |
 | KDE (kejenuhan pasar) | **scikit-learn `KernelDensity`**, kernel gaussian, bandwidth **200–300 m** | Wajib proyeksi ke meter (**EPSG:32748**, UTM 48S) sebelum dihitung; `score_samples` hasil log-densitas wajib `np.exp`; wajib dikalikan jumlah titik kompetitor (densitas KDE murni berupa probabilitas, totalnya selalu 1). |
 | Normalisasi | **Berbasis persentil** (bukan min-max) | Min-max dicoret: satu pencilan menekan seluruh sel lain. |
 | Agregasi sel → kawasan | **Persentil ke-75** | Bukan rata-rata — user tidak menyewa di sel rata-rata. |
@@ -305,11 +305,11 @@ tinggal konfirmasi resmi di sesi sinkronisasi.
 2. Baca skor komponen dari Supabase, hitung WLC pakai bobot arketipe/hasil edit pengguna.
 3. Spatial join Properti Go ke kawasan terpilih (`ST_Within`/`ST_DWithin`).
 
-🔴 **Belum terjawab — lihat konflik terbuka #1 di bagian 9:** apakah skor final kawasan
-(`scored_areas`) dimaksudkan **pra-hitung** (untuk 3 arketipe tetap saja) atau **dihitung
-live** (karena PRD juga bilang bobot "dapat disunting pengguna"). Ini menentukan apakah
-`scored_areas` benar-benar tabel statis atau cuma hasil query/RPC yang dilabeli begitu di
-PRD.
+✅ **Diselesaikan, dikonfirmasi ulang 31 Agustus 2026** (lihat detail penuh di bagian 5.3):
+skor final kawasan **selalu dihitung live** di langkah ke-2 di atas, untuk arketipe preset
+**maupun** bobot hasil edit manual pengguna — tidak ada jalur "pra-hitung skor final" sama
+sekali. `scored_areas` cuma menyimpan komponen teragregasi (persentil ke-75), bukan skor
+0–100.
 
 ---
 
@@ -391,12 +391,11 @@ untuk latensi — bergantung hasil cek region Supabase di atas.
 
 Diurutkan dari yang paling mendesak/berdampak struktural:
 
-1. 🔴 **`scored_areas` — pra-hitung atau live?** PRD menyebutnya berisi "skor 0–100 dan
-   level risiko" (seolah statis), tapi bobot bisa disunting bebas oleh pengguna (butuh
-   hitung live) dan prinsip Jalur 2 eksplisit "simpan skor komponen, bukan skor final".
-   Kemungkinan jawaban: `scored_areas` cuma pra-hitung untuk 3 arketipe preset tetap, skor
-   live (hasil edit bobot manual) dihitung on-the-fly dan tidak disimpan permanen di tabel
-   itu. **Belum dikonfirmasi ke Jalur 1/2 — jangan diasumsikan.**
+1. ✅ ~~`scored_areas` — pra-hitung atau live?~~ **Selesai** (lihat bagian 5.3 & 6.2): tidak
+   ada skor 0–100 yang disimpan statis di tabel manapun. `scored_areas` cuma menyimpan
+   komponen D/T/C/S/P_KDE teragregasi persentil ke-75 per kawasan; skor akhir + level risiko
+   selalu dihitung live di Next.js API Route, untuk arketipe preset maupun bobot hasil edit
+   pengguna. PRD bagian 7.4 perlu direvisi mengikuti rumusan ini.
 2. ❓ **Kunci gabungan `(h3_index, station_id)`** — Jalur 2 minta ini disepakati dengan
    Jalur 1 sebelum tabel `scored_cells` dibuat (satu sel bisa masuk isokron 2 stasiun
    berdekatan). Belum ada konfirmasi eksplisit dari Jalur 1.
@@ -405,8 +404,8 @@ Diurutkan dari yang paling mendesak/berdampak struktural:
    cuma satu kolom generik per sel — potensi inkonsistensi di dalam dokumen Jalur 2 sendiri.
 4. ❓ **Daftar pasti simpul dalam scope** (12? lebih, karena MRT/LRT baru masuk?) — cuma 5
    nama stasiun KRL Tangsel yang eksplisit (itu pun untuk survey, bukan daftar lengkap).
-5. 🔶 **Resolusi H3: 9 (PRD) vs 10 (rekomendasi tim)** — belum resmi dikonfirmasi Jalur 2
-   sebagai keputusan final pipeline-nya.
+5. ✅ ~~Resolusi H3: 9 vs 10~~ **Selesai** — dikonfirmasi koordinator 31 Agustus 2026: tetap
+   **resolusi 9** sesuai PRD, rekomendasi pindah ke 10 ditolak.
 6. ❓ λ (koefisien penalti KDE) belum dikalibrasi — masih grid search.
 7. ❓ Jenis `SUPABASE_KEY` (anon/service role) dan region project Supabase — belum dicek.
 8. ❓ Repo `sigmaWebgis` — akun personal atau GitHub organization? (Blocking untuk Vercel
@@ -431,13 +430,14 @@ Diurutkan dari yang paling mendesak/berdampak struktural:
 | # | Konflik | Keputusan |
 |---|---|---|
 | 1 | OSMnx vs MAPID Isochrone Tool | ✅ MAPID Isochrone Tool, OSMnx dicoret permanen. PRD Timeline M2 perlu direvisi tim product. |
-| 2 | Resolusi H3: 9 vs 10 | 🔶 Rekomendasi 10, keputusan akhir tetap Jalur 2. |
+| 2 | Resolusi H3: 9 vs 10 | ✅ Tetap **9** (dikonfirmasi ulang 31 Agustus 2026) — rekomendasi pindah ke 10 dipertimbangkan tapi ditolak. |
 | 3 | Scope moda: KRL+TJ saja vs +MRT+LRT | ✅ Keempat moda masuk scope — reverses keputusan sebelumnya. |
 | 4 | Skema Zod Jalur 3 vs penamaan final Jalur 2 | ✅ Ikuti Jalur 2 (final), Jalur 3 perlu revisi skemanya. |
 | 5 | Kepemilikan Jalur 2 (William/Dimas) | ⏭️ Diabaikan atas arahan koordinator. |
 | 6 | Struk Go simpan jam atau cuma tanggal | ✅ Dikonfirmasi koordinator: simpan jam. Verifikasi data nyata masih tertunda (lihat §9.11). |
 | 7 | Database: Supabase vs Neon | ✅ Tetap Supabase + heartbeat wajib (diputuskan sebelum sesi ini, dicatat ulang untuk kelengkapan). |
 | 8 | Realisme timeline PRD | ⏭️ Tidak dibahas atas arahan koordinator. |
+| 9 | `scored_areas` — skor final statis 0–100 vs komponen live | ✅ Ikuti riset Jalur 2 apa adanya: **tidak ada** skor final statis. `scored_areas` cuma simpan komponen teragregasi persentil ke-75; skor 0–100 + level risiko dihitung live di Next.js API Route. PRD 7.4 perlu direvisi. Dikonfirmasi ulang 31 Agustus 2026. |
 
 ---
 
