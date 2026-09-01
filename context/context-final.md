@@ -1,20 +1,17 @@
 # Context FINAL — SIGMAPS (MAPID WebGIS Competition 2026)
 
-**Disusun:** 30 Agustus 2026. **Status:** dokumen acuan utama, menggantikan `context.md`
-versi 27/28 Agustus 2026 (disimpan di luar repo ini, di folder induk `MAPID/`) untuk seluruh
-hal teknis. Disintesis dari: PRD resmi tim (`Kamehameha_SIGMAPS_PRD_MAPID_WebGIS_Competition_
-2026.md`), tiga dokumen riset jalur (`docs/jalur1-context.md`, `docs/jalur2-context.md`,
-`docs/jalur3-context.md`), draft pengisian PRD (`docs/prd-section9-13-draft.md`), dan
-keputusan konflik yang diambil koordinator (Bagas) pada 30 Agustus 2026.
+**Disusun:** 30 Agustus 2026, direvisi 2 September 2026. **Status:** dokumen acuan utama
+untuk seluruh keputusan teknis & produk SIGMAPS — satu-satunya sumber kebenaran, tidak ada
+dokumen riset terpisah lagi di belakangnya (riset awal per-jalur sudah disintesis penuh ke
+sini). Disintesis dari: PRD resmi tim, riset teknis ketiga jalur, dan keputusan konflik yang
+diambil koordinator.
 
 ## Aturan utama dokumen ini
 
-Sama seperti tiga dokumen jalur: setiap poin ditandai ✅ **DIPUTUSKAN**, 🔶 **REKOMENDASI
-(belum final)**, atau ❓ **PERTANYAAN TERBUKA**. Jangan hapus tag ❓ dan menggantinya dengan
-asumsi — bagian 9 merangkum semua yang masih perlu dijawab tim. Dokumen sumber
-(`jalur1/2/3-context.md`, PRD) tidak dihapus/digantikan secara fisik — dokumen ini adalah
-lapisan sintesis di atasnya. Kalau ada pertentangan antara dokumen ini dan salah satu
-dokumen jalur, dokumen ini yang berlaku (karena sudah melalui proses rekonsiliasi konflik).
+Setiap poin ditandai ✅ **DIPUTUSKAN**, 🔶 **REKOMENDASI (belum final)**, atau ❓
+**PERTANYAAN TERBUKA**. Jangan hapus tag ❓ dan menggantinya dengan asumsi — bagian 9
+merangkum semua yang masih perlu dijawab tim, dan bagian penutup dokumen ini merangkum apa
+saja yang perlu diputuskan sebelum dokumen ini bisa dianggap 100% final.
 
 ---
 
@@ -53,11 +50,13 @@ arahan koordinator sebelumnya, ini **tidak dipersoalkan lebih lanjut**.
 ## 2. Ruang lingkup (scope) — FINAL setelah keputusan 30 Agustus 2026
 
 ✅ **Moda transportasi: KRL, LRT, MRT, dan TransJakarta — keempatnya masuk scope.**
-Ini keputusan final terbaru (30 Agustus 2026), **membalik** keputusan sebelumnya di
-`context.md` versi 27 Agustus yang sempat mempersempit ke KRL+TransJakarta saja. Ini juga
-**membalik** pernyataan eksplisit di `jalur2-context.md` bagian 10 ("MRT dan LRT di luar
-cakupan tahap ini") — Jalur 2 **belum tahu** perubahan ini, perlu dikabari karena
-mempengaruhi daftar simpul yang dia proses.
+Ini keputusan final terbaru (30 Agustus 2026), **membalik** keputusan sebelumnya yang sempat
+mempersempit ke KRL+TransJakarta saja.
+
+❓ **Belum diputuskan/dikonfirmasi:** apakah Jalur 2 (pemilik riset spasial & daftar simpul)
+sudah tahu dan menyesuaikan pekerjaannya dengan perubahan scope ini — riset spasial
+sebelumnya berjalan dengan asumsi MRT/LRT di luar cakupan. Perlu dikonfirmasi langsung ke
+Jalur 2 karena ini mempengaruhi daftar simpul yang mereka proses.
 
 ✅ **Wilayah studi:** Jabodetabek secara umum untuk cakupan produk; **survey activities**
 wajib difokuskan ke 5 kawasan stasiun prioritas di **Tangerang Selatan** (semuanya KRL):
@@ -70,8 +69,8 @@ wajib difokuskan ke 5 kawasan stasiun prioritas di **Tangerang Selatan** (semuan
 | Sudimara | KRL | Penyangga pemukiman padat |
 | Jurangmangu | KRL | Integrasi komersial suburban |
 
-❓ **Daftar pasti "12 simpul/titik transit prioritas"** (disebut di User Flow PRD dan di
-`jalur2-context.md` bagian 6) **belum ada di dokumen manapun** — cuma angka "12", dan hanya
+❓ **Daftar pasti "12 simpul/titik transit prioritas"** (disebut di User Flow PRD)
+**belum ada di dokumen manapun** — cuma angka "12", dan hanya
 5 nama di atas yang eksplisit (itu pun cuma untuk survey, bukan berarti daftar lengkap 12).
 Dengan MRT/LRT sekarang ikut masuk scope, daftar ini kemungkinan perlu direvisi/ditambah.
 **Jangan diasumsikan 12 = 5 stasiun survey + 7 lainnya yang belum ditentukan** — tanyakan
@@ -159,14 +158,13 @@ nomor, tidak boleh dari Google Street View/internet, wajib divalidasi sebelum di
 
 **Dedup rule (mencegah hitung ganda dengan Menu Go):** ✅ merchant/properti dianggap objek
 sama kalau kedekatan koordinat **< 20 m** dan nama/kategori mirip (dari PRD bagian Data
-Processing — Cleaning). Catatan kecil: `jalur2-context.md` menyarankan radius 25 m untuk
-aturan serupa — beda angka, tapi bukan konflik substansial, PRD yang final (20 m).
+Processing — Cleaning).
 
 ---
 
 ## 5. Pipeline pengolahan data & analisis spasial (Jalur 2 — final)
 
-### 5.1 Keputusan stack (final, per `jalur2-context.md` + konfirmasi 30 Agustus)
+### 5.1 Keputusan stack (final, dikonfirmasi 30 Agustus 2026)
 
 | Hal | Keputusan | Catatan |
 |---|---|---|
@@ -180,7 +178,7 @@ aturan serupa — beda angka, tapi bukan konflik substansial, PRD yang final (20
 | Verifikasi silang | MAPID Grid Tool (mode Titik+Poligon, segi enam) + QGIS | Cuma pembanding visual — **tidak** dipakai sebagai sumber tabel (tidak punya `h3_index` global, tidak reproducible). |
 | Perkakas | GeoPandas, Shapely, h3-py, scikit-learn, scipy (`find_peaks`), NumPy, QGIS | Seluruhnya open source. |
 
-### 5.2 Formula skoring — FINAL (dari `jalur2-context.md` + dikonfirmasi identik di PRD)
+### 5.2 Formula skoring — FINAL (dikonfirmasi identik di PRD)
 
 ```
 Skor Kesesuaian = 100 × (w1·D + w2·T + w3·C + w4·S) − λ·P_KDE     (Σw = 1)
@@ -198,8 +196,7 @@ Skor Kesesuaian = 100 × (w1·D + w2·T + w3·C + w4·S) − λ·P_KDE     (Σw 
 `skor_kompetisi_kde` — **jangan dipakai lagi di mana pun**, termasuk kode/skema yang mungkin
 masih mengacu ke nama itu.
 
-**Bobot arketipe (sudah diisi PRD — ini progres yang belum tercatat balik ke `jalur2-context.md`,
-yang masih menandainya "keputusan tertunda #5"):**
+**Bobot arketipe (sudah diisi PRD, dianggap final):**
 
 | Arketipe | w1 (D) | w2 (T) | w3 (C) | w4 (S) |
 |---|---|---|---|---|
@@ -236,11 +233,10 @@ skor akhir, komponen-nya saja) — struktur mirip `scored_cells` tapi satu baris
 Skor akhir 0–100 dan level risiko **tidak pernah ditulis ke tabel manapun** — keduanya
 **dihitung live** di Next.js API Route saat ada request, dengan mengalikan komponen di
 `scored_areas` dengan bobot arketipe (atau bobot hasil edit pengguna) dan menjumlahkannya
-sesuai formula bagian 5.2. Ini bukan interpretasi — ini kutipan langsung prinsip Jalur 2 di
-`jalur2-context.md` bagian 12: *"Simpan skor komponen, bukan skor final. Bobot berubah
-tergantung arketipe pengguna, jadi skor final dihitung saat request. Kalau menyimpan skor
-final, seluruh tabel harus dihitung ulang setiap ada pengguna baru."* Prinsip ini berlaku
-sama persis di level kawasan seperti di level sel — tidak ada pengecualian untuk
+sesuai formula bagian 5.2. Prinsip yang berlaku: *"Simpan skor komponen, bukan skor final.
+Bobot berubah tergantung arketipe pengguna, jadi skor final dihitung saat request. Kalau
+menyimpan skor final, seluruh tabel harus dihitung ulang setiap ada pengguna baru."* Prinsip
+ini berlaku sama persis di level kawasan seperti di level sel — tidak ada pengecualian untuk
 `scored_areas`.
 
 **Konsekuensi ke PRD:** kalimat PRD bagian 7.4 ("scored_areas — skor 0–100 dan level
@@ -326,7 +322,7 @@ di client, beda dari key Competition `x-api-key` yang wajib server-side). MapLib
 `'use client'` + `dynamic(..., {ssr:false})`; instance map disimpan di `useRef` bukan
 `useState`.
 
-### 7.2 AI (Gemini)
+### 7.2 AI (Gemini) — lima titik sentuh, detail lengkap
 
 ✅ **Google Gemini** via Google AI Studio (free tier), **Vercel AI SDK** (`ai` +
 `@ai-sdk/google`) + **Zod** untuk validasi skema output (`generateObject`).
@@ -335,28 +331,192 @@ di client, beda dari key Competition `x-api-key` yang wajib server-side). MapLib
 model besar), `gemini-2.5-flash` untuk narasi insight. Nama model **wajib** di environment
 variable (Google merotasi model cepat).
 
-✅ **Empat titik sentuh AI** (bukan dua seperti proposal lama): 2 batch (milik Jalur 2, lihat
-5.4) + 2 runtime (parse Business Brief, narasi AI Area Insight — milik Jalur 3/backend).
+✅ **LIMA titik sentuh AI** (bukan empat — direvisi 2 September 2026 setelah diskusi MVP,
+titik #5 ditambahkan). **Prinsip yang tidak berubah di kelimanya: AI tidak pernah menghitung
+skor akhir** — skor 100% dihitung `lib/scoring.ts`, AI cuma menerjemahkan masuk atau
+meringkas keluar.
 
-🔴 **Aksi wajib, belum dikerjakan:** skema Zod `IntentSchema` di `jalur3-context.md` masih
-pakai nama lama yang sudah dilarang (`w_daya_beli`, `w_jam_puncak`, `w_kompetisi`, cuma 3
-bobot). **Harus direvisi** jadi 4 bobot dengan nama baku Jalur 2 (`w1`–`w4` mengacu ke
-`demand/temporal_fitness/competitive_headroom/segment_match`), sesuai formula final di
-bagian 5.2. Ini perlu dikabari eksplisit ke Anggota 3 — belum dikerjakan per dokumen
-terakhir yang diserahkan.
+| # | Nama | Kapan | Status di MVP 5 hari (2 Sept 2026) |
+|---|---|---|---|
+| 1 | Normalisasi kategori merchant | Batch (Jalur 2) | Di luar MVP — milik Jalur 2 |
+| 2 | Klasifikasi Community Activity per-laporan | Batch (Jalur 2) | Di luar MVP — milik Jalur 2 |
+| 3 | Parse Business Brief → arketipe+bobot | Runtime | ✅ **Masuk MVP** |
+| 4 | AI Area Insight (narasi dari skor) | Runtime | ❌ **Di luar MVP** — ditunda setelah MVP |
+| 5 | Ringkasan sentimen Community Activity | Runtime | ✅ **Masuk MVP** |
 
-**Rate limit Gemini:** berlaku **per project**, bukan per key (WebGIS publik berbagi satu
-kuota); RPD reset tengah malam Pasifik (~14.00–15.00 WIB). Mitigasi wajib: cache narasi per
-(kawasan × arketipe) di DB, rate limit per IP, degradasi anggun (peta/skor/filter manual
-tetap jalan kalau AI mati).
+#### Titik #1 — Normalisasi semantik kategori merchant (batch, Jalur 2)
 
-### 7.3 Kontrak data (ringkas — detail lengkap di `jalur3-context.md` §3)
+**Masalah:** Menu Go/Struk Go itu crowdsourced dari banyak surveyor berbeda, jadi kategori
+usaha ditulis tidak konsisten ("Coffee Shop" vs "Kopi" vs "Minuman" untuk hal yang sama).
+Tanpa distandarkan, hitungan kompetitor (`competitive_headroom`, `kde_penalty`) salah —
+kompetitor yang sama terhitung sebagai kategori berbeda-beda.
+
+**Cara kerja:** proses batch Python baca teks nama merchant/menu, kirim ke LLM untuk
+dicocokkan ke satu taksonomi baku internal (daftar kategori tertutup, bukan bebas). Validasi
+skema di sisi Python pakai **Pydantic** (bukan Zod — beda bahasa, konsep sama).
+
+**Output:** kolom "kategori baku" tambahan di Menu Go/Struk Go, dipakai downstream untuk
+hitung kompetitor per kategori (variabel C dan P_KDE).
+
+#### Titik #2 — Klasifikasi Community Activity per-laporan (batch, Jalur 2)
+
+**Masalah:** Community Activity **wajib** dipakai (ketentuan lomba), tapi isinya narasi
+bebas (`title`, `description`) — tidak terstruktur, tidak bisa langsung dianalisis spasial.
+
+**Cara kerja:** untuk **setiap satu laporan** (satu `_id`), teksnya diklasifikasikan AI ke
+tag tertutup: hambatan pejalan kaki, aksesibilitas, keramaian, konektivitas antarmoda. Kerja
+**satu laporan → satu hasil tag**, dijalankan offline sekali untuk seluruh data yang ada.
+
+**Output:** lapisan konteks kualitatif di UI — **tidak** masuk formula skor D/T/C/S (sudah
+diputuskan sebelumnya, PRD pilih opsi "konteks UI saja").
+
+**Beda dengan titik #5:** ini per-laporan individual dan offline. Titik #5 menggabungkan
+BANYAK laporan sekaligus dan jalan live saat user klik.
+
+#### Titik #3 — Parse Business Brief → arketipe + bobot (runtime) ✅ MASUK MVP
+
+**Fungsi:** pintu masuk *need-first* produk. User ketik kalimat bebas ("toko roti pagi buat
+pekerja kantoran") → AI ubah jadi parameter terstruktur yang dipakai mesin skoring.
+
+**Alur teknis:**
+```
+1. Client submit teks → POST /api/parse-intent { teks: "..." }
+2. Route Handler kirim teks ke Gemini lewat Vercel AI SDK (generateObject)
+3. Gemini dipaksa balikin JSON sesuai skema Zod berikut:
+
+const IntentSchema = z.object({
+  kategori_usaha: z.string(),
+  target_jam: z.enum(['pagi','siang','sore','malam','24jam']),
+  segmen: z.string(),
+  skala: z.enum(['kecil','menengah','besar']),
+  weights: z.object({
+    w1: z.number().min(0).max(1),   // demand
+    w2: z.number().min(0).max(1),   // temporal_fitness
+    w3: z.number().min(0).max(1),   // competitive_headroom
+    w4: z.number().min(0).max(1),   // segment_match
+  }),
+  confidence: z.number().min(0).max(1),
+})
+
+4. Zod validasi — gagal → AI SDK retry otomatis
+5. weights (w1-w4) dikirim ke POST /api/score untuk dihitung WLC (lib/scoring.ts)
+```
+
+✅ **Catatan penting soal nama field bobot:** skema di atas pakai `w1`–`w4` (mengacu ke
+`demand/temporal_fitness/competitive_headroom/segment_match`) — **bukan**
+`w_daya_beli`/`w_jam_puncak`/`w_kompetisi` (nama lama 3-bobot yang sempat dipakai draf awal
+Jalur 3, sekarang sudah usang dan **dilarang**, lihat bagian 5.2). Kalau ada kode yang masih
+pakai nama lama itu, **wajib direvisi** sebelum dipakai.
+
+`confidence` dipakai UI untuk menandai hasil parsing yang meragukan.
+
+**Untuk MVP:** alurnya **one-shot** — langsung lanjut ke Top 5 tanpa layar edit bobot manual
+(beda dari desain PRD lengkap yang punya chip+slider bisa disunting). Lihat
+`context/context-mvp.md`.
+
+#### Titik #4 — AI Area Insight: narasi dari skor komponen (runtime) ❌ DI LUAR MVP
+
+**Fungsi:** mengubah angka skor yang **sudah dihitung backend** jadi narasi yang enak dibaca
+— bukan menghitung ulang, bukan menemukan alasan baru di luar data yang dikasih (*data-to-
+text*, prinsip *strict data grounding* dari PRD).
+
+**Alur teknis:**
+```
+1. Backend SUDAH punya angka dari lib/scoring.ts, contoh:
+   { station_name: "Dukuh Atas", score: 78.4, risk_level: "Medium",
+     components: { demand: 0.72, temporal_fitness: 0.85,
+                    competitive_headroom: 0.60, segment_match: 0.55 },
+     property_count: 7 }
+
+2. Object INI PERSIS (whitelist — TIDAK ada alamat/foto/identitas surveyor) dikirim ke
+   Gemini lewat POST /api/insight
+
+3. Gemini balikin JSON sesuai skema Zod:
+
+const InsightSchema = z.object({
+  ringkasan: z.string(),
+  kelebihan: z.array(z.string()).max(3),
+  kekurangan: z.array(z.string()).max(3),
+  faktor_dominan: z.enum(['demand','temporal_fitness','competitive_headroom','segment_match']),
+})
+
+4. faktor_dominan dipakai UI untuk nyorot bar yang relevan di chart dekomposisi
+```
+
+**Kenapa payload dibatasi ketat** (cuma angka komponen, bukan data mentah lain): supaya AI
+tidak bisa "mengarang" klaim di luar data yang sistem punya.
+
+**Status: DI LUAR SCOPE MVP 5 hari** (keputusan 2 September 2026) — Top 5 hasil MVP
+ditampilkan **tanpa** narasi AI, cukup angka skor + dekomposisi komponen mentah. Fitur ini
+ditunda ke fase setelah MVP.
+
+#### Titik #5 — Ringkasan sentimen Community Activity per kawasan (runtime) ✅ MASUK MVP
+
+Titik **baru**, ditambahkan 2 September 2026 saat perencanaan MVP.
+
+**Fungsi:** saat user klik satu titik stasiun, sistem meringkas **banyak laporan mentah**
+Community Activity di kawasan (isokron) stasiun itu jadi satu insight — "apa kata orang-
+orang tentang kawasan ini". Ini pertanyaan yang beda dari titik #4: titik #4 menjelaskan
+"kenapa skornya segini" (dari angka), titik #5 menjelaskan "apa yang dilaporkan orang di
+kawasan ini" (dari teks mentah banyak orang).
+
+**Alur teknis (rancangan, artefak baru untuk MVP):**
+```
+1. User klik stasiun → GET /api/community-sentiment?station_id=...
+2. Backend query tabel Community Activity, filter berdasarkan kawasan/isokron stasiun itu
+3. WAJIB dibuang sebelum kirim ke AI: user_name, user_full_name, user_profile_picture,
+   community_picture (data identitas pribadi pelapor)
+4. Yang dikirim ke Gemini: kumpulan title+description (+ agregat: total_comment, likes)
+   dari SEMUA laporan di kawasan itu, jadi satu payload
+5. Gemini balikin satu ringkasan/summary
+```
+
+**Field Community Activity yang diketahui** (dari inspeksi `etl/` sebelumnya — ❓ perlu
+dikonfirmasi ulang masih akurat):
+```
+_id, title, description, medias, total_comment, created_at, likes,
+user_name, user_full_name, user_profile_picture,
+community_name, community_picture, community_description
+```
+
+**Kenapa field identitas wajib dibuang:** prinsip yang sudah disepakati sebelumnya — data
+pribadi (nama akun, foto profil) tidak boleh dikirim ke pihak ketiga (Gemini) tanpa alasan
+kuat, sejalan dengan larangan umum "jangan kirim data pribadi ke LLM".
+
+❓ **Belum diputuskan:** skema Zod output untuk titik ini — apakah bikin schema baru
+terpisah (`CommunitySentimentSchema`) atau digeneralisasi dari `InsightSchema` yang sudah
+ada. Perlu diputuskan Jalur 1/3 sebelum mulai kerja.
+
+❓ Tabel Community Activity **belum dibuat** di Supabase (baru ada di file ETL) — jadi
+endpoint ini butuh tabel + loader baru juga (lihat bagian 6.1).
+
+**Rate limit Gemini** (berlaku untuk titik #3 dan #5 di atas): berlaku **per project**,
+bukan per key (WebGIS publik berbagi satu kuota); RPD reset tengah malam Pasifik (~14.00–
+15.00 WIB). Mitigasi wajib: cache hasil per (kawasan × arketipe/pertanyaan) di DB, rate
+limit per IP, degradasi anggun (peta/skor/filter manual tetap jalan kalau AI mati).
+
+### 7.3 Kontrak data endpoint
 
 ```
-POST /api/score    { weights: {...} } → { areas: [{ station_id, station_name, score,
-                     risk_level, components: {...}, isochrone_5min, isochrone_10min,
-                     property_count }] }
-GET  /api/properties?station_id=... → FeatureCollection (sudah difilter dalam isokron)
+POST /api/score
+  request:  { weights: { w1, w2, w3, w4 } }
+  response: { areas: [{ station_id, station_name, score, risk_level,
+                         components: {...}, isochrone_5min, isochrone_10min,
+                         property_count }] }
+
+GET /api/properties?station_id=...
+  response: FeatureCollection Properti Go (sudah difilter dalam isokron)
+
+POST /api/parse-intent
+  request:  { teks: string }
+  response: hasil IntentSchema (lihat titik #3 di atas)
+
+POST /api/insight            [DI LUAR SCOPE MVP — lihat titik #4]
+  request:  InsightPayload (whitelist, lihat titik #4)
+  response: hasil InsightSchema
+
+GET /api/community-sentiment?station_id=...   [BARU, MASUK MVP — lihat titik #5]
+  response: ringkasan sentimen (skema masih ❓, belum diputuskan)
 ```
 
 `property_count` sengaja ikut di response ranking supaya UI bisa tandai kawasan skor tinggi
@@ -373,7 +533,7 @@ ranking <3 detik, AI Insight <10 detik).
 
 ---
 
-## 8. Deployment (final — lihat juga `docs/prd-section9-13-draft.md` untuk versi siap-tempel PRD)
+## 8. Deployment (final)
 
 | Komponen | Tempat | Status |
 |---|---|---|
@@ -438,17 +598,58 @@ Diurutkan dari yang paling mendesak/berdampak struktural:
 | 7 | Database: Supabase vs Neon | ✅ Tetap Supabase + heartbeat wajib (diputuskan sebelum sesi ini, dicatat ulang untuk kelengkapan). |
 | 8 | Realisme timeline PRD | ⏭️ Tidak dibahas atas arahan koordinator. |
 | 9 | `scored_areas` — skor final statis 0–100 vs komponen live | ✅ Ikuti riset Jalur 2 apa adanya: **tidak ada** skor final statis. `scored_areas` cuma simpan komponen teragregasi persentil ke-75; skor 0–100 + level risiko dihitung live di Next.js API Route. PRD 7.4 perlu direvisi. Dikonfirmasi ulang 31 Agustus 2026. |
+| 10 | Jumlah titik sentuh AI: 4 vs 5 | ✅ **5**, ditambah titik baru "ringkasan sentimen Community Activity" (detail penuh di bagian 7.2). |
+| 11 | Dokumen riset per-jalur terpisah vs satu dokumen tunggal | ✅ Semua isinya disintesis penuh ke dokumen ini — tidak ada lagi dokumen riset terpisah yang perlu dirujuk. |
 
 ---
 
 ## 11. Referensi
 
-- `Kamehameha_SIGMAPS_PRD_MAPID_WebGIS_Competition_2026.md` — PRD resmi tim (di `~/Downloads`).
-- `docs/jalur1-context.md` — riset Data, Basis Data & Backend (Anggota 1/koordinator).
-- `docs/jalur2-context.md` — riset Analisis Spasial & Mesin Skoring.
-- `docs/jalur3-context.md` — riset Frontend, AI, Deployment.
-- `docs/prd-section9-13-draft.md` — draft siap-tempel untuk PRD Section 9 & 13.
-- `context.md` (folder induk `MAPID/`, di luar repo ini) — versi lama, sudah digantikan
-  dokumen ini untuk seluruh keputusan teknis; masih relevan untuk detail administratif
-  kompetisi (onboarding Top 50, dll) yang tidak diulang di sini.
-- Kode: `etl/script.py`, `etl/load_supabase.py`, tabel `properti_go` di Supabase.
+- `context/Kamehameha_SIGMAPS_PRD_MAPID_WebGIS_Competition_2026 (1).md` — PRD resmi tim.
+- `context/context-mvp.md` — scope MVP 5 hari (turunan dokumen ini, baca bersamaan).
+- `CLAUDE.md` (root repo) — aturan struktur folder & kode.
+- Kode: `etl/script.py`, tabel `properti_go` di Supabase.
+
+---
+
+## 12. Yang perlu diputuskan sebelum dokumen ini bisa dianggap 100% final
+
+Dokumen ini **belum sepenuhnya final** — beberapa hal masih menggantung dan mempengaruhi
+keputusan lain (chaining), jadi sengaja tidak dihapus/diasumsikan. Dikelompokkan per
+penanggung jawab supaya jelas siapa yang perlu bergerak duluan:
+
+**Perlu keputusan/konfirmasi Jalur 2 (Analisis Spasial & Skoring):**
+- Apakah Jalur 2 sudah menyesuaikan riset & daftar simpul dengan keputusan scope terbaru
+  (MRT/LRT ikut masuk, bagian 2) — riset sebelumnya berjalan dengan asumsi MRT/LRT di luar
+  cakupan.
+- Kunci gabungan `(h3_index, station_id)` untuk tabel `scored_cells` — perlu disepakati
+  bersama Jalur 1 sebelum tabel dibuat.
+- Apakah `competitive_headroom` perlu dipecah per kategori usaha, atau tetap satu kolom
+  generik per sel (ada indikasi kebutuhan pemecahan per kategori, tapi skema keluaran final
+  belum mencerminkan itu).
+- Daftar pasti stasiun yang masuk scope (berapa jumlahnya persis, nama-namanya) — belum ada
+  di dokumen manapun selain angka "12" dan 5 nama stasiun survei.
+- Kalibrasi λ (koefisien penalti KDE) — masih menunggu hasil grid search.
+
+**Perlu keputusan/konfirmasi Jalur 1 (Data & Backend):**
+- Jenis `SUPABASE_KEY` yang dipakai (anon vs service role) dan region project Supabase —
+  belum dicek.
+- Apakah repo `sigmaWebgis` di akun personal atau GitHub organization (menentukan apakah
+  Vercel Hobby bisa langsung dipakai).
+- Tabel Struk Go/Menu Go/Activity di Supabase belum dibuat (baru ada di file ETL).
+
+**Perlu keputusan/konfirmasi Jalur 3 (Frontend & AI):**
+- Skema Zod output untuk titik sentuh AI #5 (ringkasan sentimen) — schema baru terpisah
+  atau digeneralisasi dari `InsightSchema`.
+
+**Perlu keputusan tim/produk secara umum:**
+- Slot Community Activity di formula skor — sudah dipilih "konteks UI saja" lewat PRD, tapi
+  ini opsi yang disebut "paling lemah kalau ditanya juri" — pastikan tim sudah sadar dan
+  siap menjawab kalau ditanya, bukan cuma default tanpa disadari.
+- Verifikasi dari data nyata (bukan konfirmasi lisan) bahwa Struk Go benar-benar menyimpan
+  jam transaksi — baru bisa dicek begitu ada data nyata masuk (area pilot saat ini nol
+  baris Struk Go).
+
+Sampai poin-poin di atas terjawab, anggap dokumen ini **stabil untuk mulai bekerja** tapi
+**belum boleh dianggap tidak akan berubah lagi** — terutama untuk apa pun yang menyentuh
+skema tabel `scored_cells`/`scored_areas` dan daftar stasiun.
