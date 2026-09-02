@@ -1,4 +1,4 @@
-import BaseMap from "@/components/BaseMap";
+import BaseMap from "@/components/map/BaseMap";
 
 export default function Home() {
   return <BaseMap />;
