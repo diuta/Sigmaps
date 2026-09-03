@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * hooks/useMapInstance.ts
+ * hooks/useMapInstance.tsx
  * Context internal untuk zona Map (ZONA CACA)
  *
  * Sesuai ARCHITECTURE.md §4.2:

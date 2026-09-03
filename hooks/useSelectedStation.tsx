@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * hooks/useSelectedStation.ts
+ * hooks/useSelectedStation.tsx
  * Jembatan Komunikasi Utama Map <-> Sidebar
  *
  * Sesuai ARCHITECTURE.md §4.1:
