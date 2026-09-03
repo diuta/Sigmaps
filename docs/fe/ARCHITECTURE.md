@@ -150,8 +150,13 @@ sigmaWebgis/
 │
 ├── etl/                              # Python scripts — JANGAN disentuh dari FE
 └── public/
-    └── geojson/
-        └── krl.geojson               # Static GeoJSON stasiun KRL
+    ├── geojson/
+    │   └── krl.geojson               # Static GeoJSON stasiun KRL (4 stasiun dummy)
+    └── assets/
+        └── map/                      # ZONA CACA — semua aset visual untuk map layer
+            ├── marker-station-active.svg    # Shield pin — stasiun aktif (Cobalt Metro)
+            ├── marker-station-inactive.svg  # Shield pin — is_rankable=false (Cool Slate)
+            └── [tambah aset lain di sini]   # Konsistensi nama: kebab-case, prefix konteks
 ```
 
 ---
