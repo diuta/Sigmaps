@@ -56,7 +56,7 @@ tidak dianggap keputusan permanen.
 **Alur teknis:**
 ```
 Sidebar (Client Component)
-  → POST /api/parse-intent { teks: "..." }
+  → POST /api/prompt-request { teks: "..." }
       → Gemini + Zod (IntentSchema: kategori_usaha, target_jam, segmen, skala, weights, confidence)
   → POST /api/score { weights }
       → baca scored_areas/scored_cells dari Supabase
@@ -156,7 +156,7 @@ Supaya tidak melar — ini semua **tidak** dikerjakan dalam 5 hari ini:
 
 ## 5. Pemetaan kerja per jalur (siapa kerjain apa untuk MVP ini)
 
-- **Jalur 1 (Data/Backend):** `app/api/parse-intent`, `app/api/score`, `app/api/properties`,
+- **Jalur 1 (Data/Backend):** `app/api/prompt-request`, `app/api/score`, `app/api/properties`,
   `app/api/community-sentiment` (baru, untuk Langkah 3a), skema tabel sementara (dummy/seed)
   sambil nunggu Jalur 2, tabel Community Activity di Supabase (belum ada, cuma di ETL).
 - **Jalur 2 (Analisis Spasial/Skoring):** **blocking item** — skema & isi `scored_areas`/

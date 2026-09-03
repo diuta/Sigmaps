@@ -8,8 +8,9 @@ const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
 })
 
-// Nama model wajib bisa di-override lewat env var, bukan hardcode (context/context-final.md
-// §7.2: "Nama model wajib di environment variable, Google merotasi model cepat") — default di
-// bawah cuma dipakai kalau env var tidak diset, bukan berarti override-nya opsional dilewati.
-export const geminiFlashLite = google(process.env.GEMINI_MODEL_FLASH_LITE || 'gemini-3.5-flash-lite')
-export const geminiFlash = google(process.env.GEMINI_MODEL_FLASH || 'gemini-3.5-flash')
+// Model wajib lewat env var, bukan hardcode — Google merotasi model cepat (lihat CLAUDE.md #4).
+// Default di bawah sempat gemini-2.5-*, tapi per 3 Sept 2026 model itu sudah 404 untuk API
+// key baru ("no longer available to new users") — diganti ke gemini-3.5-* setelah dites
+// langsung ke API dan berhasil.
+export const geminiFlashLite = google(process.env.GEMINI_MODEL_FLASH_LITE ?? 'gemini-3.5-flash-lite')
+export const geminiFlash = google(process.env.GEMINI_MODEL_FLASH ?? 'gemini-3.5-flash')
