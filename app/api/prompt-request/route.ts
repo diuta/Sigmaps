@@ -1,20 +1,14 @@
 import { NextResponse } from 'next/server'
 import { generateText } from 'ai'
 import { geminiFlashLite } from '@/lib/ai/gemini'
-import { PromptRequestSchema } from '@/lib/schemas/prompt-request'
 
 export async function POST(request: Request) {
-  const body = await request.json()
-  const parsed = PromptRequestSchema.safeParse(body)
-
-  if (!parsed.success) {
-    return NextResponse.json({ error: 'Input tidak valid' }, { status: 400 })
-  }
+  const body = await request.json() // belom diimplement zod schema, jadi masih raw json string. todo: buat schema di lib/schema
 
   try {
     const { text } = await generateText({
       model: geminiFlashLite,
-      prompt: parsed.data.teks,
+      prompt: body.text
     })
 
     return NextResponse.json({ data: { text } })
