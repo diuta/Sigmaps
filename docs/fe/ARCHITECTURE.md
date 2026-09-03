@@ -433,24 +433,32 @@ Token dari `DESIGN.md` sebagai CSS custom properties di `app/globals.css`.
 
 ## 12. Dummy Data Strategy & API Injection Seam
 
-> **Status saat ini:** Pure FE phase — belum ada API real dari Jalur 1.
-> API list final **belum diterima**. Arsitektur ini dirancang agar swap dummy → real
-> hanya memerlukan perubahan di satu tempat per fitur.
+> 🟡 **CURRENT STATUS: PURE FE DUMMY PHASE**
+> Semua data adalah palsu. Tidak ada koneksi ke backend, Supabase, atau AI.
+> API list dari Jalur 1 **belum diterima**.
 
-### Pola yang dipakai
+### Keputusan Arsitektur yang Sudah Final
 
-Semua hooks (`useScore`, `useParseIntent`, `useSelectedStation`) adalah **data-source agnostic**.
-Komponen tidak tahu apakah data datang dari dummy atau API real.
+| Keputusan | Pilihan | Alasan |
+|-----------|---------|--------|
+| Station marker renderer | **HTML Marker** (`maplibregl.Marker`) | ~30 stasiun (≤50), perlu CSS hover/glow/animation per DESIGN.md |
+| Data source saat ini | `lib/dummy/*` | API belum siap, pure FE phase |
+| Marker shape | Menunggu asset dari Caca | Drop ke `public/assets/map/` saat siap |
+
+### Pola Hook — Data-Source Agnostic
+
+Komponen tidak tahu apakah data datang dari dummy atau API. Swap terjadi
+hanya di dalam hook, satu baris, dengan komentar yang jelas:
 
 ```typescript
-// hooks/useScore.ts — pola yang harus diikuti
+// hooks/useScore.ts — pola yang harus diikuti di semua hooks
 export function useScore() {
   const [data, setData] = useState<ScoreResponse | null>(null);
 
   async function fetchScore(intent: IntentOutput) {
-    // 🟡 FASE DUMMY: swap baris ini saat API siap
+    // 🟡 FASE DUMMY: swap baris ini saat /api/score siap
     const result = DUMMY_SCORE_RESPONSE;
-    // ✅ FASE REAL:  const result = await fetch('/api/score', {...}).then(r => r.json());
+    // ✅ FASE REAL:  const result = await fetch('/api/score', { method:'POST', body: JSON.stringify(intent) }).then(r => r.json());
     setData(result);
   }
 
@@ -458,17 +466,45 @@ export function useScore() {
 }
 ```
 
-### Aturan dummy data
+### Aturan Menulis Dummy Code
 
-1. **Semua dummy data ada di `lib/dummy/`.** Tidak ada data palsu yang di-hardcode di komponen.
-2. **Shape dummy harus identik dengan shape types.** `DUMMY_SCORE_RESPONSE` harus valid sebagai `ScoreResponse`.
-3. **Tandai dengan komentar `🟡 FASE DUMMY`** di setiap baris yang akan diswap.
-4. **Saat API siap: hapus `lib/dummy/` dan satu baris komentar** — tidak ada refactor komponen.
+1. **Semua data palsu hanya di `lib/dummy/`.** Tidak ada hardcode di komponen manapun.
+2. **Shape dummy harus match types persis.** TypeScript harus happy tanpa cast.
+3. **Tandai setiap baris swap dengan `// 🟡 FASE DUMMY`** — satu baris, langsung di atas yang akan diganti.
+4. **Tidak ada logika bisnis di dummy files** — hanya `export const DATA = ...`.
 
-### API yang sedang ditunggu dari Jalur 1
+### Checklist Penghapusan Dummy (saat API siap)
 
-> ❓ **Daftar endpoint final belum diterima.** Tabel di bawah berdasarkan context-mvp.md —
-> nama path dan request/response body bisa berubah saat kontrak resmi dikirim.
+Saat API dari Jalur 1 sudah dikonfirmasi, lakukan ini secara berurutan:
+
+```
+[ ] 1. Terima kontrak API (endpoint, request, response shape)
+[ ] 2. Update tabel API di bawah dengan status ✅
+[ ] 3. Swap baris 🟡 FASE DUMMY di setiap hook → real fetch call
+[ ] 4. Verifikasi TypeScript tidak ada error
+[ ] 5. Hapus seluruh folder lib/dummy/ (rm -rf lib/dummy)
+[ ] 6. Hapus import dummy di setiap hook
+[ ] 7. (Opsional) Hapus komentar // ✅ FASE REAL yang sudah aktif
+```
+
+**File yang akan dihapus saat API siap:**
+
+| File | Digantikan oleh |
+|------|-----------------|
+| `lib/dummy/stations.ts` | Fetch dari Supabase di `app/page.tsx` (Server Component) |
+| `lib/dummy/score.ts` | `fetch('/api/score', ...)` di `hooks/useScore.ts` |
+| `lib/dummy/properties.ts` | `fetch('/api/properties?station_id=...')` di `hooks/useProperties.ts` |
+| `lib/dummy/sentiment.ts` | `fetch('/api/community-sentiment?station_id=...')` di `hooks/useSentiment.ts` |
+
+**File yang TIDAK dihapus** (tetap ada setelah dummy phase):
+- `types/*` — shape tetap sama
+- `hooks/*` — cukup hapus baris 🟡 dan uncomment ✅
+- `components/*` — tidak ada yang perlu diubah
+
+### API yang Sedang Ditunggu dari Jalur 1
+
+> ❓ **Daftar endpoint final belum diterima.** Shape di bawah berdasarkan context-mvp.md —
+> bisa berubah saat kontrak resmi dikirim.
 
 | Endpoint | Method | Request | Response | Status |
 |----------|--------|---------|----------|--------|
@@ -477,10 +513,10 @@ export function useScore() {
 | `/api/properties` | GET | `?station_id=` | `PropertyUnit[]` | ❓ Menunggu isokron siap (B-1) |
 | `/api/community-sentiment` | GET | `?station_id=` | `{ ringkasan: string }` | ❓ Menunggu tabel Community Activity (B-6) |
 
-*Update tabel ini saat kontrak dari Jalur 1 diterima.*
+*Update kolom Status menjadi ✅ saat kontrak dari Jalur 1 diterima.*
 
 ---
 
 *Terakhir diupdate: September 2026*
-*Ownership: Caca = Map, Clement = Sidebar & API*
+*Ownership: Caca = Map (~30 stasiun, HTML Marker), Clement = Sidebar & API*
 *Crosscheck dengan: `docs/fe/context-mvp.md` v2 (2 Sep 2026)*
