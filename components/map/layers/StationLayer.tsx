@@ -54,31 +54,31 @@ export default function StationLayer() {
       el.innerHTML = `
         <div class="marker-active-pulse-container"></div>
         <div class="relative flex flex-col items-center select-none pointer-events-auto">
-          <!-- Marker Image -->
-          <img 
-            src="${svgSrc}" 
-            alt="${station.station_name}" 
-            class="w-[42px] h-[48px] object-contain drop-shadow-sm transition-transform duration-200" 
-            draggable="false"
-          />
-
-          <!-- Rank Badge (khusus Top rank) -->
-          ${
-            station.rank !== null
-              ? `<span class="absolute -top-1.5 -right-1 bg-white text-[10px] font-bold text-[var(--color-brand)] px-1.5 py-0.2 rounded-full shadow-md border border-[var(--color-border)]">
-                  #${station.rank}
-                </span>`
-              : ""
-          }
-
-          <!-- Floating Name Label (Pill) -->
-          <div class="station-label mt-1 px-2 py-0.5 rounded-md text-[11px] font-semibold whitespace-nowrap shadow-md backdrop-blur-sm transition-all duration-200 ${
+          <!-- Floating Name & Rank Header Pill (Bersih di atas pin, tidak menutupi icon kereta) -->
+          <div class="station-label mb-1.5 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-tight whitespace-nowrap shadow-xl backdrop-blur-md transition-all duration-200 ${
             station.is_rankable
-              ? "bg-slate-900/85 text-white border border-slate-700/50"
-              : "bg-slate-800/80 text-slate-300 border border-slate-600/40 text-[10px]"
+              ? "bg-slate-900/90 text-white border border-slate-700/70"
+              : "bg-slate-800/85 text-slate-300 border border-slate-600/40 text-[10px]"
           }">
-            ${station.station_name}
-            ${!station.is_rankable ? ' <span class="text-[9px] text-amber-400 font-normal">· Data belum cukup</span>' : ""}
+            ${
+              station.rank !== null
+                ? `<span class="px-1.5 py-0.2 bg-[var(--color-brand)] text-white text-[10px] font-extrabold rounded-full shadow-sm">
+                    #${station.rank}
+                  </span>`
+                : ""
+            }
+            <span>${station.station_name}</span>
+            ${!station.is_rankable ? ' <span class="text-[9px] text-amber-300 font-normal">· Data belum cukup</span>' : ""}
+          </div>
+
+          <!-- Marker Pin Wrapper (Icon kereta bebas & bersih tanpa tertimpa) -->
+          <div class="relative flex items-center justify-center">
+            <img 
+              src="${svgSrc}" 
+              alt="${station.station_name}" 
+              class="w-[54px] h-[60px] object-contain drop-shadow-md transition-transform duration-200" 
+              draggable="false"
+            />
           </div>
         </div>
       `;
