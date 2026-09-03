@@ -11,7 +11,42 @@ selama proses *vibe coding* MVP SIGMAPS.
 
 ---
 
+## 0. Agent Guardrails (Baca Ini Dulu)
+
+> Paste section ini sebagai konteks di awal setiap sesi coding AI.
+
+**1. Single Truth Document**
+- Follow `docs/fe/context-mvp.md` v2 strictly.
+- No H3 / heatmaps. No 5-minute isochrones. No weight customization UI. `hex-area.ts` kept as artifact only.
+- AI touches ONLY: (a) intent parsing via Zod in `/api/parse-intent`, (b) community sentiment in `/api/community-sentiment`.
+- Scoring is 100% deterministic server-side in `lib/scoring.ts` (`0.25·D + 0.50·C + 0.25·S`). AI does NOT calculate scores.
+
+**2. Ownership & Directory Boundaries**
+- **CACA** owns: `components/map/*`, `hooks/useMapInstance.ts`, `app/globals.css` — MapLibre instance, station pins, property dots, isochrone.
+- **CLEMENT** owns: `components/sidebar/*`, `app/api/*`, `lib/scoring.ts`, `lib/dummy/*` — sidebar UI, API routes, dummy data.
+- **SHARED** (never modify unilaterally): `types/`, `hooks/useSelectedStation.ts`.
+
+**3. Cross-Boundary Communication**
+- Sidebar MUST NOT call `map.flyTo()` directly or import from `components/map/`.
+- Sidebar sets `selectedStation` via `useSelectedStation` → `BaseMap.tsx` listens and triggers `flyTo()` internally.
+- All styling: CSS variables from `app/globals.css` only (e.g. `var(--color-brand)`). No hardcoded hex.
+- All placeholder data: `lib/dummy/` only, hooks tagged `// 🟡 FASE DUMMY`.
+
+**4. API Status — Semua Masih Pending dari Jalur 1**
+
+| Endpoint | Method | Shape | Status |
+|----------|--------|-------|--------|
+| `/api/parse-intent` | POST | `{ teks }` → `IntentOutput` | ❓ Menunggu konfirmasi |
+| `/api/score` | POST | `{ tipe_3, harga_target }` → `ScoreResponse` (§6.8 context-mvp) | ❓ Menunggu `scored_areas` |
+| `/api/properties` | GET | `?station_id=` → `PropertyUnit[]` | ❓ Menunggu isokron (B-1) |
+| `/api/community-sentiment` | GET | `?station_id=` → `{ ringkasan: string }` | ❓ Menunggu tabel Activity (B-6) |
+
+Sampai API dikonfirmasi: semua hooks pakai `lib/dummy/*`.
+
+---
+
 ## 1. Prinsip Utama
+
 
 1. **Satu direktori, satu tanggung jawab.** Tidak ada folder bernama `utils/`, `misc/`, atau `common/` tanpa deskripsi jelas.
 2. **Zona kepemilikan, bukan aturan larangan.** Bukan berarti salah satu tidak boleh menyentuh zona lain — tapi kalau merge conflict terjadi, *owner* zona itu yang resolve.
