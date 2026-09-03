@@ -102,10 +102,12 @@ sigmaWebgis/
 ├── components/                       # UI Components — dibagi per zona
 │   ├── map/                          # ZONA CACA — semua layer di atas peta
 │   │   ├── BaseMap.tsx               # maplibre-gl canvas; listens to selectedStation → flyTo
-│   │   └── layers/
-│   │       ├── StationLayer.tsx      # Titik stasiun
-│   │       ├── PropertyLayer.tsx     # Titik oranye properti sekitar
-│   │       └── IsochroneLayer.tsx    # Poligon isokron 10 menit SAJA (lihat §9)
+│   │   ├── layers/
+│   │   │   ├── StationLayer.tsx      # Titik stasiun
+│   │   │   ├── PropertyLayer.tsx     # Titik oranye properti sekitar
+│   │   │   └── IsochroneLayer.tsx    # Poligon isokron (border dashed, fill transparan)
+│   │   └── dev/                      # 🟡 DEV / EXPERIMENTAL ONLY (mudah dihapus)
+│   │       └── IsochroneDevTool.tsx  # Floating slider durasi/radius + switch organik vs buffer
 │   │
 │   └── sidebar/                      # ZONA CLEMENT — right sidebar 380px
 │       ├── Sidebar.tsx               # Container + orchestrator
@@ -495,6 +497,9 @@ Saat API dari Jalur 1 sudah dikonfirmasi, lakukan ini secara berurutan:
 | `lib/dummy/score.ts` | `fetch('/api/score', ...)` di `hooks/useScore.ts` |
 | `lib/dummy/properties.ts` | `fetch('/api/properties?station_id=...')` di `hooks/useProperties.ts` |
 | `lib/dummy/sentiment.ts` | `fetch('/api/community-sentiment?station_id=...')` di `hooks/useSentiment.ts` |
+| `components/map/dev/` | Hapus seluruh folder saat poligon MAPID (B-1) siap |
+| `lib/map/isochrone-generator.ts` | Hapus — digantikan oleh GeoJSON asli dari Jalur 2 |
+| `hooks/useIsochroneConfig.tsx` | Hapus — tidak lagi dibutuhkan saat poligon statis/API siap |
 
 **File yang TIDAK dihapus** (tetap ada setelah dummy phase):
 - `types/*` — shape tetap sama
