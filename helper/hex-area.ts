@@ -1,3 +1,5 @@
+// kept as an artifact in case dibutuhin lagi
+
 import type { FeatureCollection, Geometry } from "geojson";
 
 export default function hexArea(
