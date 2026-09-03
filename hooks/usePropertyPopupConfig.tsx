@@ -1,0 +1,53 @@
+"use client";
+
+/**
+ * hooks/usePropertyPopupConfig.tsx
+ * 🟡 DEV / EXPERIMENTAL ONLY — State Controller untuk Eksplorasi Desain Property Popup
+ *
+ * Mendukung opsi style:
+ * - 'sleek': Sesuai referensi Figma (horizontal compact 200x72 mini thumbnail + badge)
+ * - 'slender-detail': Horizontal sleek dengan alamat jalan ringkas & kategori
+ * - 'vertical-card': Desain kartu vertikal awal
+ */
+
+import React, { createContext, useContext, useState, ReactNode } from "react";
+
+export type PropertyPopupStyle = "sleek" | "slender-detail" | "vertical-card";
+
+interface PropertyPopupConfigContextValue {
+  popupStyle: PropertyPopupStyle;
+  setPopupStyle: (style: PropertyPopupStyle) => void;
+  themeMode: "light" | "dark";
+  setThemeMode: (theme: "light" | "dark") => void;
+}
+
+const PropertyPopupConfigContext = createContext<
+  PropertyPopupConfigContextValue | undefined
+>(undefined);
+
+export function PropertyPopupConfigProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [popupStyle, setPopupStyle] = useState<PropertyPopupStyle>("sleek");
+  const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
+
+  return (
+    <PropertyPopupConfigContext.Provider
+      value={{ popupStyle, setPopupStyle, themeMode, setThemeMode }}
+    >
+      {children}
+    </PropertyPopupConfigContext.Provider>
+  );
+}
+
+export function usePropertyPopupConfig(): PropertyPopupConfigContextValue {
+  const context = useContext(PropertyPopupConfigContext);
+  if (!context) {
+    throw new Error(
+      "usePropertyPopupConfig must be used within a PropertyPopupConfigProvider"
+    );
+  }
+  return context;
+}

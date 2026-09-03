@@ -107,7 +107,7 @@ sigmaWebgis/
 │   │   │   ├── PropertyLayer.tsx     # Titik oranye properti sekitar
 │   │   │   └── IsochroneLayer.tsx    # Poligon isokron (border dashed, fill transparan)
 │   │   └── dev/                      # 🟡 DEV / EXPERIMENTAL ONLY (mudah dihapus)
-│   │       └── IsochroneDevTool.tsx  # Floating slider durasi/radius + switch organik vs buffer
+│   │       └── DevToolsOverlay.tsx   # Unified floating dev tools (Isochrone + Property Popup)
 │   │
 │   └── sidebar/                      # ZONA CLEMENT — right sidebar 380px
 │       ├── Sidebar.tsx               # Container + orchestrator
@@ -500,6 +500,7 @@ Saat API dari Jalur 1 sudah dikonfirmasi, lakukan ini secara berurutan:
 | `components/map/dev/` | Hapus seluruh folder saat poligon MAPID (B-1) siap |
 | `lib/map/isochrone-generator.ts` | Hapus — digantikan oleh GeoJSON asli dari Jalur 2 |
 | `hooks/useIsochroneConfig.tsx` | Hapus — tidak lagi dibutuhkan saat poligon statis/API siap |
+| `hooks/usePropertyPopupConfig.tsx` | Hapus — tidak lagi dibutuhkan setelah varian desain popup final disepakati |
 
 **File yang TIDAK dihapus** (tetap ada setelah dummy phase):
 - `types/*` — shape tetap sama

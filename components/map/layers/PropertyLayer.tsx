@@ -4,27 +4,134 @@
  * components/map/layers/PropertyLayer.tsx
  * ZONA CACA — Property Units Pin Layer
  *
- * Sesuai context-mvp.md §2 Langkah 4:
- * - Menampilkan titik properti di sekitar stasiun aktif (`selectedStation`).
- * - Menggunakan aset SVG oranye: `/assets/map/maker-property-default.svg`.
- * - Interaksi Klik: Membuka mini popover foto tampak depan + alamat.
- *
- * ⛔ STRICT DATA GUARDRAILS:
- * Dilarang menampilkan harga, luas tanah/bangunan, atau kontak pemilik.
+ * Mendukung template popup yang dapat diganti via `usePropertyPopupConfig()`:
+ * - 'sleek': Compact horizontal pill (sesuai referensi Figma 200x72)
+ * - 'slender-detail': Horizontal sleek + baris alamat ringkas
+ * - 'vertical-card': Format kartu vertikal awal
  */
 
 import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import { useMapInstance } from "@/hooks/useMapInstance";
 import { useSelectedStation } from "@/hooks/useSelectedStation";
+import { usePropertyPopupConfig, PropertyPopupStyle } from "@/hooks/usePropertyPopupConfig";
 import type { PropertyUnit } from "@/types/property";
 
 // 🟡 FASE DUMMY: swap ke fetch(/api/properties?station_id=...) saat backend siap
 import { DUMMY_PROPERTIES } from "@/lib/dummy/properties";
 
+function renderPopupHTML(
+  prop: PropertyUnit,
+  stationName: string,
+  style: PropertyPopupStyle,
+  theme: "light" | "dark"
+): string {
+  const isDark = theme === "dark";
+  const photoSrc =
+    prop.foto_tampak_depan ||
+    "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&auto=format&fit=crop&q=80";
+
+  const badgeText = prop.jenis_properti === "Sewa" ? "Siap Sewa" : "Siap Jual";
+
+  // 1. SLEEK HORIZONTAL (Sesuai Referensi Figma ~210x72)
+  if (style === "sleek") {
+    return `
+      <div class="flex items-center gap-3 p-2.5 rounded-2xl shadow-2xl border transition-all select-none ${
+        isDark
+          ? "bg-slate-900/95 border-slate-700/80 text-white backdrop-blur-md"
+          : "bg-white/95 border-slate-200/90 text-slate-900 backdrop-blur-md"
+      }" style="min-width: 215px; max-width: 250px;">
+        <!-- Left Squircle Image -->
+        <div class="w-[52px] h-[52px] rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 shadow-sm">
+          <img src="${photoSrc}" alt="${prop.kategori_properti}" class="w-full h-full object-cover" />
+        </div>
+
+        <!-- Right Content -->
+        <div class="flex flex-col justify-center min-w-0 pr-1">
+          <h4 class="text-[13px] font-bold tracking-tight truncate leading-tight ${
+            isDark ? "text-white" : "text-slate-900"
+          }">
+            ${prop.kategori_properti} ${stationName}
+          </h4>
+
+          <div class="mt-1.5 flex items-center gap-1.5">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-tight ${
+              prop.jenis_properti === "Sewa"
+                ? "bg-emerald-50 text-emerald-800 border border-emerald-200/80"
+                : "bg-blue-50 text-blue-800 border border-blue-200/80"
+            }">
+              ${badgeText}
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 2. SLENDER DETAIL (Horizontal Sleek + Baris Alamat Ringkas ~250x84)
+  if (style === "slender-detail") {
+    return `
+      <div class="flex items-center gap-3 p-3 rounded-2xl shadow-2xl border transition-all select-none ${
+        isDark
+          ? "bg-slate-900/95 border-slate-700/80 text-white backdrop-blur-md"
+          : "bg-white/95 border-slate-200/90 text-slate-900 backdrop-blur-md"
+      }" style="min-width: 245px; max-width: 280px;">
+        <!-- Left Thumbnail -->
+        <div class="w-[58px] h-[58px] rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 shadow-sm relative">
+          <img src="${photoSrc}" alt="${prop.kategori_properti}" class="w-full h-full object-cover" />
+        </div>
+
+        <!-- Right Info -->
+        <div class="flex flex-col justify-center min-w-0 pr-1 flex-1">
+          <div class="flex items-center justify-between gap-1">
+            <h4 class="text-[12px] font-bold tracking-tight truncate leading-tight ${
+              isDark ? "text-white" : "text-slate-900"
+            }">
+              ${prop.kategori_properti}
+            </h4>
+            <span class="inline-flex items-center px-2 py-0.2 rounded-full text-[10px] font-semibold flex-shrink-0 ${
+              prop.jenis_properti === "Sewa"
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                : "bg-blue-50 text-blue-700 border border-blue-200/80"
+            }">
+              ${badgeText}
+            </span>
+          </div>
+
+          <p class="mt-1 text-[11px] leading-snug line-clamp-2 ${
+            isDark ? "text-slate-300" : "text-slate-500"
+          }">
+            ${prop.alamat}
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
+  // 3. VERTICAL CARD (Format Awal)
+  return `
+    <div class="w-[260px] bg-slate-900/95 text-slate-100 rounded-xl overflow-hidden shadow-2xl border border-slate-700/80 font-sans backdrop-blur-md">
+      <div class="relative w-full h-[120px] bg-slate-800 flex items-center justify-center overflow-hidden">
+        <img src="${photoSrc}" alt="${prop.alamat}" class="w-full h-full object-cover" />
+        <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+          prop.jenis_properti === "Sewa"
+            ? "bg-amber-500/90 text-slate-950"
+            : "bg-emerald-500/90 text-slate-950"
+        }">
+          ${prop.jenis_properti}
+        </span>
+      </div>
+      <div class="p-3">
+        <h4 class="text-xs font-semibold text-white line-clamp-2 leading-snug">${prop.alamat}</h4>
+      </div>
+    </div>
+  `;
+}
+
 export default function PropertyLayer() {
   const { map } = useMapInstance();
   const { selectedStation } = useSelectedStation();
+  const { popupStyle, themeMode } = usePropertyPopupConfig();
 
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const activePopupRef = useRef<maplibregl.Popup | null>(null);
@@ -32,7 +139,7 @@ export default function PropertyLayer() {
   useEffect(() => {
     if (!map) return;
 
-    // 1. Bersihkan marker dan popup sebelumnya
+    // Bersihkan marker dan popup sebelumnya
     if (activePopupRef.current) {
       activePopupRef.current.remove();
       activePopupRef.current = null;
@@ -40,11 +147,8 @@ export default function PropertyLayer() {
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
-    // 2. Jika tidak ada stasiun aktif, tidak perlu merender properti
     if (!selectedStation) return;
 
-    // 3. Ambil data properti untuk stasiun yang sedang dipilih
-    // 🟡 FASE DUMMY: nanti diganti fetch(`/api/properties?station_id=${selectedStation.area_id}`)
     const properties: PropertyUnit[] =
       DUMMY_PROPERTIES[selectedStation.area_id] || [];
 
@@ -54,76 +158,41 @@ export default function PropertyLayer() {
 
       el.innerHTML = `
         <div class="relative flex flex-col items-center group">
-          <!-- Property Pin SVG (Compact secondary marker ~20x25px) -->
           <img 
             src="/assets/map/maker-property-default.svg" 
             alt="${prop.kategori_properti}" 
             class="w-[20px] h-[25px] object-contain transition-transform duration-200" 
             draggable="false"
           />
-
-          <!-- Mini Hover Tag -->
           <div class="absolute -top-6 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] font-semibold rounded-md shadow-md whitespace-nowrap border border-slate-700/60 backdrop-blur-sm z-30">
             ${prop.kategori_properti} · ${prop.jenis_properti}
           </div>
         </div>
       `;
 
-      // HTML konten untuk Popover Card saat pin diklik
-      const popupContent = `
-        <div class="w-[260px] bg-slate-900/95 text-slate-100 rounded-xl overflow-hidden shadow-2xl border border-slate-700/80 font-sans backdrop-blur-md">
-          <!-- Foto Tampak Depan -->
-          <div class="relative w-full h-[120px] bg-slate-800 flex items-center justify-center overflow-hidden">
-            ${
-              prop.foto_tampak_depan
-                ? `<img src="${prop.foto_tampak_depan}" alt="${prop.alamat}" class="w-full h-full object-cover" />`
-                : `<span class="text-[11px] text-slate-400 italic">Foto tidak tersedia</span>`
-            }
-            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase ${
-              prop.jenis_properti === "Sewa"
-                ? "bg-amber-500/90 text-slate-950"
-                : "bg-emerald-500/90 text-slate-950"
-            }">
-              ${prop.jenis_properti}
-            </span>
-            <span class="absolute top-2 right-8 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-950/70 text-slate-200 border border-slate-700/50">
-              ${prop.kategori_properti}
-            </span>
-          </div>
-
-          <!-- Info Alamat -->
-          <div class="p-3">
-            <h4 class="text-xs font-semibold text-white line-clamp-2 leading-snug">
-              ${prop.alamat}
-            </h4>
-            <div class="mt-2 pt-2 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
-              <span>Unit di sekitar ${selectedStation.station_name}</span>
-              <span class="text-emerald-400 font-medium">Tersedia</span>
-            </div>
-          </div>
-        </div>
-      `;
+      const popupHTML = renderPopupHTML(
+        prop,
+        selectedStation.station_name,
+        popupStyle,
+        themeMode
+      );
 
       const popup = new maplibregl.Popup({
-        offset: [0, -24],
+        offset: [0, -22],
         closeButton: true,
         closeOnClick: true,
-        maxWidth: "280px",
-      }).setHTML(popupContent);
+        maxWidth: "300px",
+      }).setHTML(popupHTML);
 
-      // Event click pin -> buka popup
       el.addEventListener("click", (e) => {
         e.stopPropagation();
-
         if (activePopupRef.current) {
           activePopupRef.current.remove();
         }
-
         popup.setLngLat([prop.lng, prop.lat]).addTo(map);
         activePopupRef.current = popup;
       });
 
-      // Pasang Marker ke Map
       const marker = new maplibregl.Marker({
         element: el,
         anchor: "bottom",
@@ -142,7 +211,7 @@ export default function PropertyLayer() {
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
     };
-  }, [map, selectedStation]);
+  }, [map, selectedStation, popupStyle, themeMode]);
 
   return null;
 }
