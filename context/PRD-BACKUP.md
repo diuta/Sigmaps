@@ -26,42 +26,6 @@ WebGIS \- Spatial Intelligence untuk Transportasi Massal
 | 4 | Clement Nathanael | UI/UX Developer |
 | 5 | Dimas Putra Aryawan | Data & AI Analyst |
 
----
-
-**🔄 CATATAN REVISI UNTUK MVP 5 HARI (ditambahkan 3 September 2026)**
-
-Dokumen PRD ini menjelaskan **rencana produk penuh** yang tetap berlaku sebagai arah jangka
-panjang SIGMAPS. Untuk build MVP 5 hari yang dikerjakan sekarang, ada 8 penyesuaian scope
-dan metode yang dikonfirmasi lewat `context/context-mvp.md` (dokumen acuan MVP,
-menggantikan bagian yang bertentangan di PRD ini untuk scope MVP):
-
-1. **Indeks Risiko Spasial** keluar dari MVP — tidak ada rumusnya di model skor MVP.
-2. **Heatmap kejenuhan pasar** (sel H3) keluar dari MVP — skoring MVP di level
-   kawasan/stasiun, bukan sel H3.
-3. **Isokron 5 menit dicabut** untuk MVP — hanya isokron 10 menit yang dipakai.
-4. **Klaim "AI menerjemahkan rencana usaha menjadi bobot parameter" gugur untuk MVP** — AI
-   MVP hanya menentukan kategori usaha (`tipe_3`) dan perkiraan harga, bukan bobot. Bobot
-   MVP tunggal (0,25 D : 0,50 C : 0,25 S), ditetapkan di server, tidak bisa disunting
-   pengguna (layar edit bobot dihapus permanen dari MVP).
-5. **Bab 5 Dataset** — tambahan sensus restoran (GeoJSON per kota) sebagai sumber komponen
-   C untuk MVP; koreksi peran dataset: **Struk Go mati** (100/100 sampel tanpa jam/nominal
-   transaksi, tidak dipakai di MVP), **Menu Go** dipakai untuk D dan S (bukan T), dan
-   **Community Activity** tidak masuk formula skor sama sekali (tetap dipakai sebagai layer
-   peta + ringkasan sentimen AI).
-6. **Bab 7 Metode** — formula MVP `skor = 100 × (0,25·D + 0,50·C + 0,25·S)`, bukan 4
-   variabel + KDE. KDE dan OSMnx dihapus dari pipeline MVP.
-7. **Bab 9 Persyaratan Teknis** — `scikit-learn` tidak dipakai di pipeline batch MVP (tidak
-   ada KDE untuk dihitung).
-8. **SIGMAPS mengukur potensi pasar, bukan kelayakan investasi** — karena biaya sewa
-   (Property Go tidak punya kolom harga) tidak terukur, S mengukur tingkat harga kawasan
-   sebagai cerminan daya beli, bukan kelayakan investasi usaha.
-
-Detail lengkap, alasan, dan rumus final MVP ada di `context/context-mvp.md`. Bagian PRD di
-bawah ini **tidak diubah isinya** kecuali ditandai catatan 🔄 langsung di tempatnya — bagian
-yang tidak ditandai tetap berlaku sebagai rencana produk penuh pasca-MVP.
-
----
-
 **1\. Ringkasan Eksekutif**
 
 **SIGMAPS** (Spatial Intelligence & Geography MAPS) adalah WebGIS yang mengubah pemilihan lokasi usaha di kawasan stasiun KRL Jabodetabek dari proses tebak-tebakan menjadi keputusan berbasis bukti spasial yang terukur dan dapat ditelusuri.
@@ -70,35 +34,13 @@ yang tidak ditandai tetap berlaku sebagai rencana produk penuh pasca-MVP.
 
 **Dataset yang digunakan**. Tiga dataset Data Mission MAPID  Struk Go (sinyal permintaan dan profil temporal), Menu Go (basis kompetitor dan daya beli), dan Properti Go (katalog unit siap sewa)  dilengkapi Community Activity sebagai lapisan konteks kawasan, serta Katalog MAPID, OpenStreetMap sebagai data pendukung.
 
-🔄 **Untuk MVP:** verifikasi data nyata menemukan **Struk Go mati** (100/100 sampel tanpa jam
-maupun nominal transaksi) — tidak dipakai di MVP. D dan S untuk MVP bersumber dari Menu Go +
-survei tim, C bersumber dari sensus restoran (dataset tambahan, lihat `context-mvp.md` 7).
-
 **Survey Activities**. Survei lapangan difokuskan pada lima kawasan stasiun KRL prioritas di Tangerang Selatan: Cisauk, Serpong, Rawa Buntu, Sudimara, dan Jurangmangu. Survei mengumpulkan POI kuliner dan ritel, unit properti komersial, titik akses pejalan kaki, serta narasi kondisi kawasan. Perannya bukan pelengkap: survei menambal cakupan data sekunder dan menjamin presisi koordinat, dan karena tiga dari lima komponen skor bertumpu pada titik merchant, kualitas survei menentukan kualitas hasil.
-
-🔄 **Untuk MVP:** kawasan survei/skoring berpindah ke DKI Jakarta (Menu Go menumpuk di sana,
-nyaris nol di Tangsel), bukan lima stasiun Tangsel di atas — lihat `context-mvp.md` 2.
 
 **Analisis spasial**. Kawasan dibatasi dengan isokron jalan kaki 5 dan 10 menit dari pintu stasiun, bukan lingkaran radius, sehingga jalan buntu dan ketiadaan penyeberangan ikut diperhitungkan. Seluruh data diagregasi ke sel heksagon Uber H3 agar setiap kawasan dapat dibandingkan secara adil. Kejenuhan pasar diukur dengan Kernel Density Estimation, dan seluruh parameter digabungkan lewat Weighted Linear Combination menjadi satu skor kesesuaian.
 
-🔄 **Untuk MVP:** hanya isokron 10 menit yang dipakai (5 menit dicabut); tidak ada agregasi
-H3 (skoring langsung di level kawasan); tidak ada KDE; formula MVP adalah
-`skor = 100 × (0,25·D + 0,50·C + 0,25·S)`, 3 variabel bukan 4+penalti. Lihat
-`context-mvp.md` 6.
-
 **Peran AI.** AI dipakai pada empat titik sentuh yang seluruhnya berada di luar mesin skoring: dua pada proses batch (normalisasi kategori merchant dan klasifikasi narasi kondisi kawasan) dan dua pada saat pengguna berinteraksi (menerjemahkan rencana usaha menjadi bobot parameter, dan menyusun narasi Area Insight). Mesin skoring 100% deterministik dan tidak pernah memanggil AI  menjalankan analisis yang sama dua kali menghasilkan angka yang sama persis.
 
-🔄 **Untuk MVP:** titik batch (normalisasi kategori merchant, klasifikasi Community Activity)
-**dicabut permanen**, bukan cuma di luar scope. AI tidak lagi "menerjemahkan rencana usaha
-menjadi bobot parameter" — AI MVP hanya menentukan kategori usaha & perkiraan harga; bobot
-tunggal ditetapkan server, tidak bisa disunting. Sebagai gantinya, MVP menambahkan satu titik
-sentuh baru: ringkasan sentimen Community Activity per kawasan (lihat `context-mvp.md` 3).
-
 **Hasil utama**. Pengguna menerima peringkat kawasan stasiun beserta Skor Kesesuaian 0–100 dan Indeks Risiko Spasial, peta isokron dan heatmap kejenuhan pasar, narasi yang menjelaskan alasan di balik peringkat, daftar unit properti siap sewa di kawasan rekomendasi, serta ringkasan yang dapat diekspor ke PDF.
-
-🔄 **Untuk MVP:** Top 5 kawasan ditampilkan dengan skor 0–100 + dekomposisi komponen mentah
-(angka, tanpa narasi AI) — **tanpa** Indeks Risiko Spasial, **tanpa** heatmap kejenuhan
-pasar, **tanpa** narasi Area Insight, dan **tanpa** export PDF. Lihat `context-mvp.md` 4.
 
 **2\. Tujuan Produk**
 
@@ -166,14 +108,6 @@ Menyediakan platform WebGIS yang mengubah pemilihan lokasi usaha di kawasan tran
 * Katalog properti terintegrasi dan matriks perbandingan 2–3 properti secara berdampingan.  
 * Fitur export ringkasan analisis kawasan dan properti terpilih ke berkas PDF.  
 * Antarmuka responsif untuk desktop dan mobile, dipublikasikan sebagai aplikasi web yang dapat diakses publik.
-
-🔄 **In-Scope di atas adalah rencana produk penuh. Untuk MVP 5 hari** (`context-mvp.md`
-4, 8): bobot preset yang bisa disunting pengguna **dihapus permanen**, bukan sekadar
-dinonaktifkan; analisis spasial **tidak** memakai agregasi H3 sama sekali dan **hanya**
-isokron 10 menit (5 menit dicabut); dataset Struk Go **tidak dipakai** (mati, diganti sensus
-restoran untuk komponen C); heatmap kejenuhan pasar per sel H3, Indeks Risiko Spasial, AI
-Area Insight, matriks perbandingan properti, dan export PDF **seluruhnya di luar MVP** — Top
-5 kawasan tampil sebagai skor + dekomposisi komponen mentah tanpa fitur-fitur tersebut.
 
 **Out-of-Scope**
 
@@ -246,12 +180,8 @@ Area Insight, matriks perbandingan properti, dan export PDF **seluruhnya di luar
 | :---- | :---- | :---- |
 | Community Activity | MAPID | Layer pengayaan kondisi kawasan: hambatan pejalan kaki, aksesibilitas, keramaian, dan konektivitas antarmoda yang tidak terekam dataset lain. |
 | Properti Go | MAPID | Menjadi katalog persediaan aset siap sewa yang ditampilkan setelah kawasan diperingkat. |
-| Struk Go | MAPID | ~~Sinyal permintaan nyata, menggantikan data trafik penumpang yang tidak tersedia. Menjadi dasar pemrofilan temporal dan deteksi jam puncak kawasan.~~ 🔄 **Untuk MVP: tidak dipakai** — verifikasi data nyata menemukan Struk Go mati (100/100 sampel se-Jabodetabek tanpa jam maupun nominal transaksi). D untuk MVP bersumber dari `kondisi_tempat` Menu Go + survei tim, bukan Struk Go. |
+| Struk Go | MAPID | Sinyal permintaan nyata, menggantikan data trafik penumpang yang tidak tersedia. Menjadi dasar pemrofilan temporal dan deteksi jam puncak kawasan. |
 | Menu Go | MAPID | Basis data pesaing, daya beli kawasan. Kolom kondisi pembeli dipakai sebagai ground truth untuk memvalidasi skor. |
-
-🔄 **Tambahan dataset untuk MVP** (`context-mvp.md` 7): **Sensus restoran** (GeoJSON per
-kota, kolom `TIPE_3`) — sumber komponen `competitive_headroom` (C) di MVP, menggantikan
-peran yang sebelumnya diharapkan dari Menu Go/Struk Go untuk kompetisi.
 
  **5.2 Dataset Pendukung**
 
@@ -388,13 +318,13 @@ Seluruh sumber disatukan pada satu kerangka spasial bersama:
 
 | Parameter | Simbol | Sumber data | Bentuk perhitungan |
 | :---- | :---- | :---- | :---- |
-| Demand | **D** | ~~Struk Go~~ 🔄 MVP: Menu Go (`kondisi_tempat`) + survei tim | ~~Intensitas transaksi per sel, dihaluskan dengan tetangga H3 radius 1~~ 🔄 MVP: rata-rata tertimbang `kondisi_tempat` (Sepi/Sedang/Ramai) per kawasan, ditarik ke netral 0,5 dengan K=8 (lihat `context-mvp.md` 6.2) |
-| Temporal fitness | **T** | Struk Go | Proporsi transaksi kawasan yang jatuh pada rentang jam operasional usaha — 🔄 **dicabut dari formula MVP**, Struk Go mati (lihat 5.1 dataset) |
-| Competitive headroom | **C** | ~~Menu Go \+ survei lapangan~~ 🔄 MVP: sensus restoran (`TIPE_3`) | ~~Rasio permintaan terhadap jumlah pesaing sekategori~~ 🔄 MVP: kepadatan restoran ber-`TIPE_3` sama per km², dinormalisasi min-max dengan pemotongan persentil 5/95, kurva punuk puncak 0,4 (`context-mvp.md` 6.3) |
+| Demand | **D** | Struk Go | Intensitas transaksi per sel, dihaluskan dengan tetangga H3 radius 1 |
+| Temporal fitness | **T** | Struk Go | Proporsi transaksi kawasan yang jatuh pada rentang jam operasional usaha |
+| Competitive headroom | **C** | Menu Go \+ survei lapangan | Rasio permintaan terhadap jumlah pesaing sekategori |
 | Segment match | **S** | Menu Go | Kecocokan median harga menu kawasan terhadap rentang harga segmen sasaran |
-| Penalti kejenuhan | **P\_KDE** | Menu Go \+ survei lapangan | Densitas pesaing sekategori hasil KDE — 🔄 **dicabut dari formula MVP**, tidak ada KDE di pipeline MVP |
-| Delineasi kawasan |  | Katalog Stasiun MAPID \+ MAPID Isochrone | Poligon isokron 5 dan 10 menit — 🔄 MVP: hanya isokron 10 menit |
-| Jarak properti |  | Properti Go \+ faktor detour hasil kalibrasi MAPID Routing | Perkiraan jarak dan waktu jalan kaki ke pintu simpul — 🔄 **tidak ditampilkan di MVP**, tidak ada sumber angkanya (`context-mvp.md` 8) |
+| Penalti kejenuhan | **P\_KDE** | Menu Go \+ survei lapangan | Densitas pesaing sekategori hasil KDE |
+| Delineasi kawasan |  | Katalog Stasiun MAPID \+ MAPID Isochrone | Poligon isokron 5 dan 10 menit |
+| Jarak properti |  | Properti Go \+ faktor detour hasil kalibrasi MAPID Routing | Perkiraan jarak dan waktu jalan kaki ke pintu simpul |
 | Pengayaan kondisi |  | Community Activity \+ survei | Tag hambatan pejalan kaki, aksesibilitas, keramaian, konektivitas antarmoda |
 
 3\. Tujuan analisis.
@@ -427,15 +357,6 @@ Skor Kesesuaian \= 100 × ( w₁·D \+ w₂·T \+ w₃·C \+ w₄·S ) − λ ·
 | Bisnis Tujuan  didatangi khusus oleh pelanggan | 0,20 | 0,15 | 0,30 | 0,35 |
 | Bisnis Harian  melayani kebutuhan rutin sekitar | 0,25 | 0,25 | 0,25 | 0,25 |
 
-🔄 **Formula & tabel bobot di atas adalah rencana produk penuh, tidak berlaku untuk MVP.**
-Formula MVP (`context-mvp.md` 6.1–6.5): `skor = 100 × (0,25·D + 0,50·C + 0,25·S)` — 3
-variabel (`demand`, `competitive_headroom`, `segment_match`), T dan P\_KDE dicabut karena
-sumber datanya (Struk Go, KDE) tidak layak dibangun dalam sisa waktu MVP. Bobot MVP
-**tunggal** (0,25/0,50/0,25), bukan per-arketipe — empat set bobot diuji pada data yang sama
-dan menghasilkan peringkat identik (rentang C 14× lebih lebar dari D), sehingga dipilih satu
-bobot dari rasio 2:1 studi AHP-TOPSIS (JUTIN Universitas Pahlawan 2026), bukan tabel
-arketipe di atas.
-
 **AI Integration**
 
 AI dipakai pada empat titik sentuh yang seluruhnya berada **di luar** mesin skoring. Mesin skoring bersifat deterministik dan tidak pernah memanggil AI; menjalankan analisis yang sama dua kali akan menghasilkan angka yang sama persis.
@@ -448,14 +369,6 @@ AI dipakai pada empat titik sentuh yang seluruhnya berada **di luar** mesin skor
 | Jalur A (batch) | Narasi kondisi kawasan dari Community Activity dan catatan surveyor | Teks paragraf |
 | Jalur B (runtime) | Deskripsi rencana usaha pengguna dan nilai filter terstruktur | Teks bebas \+ parameter |
 | Jalur B (runtime) | Ringkasan agregat hasil skoring kawasan terpilih | Objek JSON berisi angka agregat |
-
-🔄 **Untuk MVP** (`context-mvp.md` 3): kedua baris **Jalur A (batch) dicabut permanen** —
-`TIPE_3` sensus restoran sudah baku (tak perlu normalisasi AI), Community Activity tidak
-lagi menyentuh formula skor. Baris kedua Jalur B ("ringkasan agregat hasil skoring" — AI
-Area Insight) **di luar scope MVP**, ditunda pasca-MVP. Baris pertama Jalur B berubah isinya:
-bukan lagi "diterjemahkan jadi bobot", tapi jadi `tipe_3` + `harga_target` (lihat
-`IntentSchema` MVP di bawah). MVP menambah satu jalur runtime baru yang tidak ada di tabel
-ini: ringkasan sentimen Community Activity per kawasan saat user klik stasiun.
 
 2\. Proses integrasi AI melalui backend dan AI API/AI Router.
 
@@ -506,9 +419,9 @@ Pengguna menerima peringkat kawasan yang menyempitkan puluhan kandidat menjadi b
 
 * **Business Brief \-** Titik masuk produk. Pengguna menuliskan rencana usahanya dalam kalimat sehari-hari dan/atau mengisi filter terstruktur; sistem menerjemahkannya menjadi arketipe usaha beserta bobot parameter yang ditampilkan terbuka dan dapat disunting sebelum analisis dijalankan.  
 * **Peringkat Kawasan Stasiun \-** Daftar kawasan simpul transit terurut menurut kecocokannya dengan rencana usaha, sehingga pencarian langsung menyempit dari puluhan kawasan menjadi beberapa kandidat teratas.  
-* **Peta isokron 5 dan 10 menit \-** Batas kawasan digambar dari waktu tempuh berjalan kaki nyata menyusuri jaringan jalan, bukan lingkaran radius, sehingga hambatan seperti jalan buntu dan ketiadaan penyeberangan ikut diperhitungkan. 🔄 **Untuk MVP hanya isokron 10 menit** yang dipakai, 5 menit dicabut.
-* **Heatmap kejenuhan pasar \-** Visualisasi per sel heksagon yang menunjukkan seberapa sesak persaingan pada kategori usaha terpilih, sehingga pengguna dapat membedakan zona risiko tinggi dari celah pasar yang masih terbuka. 🔄 **Keluar dari scope MVP** — skoring MVP tidak beragregasi ke sel H3 (`context-mvp.md` 4).
-* **Scorecard & dekomposisi skor \-** Kesimpulan berupa satu angka kecocokan dan satu level risiko, disertai rincian kontribusi tiap parameter agar pengguna tahu skor itu berasal dari mana dan tidak menerimanya sebagai kotak hitam. 🔄 **Untuk MVP:** hanya skor 0–100 + dekomposisi 3 komponen mentah (angka, tanpa narasi AI) yang ditampilkan — **tanpa** level risiko, Indeks Risiko Spasial tidak ada rumusnya di model MVP.  
+* **Peta isokron 5 dan 10 menit \-** Batas kawasan digambar dari waktu tempuh berjalan kaki nyata menyusuri jaringan jalan, bukan lingkaran radius, sehingga hambatan seperti jalan buntu dan ketiadaan penyeberangan ikut diperhitungkan.  
+* **Heatmap kejenuhan pasar \-** Visualisasi per sel heksagon yang menunjukkan seberapa sesak persaingan pada kategori usaha terpilih, sehingga pengguna dapat membedakan zona risiko tinggi dari celah pasar yang masih terbuka.  
+* **Scorecard & dekomposisi skor \-** Kesimpulan berupa satu angka kecocokan dan satu level risiko, disertai rincian kontribusi tiap parameter agar pengguna tahu skor itu berasal dari mana dan tidak menerimanya sebagai kotak hitam.  
 * **AI Area Insight \-** Terjemahan angka hasil skoring menjadi narasi kelebihan dan kekurangan kawasan dalam bahasa awam, dengan tiap pernyataan berangka dapat diklik untuk menyorot data asalnya di peta.  
 * **Katalog properti terintegrasi \-** Jembatan dari analisis kawasan ke keputusan nyata: menampilkan unit yang benar-benar tersedia di kawasan rekomendasi, lengkap dengan perkiraan jarak jalan kaki ke pintu stasiun.  
 * **Matriks perbandingan properti \-** Tabel berdampingan untuk menyejajarkan beberapa kandidat unit secara apple-to-apple sebelum pengguna menandatangani kontrak sewa.  
@@ -520,9 +433,9 @@ Pengguna menerima peringkat kawasan yang menyempitkan puluhan kandidat menjadi b
 | :---- | :---- |
 | Business Brief  | Pengguna dapat mengisi rencana usaha dalam teks bebas dan/atau filter terstruktur. Sistem menampilkan arketipe usaha dan preset bobot hasil klasifikasi dalam waktu kurang dari 5 detik, dan bobot tersebut dapat disunting pengguna sebelum analisis dijalankan. |
 | Peringkat Kawasan Stasiun | Setelah brief dikirim, sistem menampilkan daftar kawasan stasiun terurut menurun berdasarkan Skor Kesesuaian Bisnis, dengan minimal 5 kawasan pada daftar dan waktu tampil di bawah 3 detik. Mengklik satu kawasan memindahkan tampilan peta ke kawasan tersebut. |
-| Peta isokron jalan kaki 5 dan 10 menit | Peta menampilkan poligon isokron 5 dan 10 menit dari pintu stasiun terpilih di atas basemap MAPID MAPS, dapat dinyalakan dan dimatikan melalui kontrol layer, serta mengikuti jaringan jalan riil — 🔄 MVP: hanya 10 menit |
-| Heatmap kejenuhan pasar | ~~Peta menampilkan sel H3 berwarna gradasi sesuai tingkat kejenuhan pasar untuk kategori usaha yang dipilih, dilengkapi legenda dan tooltip berisi jumlah kompetitor serta nilai densitas pada sel tersebut.~~ 🔄 **Di luar scope MVP**, lihat `context-mvp.md` 4. |
-| Scorecard kelayakan dan dekomposisi skor | ~~Panel menampilkan Skor Kesesuaian Bisnis 0–100 dan Indeks Risiko Spasial (Low/Medium/High), disertai grafik kontribusi keempat variabel dan besaran penalti risiko. Jumlah kontribusi yang ditampilkan konsisten dengan skor akhir.~~ 🔄 **MVP:** skor 0–100 + dekomposisi 3 komponen (`demand`, `competitive_headroom`, `segment_match`) sebagai angka mentah, tanpa Indeks Risiko Spasial dan tanpa narasi AI. |
+| Peta isokron jalan kaki 5 dan 10 menit | Peta menampilkan poligon isokron 5 dan 10 menit dari pintu stasiun terpilih di atas basemap MAPID MAPS, dapat dinyalakan dan dimatikan melalui kontrol layer, serta mengikuti jaringan jalan riil  |
+| Heatmap kejenuhan pasar | Peta menampilkan sel H3 berwarna gradasi sesuai tingkat kejenuhan pasar untuk kategori usaha yang dipilih, dilengkapi legenda dan tooltip berisi jumlah kompetitor serta nilai densitas pada sel tersebut. |
+| Scorecard kelayakan dan dekomposisi skor | Panel menampilkan Skor Kesesuaian Bisnis 0–100 dan Indeks Risiko Spasial (Low/Medium/High), disertai grafik kontribusi keempat variabel dan besaran penalti risiko. Jumlah kontribusi yang ditampilkan konsisten dengan skor akhir. |
 | AI Area Insight | Sistem menghasilkan narasi kelebihan dan kekurangan kawasan dalam waktu di bawah 10 detik. Setiap pernyataan berangka memiliki tautan yang, ketika diklik, menyorot titik atau sel data terkait pada peta. Bila layanan AI gagal, panel menampilkan ringkasan bertemplat non-AI tanpa membuat halaman gagal dimuat. |
 | Katalog properti terintegrasi | Setelah kawasan dipilih, sistem menampilkan Top 5 properti dari Property Go beserta kategori, jenis penawaran, jarak jalan kaki ke pintu stasiun, dan foto bila tersedia. Setiap kartu properti tertaut ke penanda lokasinya di peta. |
 | Matriks perbandingan properti | Pengguna dapat memilih 2–3 properti dan melihatnya berdampingan dalam satu tabel yang membandingkan skor akhir, jam puncak transaksi, level risiko, jarak ke stasiun, kategori properti. |
@@ -577,12 +490,6 @@ jalan kaki, **MAPID Routing Tool** untuk kalibrasi faktor detour, dan **MAPID Gr
 verifikasi silang. Basemap menggunakan **MAPID MAPS** sesuai ketentuan lomba, dipanggil
 
 langsung dari sisi frontend.
-
-🔄 **Untuk pipeline batch MVP** (`context-mvp.md` 6.9, 8): `scikit-learn`, `h3-py`, dan
-**MAPID Grid Tool** **tidak dipakai** — tidak ada KDE untuk dihitung, dan skoring MVP tidak
-beragregasi ke sel H3. Pipeline batch MVP juga **tanpa AI sama sekali** (lihat catatan AI
-Integration di atas). GeoPandas, Shapely, MAPID Isochrone Tool, MAPID Routing Tool, QGIS, dan
-MAPID MAPS tetap dipakai persis seperti di atas.
 
 **Deployment**
 
@@ -653,9 +560,9 @@ Gambar 10.2 Rancangan *User interface Medium-Fidelity* Layar Utama (Dashboard Ha
 
 Rancangan tahap awal tersebut merepresentasikan tampilan layar saat sistem selesai memproses data (User Flow Tahap 4: Hasil yang Diterima) dengan tata letak tiga kolom:
 
-1. Panel Kiri (Kriteria & Parameter): Menampilkan ringkasan Business Brief dan nilai 4 bobot parameter terpasang (D,T,C,S), dilengkapi tombol "Ubah Parameter" untuk memfasilitasi iterasi analisis ulang (User Flow Tahap 2 & 5). 🔄 **Untuk MVP:** tombol "Ubah Parameter" **dihapus permanen** (bukan ditunda) — bobot tunggal ditetapkan server, tidak ada yang bisa disunting. Panel menampilkan 3 komponen (D,C,S), bukan 4 (T dicabut).
-2. Area Tengah (Peta Interaktif WebGIS): Peta otomatis memperbesar (zoom in) ke kawasan rekomendasi \#1 (Stasiun Cisauk), menampilkan layer poligon isokron jalan kaki, sebaran heatmap potensi lokasi, titik unit properti siap sewa, serta penanda hambatan trotoar lapangan (User Flow Tahap 1, 3, & 4). 🔄 **Untuk MVP:** kawasan rekomendasi ada di DKI Jakarta (bukan Cisauk); heatmap keluar dari scope MVP.
-3. Panel Kanan (Scorecard, AI Insight, & Katalog): Menyajikan Scorecard evaluasi bisnis (Skor 88/100, Risiko Rendah), rincian dekomposisi kontribusi skor dan penalti kejenuhan pasar, kotak diagnosis AI Area Insight, serta preview unit Properti Go sebelum pengguna melangkah ke matriks perbandingan (User Flow Tahap 4 & 5). 🔄 **Untuk MVP:** Scorecard tanpa level risiko dan tanpa "penalti kejenuhan pasar" (P\_KDE dicabut); kotak AI Area Insight **di luar scope MVP**; matriks perbandingan properti **di luar scope MVP**.
+1. Panel Kiri (Kriteria & Parameter): Menampilkan ringkasan Business Brief dan nilai 4 bobot parameter terpasang (D,T,C,S), dilengkapi tombol "Ubah Parameter" untuk memfasilitasi iterasi analisis ulang (User Flow Tahap 2 & 5).  
+2. Area Tengah (Peta Interaktif WebGIS): Peta otomatis memperbesar (zoom in) ke kawasan rekomendasi \#1 (Stasiun Cisauk), menampilkan layer poligon isokron jalan kaki, sebaran heatmap potensi lokasi, titik unit properti siap sewa, serta penanda hambatan trotoar lapangan (User Flow Tahap 1, 3, & 4).  
+3. Panel Kanan (Scorecard, AI Insight, & Katalog): Menyajikan Scorecard evaluasi bisnis (Skor 88/100, Risiko Rendah), rincian dekomposisi kontribusi skor dan penalti kejenuhan pasar, kotak diagnosis AI Area Insight, serta preview unit Properti Go sebelum pengguna melangkah ke matriks perbandingan (User Flow Tahap 4 & 5).
 
 ![][image5]
 

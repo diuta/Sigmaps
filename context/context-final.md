@@ -1,10 +1,13 @@
 # Context FINAL — SIGMAPS (MAPID WebGIS Competition 2026)
 
-**Disusun:** 30 Agustus 2026, direvisi 2 September 2026. **Status:** dokumen acuan utama
-untuk seluruh keputusan teknis & produk SIGMAPS — satu-satunya sumber kebenaran, tidak ada
-dokumen riset terpisah lagi di belakangnya (riset awal per-jalur sudah disintesis penuh ke
-sini). Disintesis dari: PRD resmi tim, riset teknis ketiga jalur, dan keputusan konflik yang
-diambil koordinator.
+**Disusun:** 30 Agustus 2026, direvisi 2–3 September 2026. **Status:** dokumen acuan utama
+untuk seluruh keputusan teknis & produk SIGMAPS di luar scope MVP. Disintesis dari: PRD
+resmi tim, riset teknis ketiga jalur, dan keputusan konflik yang diambil koordinator.
+
+🔄 **Untuk scope MVP 5 hari, `context/context-mvp.md` yang berlaku bila bertentangan dengan
+dokumen ini** — lihat catatan 🔄 yang ditambahkan di seluruh dokumen ini pada bagian yang
+sudah diganti/dicabut untuk MVP. Bagian yang tidak ditandai 🔄 tetap berlaku penuh, baik
+untuk MVP maupun rencana produk pasca-MVP.
 
 ## Aturan utama dokumen ini
 
@@ -61,6 +64,12 @@ Jalur 2 karena ini mempengaruhi daftar simpul yang mereka proses.
 ✅ **Wilayah studi:** Jabodetabek secara umum untuk cakupan produk; **survey activities**
 wajib difokuskan ke 5 kawasan stasiun prioritas di **Tangerang Selatan** (semuanya KRL):
 
+🔄 **Untuk MVP** (`context-mvp.md` 2): kawasan yang benar-benar diskor & disurvei berpindah
+ke **DKI Jakarta** (klaster Menu Go terbesar ada di Tanah Abang, Sudirman, koridor Sawah
+Besar–Juanda), menggantikan 5 stasiun Tangsel di bawah — alasannya Menu Go (sumber tunggal D
+dan S) menumpuk di Jakarta dan nyaris nol di Tangsel. Cakupan produk tetap Jabodetabek,
+tabel 5 stasiun di bawah tetap berlaku sebagai rencana produk penuh pasca-MVP.
+
 | Stasiun | Moda | Alasan (dari PRD) |
 |---|---|---|
 | Cisauk | KRL, BSD Link | Node transit antarmoda paling terintegrasi |
@@ -96,7 +105,7 @@ prediktif untuk skor (skor 100% formula deterministik), pembaruan data real-time
 | Dataset | Fungsi dalam produk | Batasan penting |
 |---|---|---|
 | **Properti Go** | Katalog aset siap sewa/jual, ditampilkan setelah kawasan diperingkat | ✅ **Tidak** punya kolom luas, harga, kontak pemilik. **Tidak ada OCR** — semua baca kolom terstruktur. Properti berstatus terjual tidak dihitung. |
-| **Struk Go** | Sinyal permintaan riil (D) + profil temporal (T) | ✅ Dikonfirmasi koordinator: **punya jam transaksi**, bukan cuma tanggal (bukan hasil verifikasi data nyata — lihat catatan 3.2). |
+| **Struk Go** | ~~Sinyal permintaan riil (D) + profil temporal (T)~~ | 🔄 **Diperbarui mengikuti `context-mvp.md` Bagian 7:** verifikasi data nyata (bukan lagi cuma konfirmasi lisan) menemukan **Struk Go mati** — dari 100 sampel se-Jabodetabek, kolom `tanggal` kosong `{}` di 100 dari 100 baris, dan tidak ada kolom nominal transaksi. Struk Go **tidak dipakai lagi** sebagai sumber D maupun T untuk MVP. D sekarang bersumber dari `kondisi_tempat` Menu Go + survei tim (lihat `context-mvp.md` 6.2), dan T dicabut dari formula MVP sepenuhnya. |
 | **Menu Go** | Basis kompetitor (C, P_KDE) + daya beli (S), kolom Kondisi Pembeli jadi ground truth validasi | — |
 | **Community Activity** | Pengayaan kondisi kawasan (hambatan pejalan kaki, aksesibilitas, keramaian, konektivitas antarmoda), **wajib** dipakai | ✅ Diputuskan (implisit lewat PRD): jadi **lapisan konteks UI saja**, **tidak** masuk formula skor D/T/C/S. Jalur 2 sendiri menyebut opsi ini "paling lemah kalau ditanya juri" — tim sudah pilih opsi ini secara de facto lewat PRD, sadari trade-off-nya. |
 
@@ -134,9 +143,14 @@ transaksi (dikonfirmasi koordinator secara keputusan, tapi baris nyata untuk men
 masih nol di area pilot ini) — verifikasi ulang begitu ada data Struk Go nyata masuk (area
 lain, atau hasil survey activities).
 
-**Mitigasi yang sudah direncanakan (Jalur 2):** generator data sintetis (2.000 transaksi
+~~**Mitigasi yang sudah direncanakan (Jalur 2):** generator data sintetis (2.000 transaksi
 palsu dengan pola jam terkontrol) untuk membangun & menguji pipeline sekarang, sambil
-menunggu survey activities wajib mengisi data lapangan riil.
+menunggu survey activities wajib mengisi data lapangan riil.~~
+
+🔄 **Diperbarui mengikuti `context-mvp.md` Bagian 8:** generator data sintetis untuk Struk Go
+**dicabut**. Karena Struk Go terkonfirmasi mati (lihat catatan di tabel 3.1), D untuk MVP
+dibangun langsung dari `kondisi_tempat` Menu Go + survei tim yang datanya sudah nyata
+tersedia, bukan dari data sintetis.
 
 ### 3.3 Dataset pendukung (dari PRD)
 
@@ -156,9 +170,14 @@ hambatan), Community Activity (kondisi kawasan, keramaian, first/last-mile).
 **Ketentuan:** data sesuai kondisi lapangan, koordinat akurat, foto jelas tanpa wajah/plat
 nomor, tidak boleh dari Google Street View/internet, wajib divalidasi sebelum dipakai.
 
-**Dedup rule (mencegah hitung ganda dengan Menu Go):** ✅ merchant/properti dianggap objek
+**Dedup rule (mencegah hitung ganda dengan Menu Go):** ~~merchant/properti dianggap objek
 sama kalau kedekatan koordinat **< 20 m** dan nama/kategori mirip (dari PRD bagian Data
-Processing — Cleaning).
+Processing — Cleaning).~~
+
+🔄 **Dicabut mengikuti `context-mvp.md` 6.9:** aturan dedup jarak/nama di atas tidak berlaku
+lagi untuk MVP. Bila anggota tim mensurvei tempat yang sudah ada di Menu Go, hasilnya
+dihitung sebagai **dua pengamatan terpisah** (dua observasi keramaian pada waktu berbeda),
+bukan digabung jadi satu baris.
 
 ---
 
@@ -168,17 +187,17 @@ Processing — Cleaning).
 
 | Hal | Keputusan | Catatan |
 |---|---|---|
-| Isokron | **MAPID Isochrone Tool** (profil `foot`, mode batch "Pilih Layer", satuan menit **dan** meter bisa diatur, nilai **300 & 600 detik**) | ✅ **OSMnx dicoret permanen** — dikonfirmasi ulang 30 Agustus. PRD masih menyebut OSMnx di Timeline M2 — **itu bagian PRD yang perlu direvisi tim product**, bukan rencana teknis yang berlaku. |
+| Isokron | **MAPID Isochrone Tool** (profil `foot`, mode batch "Pilih Layer", satuan menit **dan** meter bisa diatur, nilai **300 & 600 detik**) | ✅ **OSMnx dicoret permanen** — dikonfirmasi ulang 30 Agustus. PRD masih menyebut OSMnx di Timeline M2 — **itu bagian PRD yang perlu direvisi tim product**, bukan rencana teknis yang berlaku. 🔄 **Untuk MVP** (`context-mvp.md` 2): hanya isokron **10 menit** yang dipakai, isokron 5 menit dicabut dari formula & UI. |
 | Kalibrasi jarak jalan kaki | **MAPID Routing Tool**, 15–20 pasang rute kalibrasi, kecepatan acuan **4,4 km/jam**, faktor detour = median(jarak jaringan/jarak garis lurus), nilai wajar 1,2–1,4 | Routing Tool tidak punya mode batch — hanya untuk kalibrasi, bukan komputasi massal per properti. |
-| Unit agregasi | **Uber H3**, `h3-py` | — |
-| Resolusi H3 | ✅ **9 — final, dikonfirmasi koordinator 31 Agustus 2026** | Sempat ada rekomendasi pindah ke resolusi 10 (alasan: resolusi 9 cuma hasilkan 9–11 sel/isokron 10 menit, dianggap kasar untuk k-ring smoothing, persentil ke-75, dan bandwidth KDE 250 m). **Rekomendasi itu ditolak** — tim tetap pakai resolusi 9 sesuai PRD. Jangan diubah lagi tanpa keputusan baru dari koordinator/Jalur 2. |
-| KDE (kejenuhan pasar) | **scikit-learn `KernelDensity`**, kernel gaussian, bandwidth **200–300 m** | Wajib proyeksi ke meter (**EPSG:32748**, UTM 48S) sebelum dihitung; `score_samples` hasil log-densitas wajib `np.exp`; wajib dikalikan jumlah titik kompetitor (densitas KDE murni berupa probabilitas, totalnya selalu 1). |
-| Normalisasi | **Berbasis persentil** (bukan min-max) | Min-max dicoret: satu pencilan menekan seluruh sel lain. |
-| Agregasi sel → kawasan | **Persentil ke-75** | Bukan rata-rata — user tidak menyewa di sel rata-rata. |
+| Unit agregasi | **Uber H3**, `h3-py` | 🔄 **Tidak dipakai untuk MVP** (`context-mvp.md` 4): skoring MVP di level kawasan/stasiun langsung dari `scored_areas`, tanpa agregasi sel H3 maupun `scored_cells`. Tetap berlaku untuk rencana produk penuh pasca-MVP. |
+| Resolusi H3 | ✅ **9 — final, dikonfirmasi koordinator 31 Agustus 2026** | Sempat ada rekomendasi pindah ke resolusi 10 (alasan: resolusi 9 cuma hasilkan 9–11 sel/isokron 10 menit, dianggap kasar untuk k-ring smoothing, persentil ke-75, dan bandwidth KDE 250 m). **Rekomendasi itu ditolak** — tim tetap pakai resolusi 9 sesuai PRD. Jangan diubah lagi tanpa keputusan baru dari koordinator/Jalur 2. Berlaku untuk H3 pasca-MVP; **tidak dipakai sama sekali di MVP** (baris di atas). |
+| KDE (kejenuhan pasar) | ~~**scikit-learn `KernelDensity`**, kernel gaussian, bandwidth **200–300 m**~~ | 🔄 **Dicabut untuk MVP** (`context-mvp.md` 4 & 8): tidak ada `kde_penalty`/KDE/scikit-learn/EPSG:32748 di pipeline MVP. Kolom `kde_penalty` di `scored_areas` MVP selalu `NULL`. Tetap berlaku sebagai rencana produk penuh pasca-MVP. |
+| Normalisasi | ~~**Berbasis persentil** (bukan min-max)~~ | 🔄 **Diganti untuk MVP** (`context-mvp.md` 6.3): normalisasi komponen C sekarang **min-max dengan pemotongan pencilan persentil ke-5/95**, bukan persentil murni — alasannya di level kawasan (5 kawasan) persentil murni cuma menghasilkan 5 nilai seragam yang tidak mencerminkan kenyataan. Persentil murni tetap berlaku untuk skoring level sel H3 pasca-MVP. |
+| Agregasi sel → kawasan | ~~**Persentil ke-75**~~ | 🔄 **Tidak berlaku untuk MVP** (`context-mvp.md` 4): MVP tidak beragregasi dari sel H3 ke kawasan — `scored_areas` MVP diisi langsung dari spatial join pengamatan ke poligon isokron kawasan (6.9), bukan dari sel H3. Tetap berlaku untuk `scored_cells` pasca-MVP. |
 | Verifikasi silang | MAPID Grid Tool (mode Titik+Poligon, segi enam) + QGIS | Cuma pembanding visual — **tidak** dipakai sebagai sumber tabel (tidak punya `h3_index` global, tidak reproducible). |
-| Perkakas | GeoPandas, Shapely, h3-py, scikit-learn, scipy (`find_peaks`), NumPy, QGIS | Seluruhnya open source. |
+| Perkakas | GeoPandas, Shapely, h3-py, scikit-learn, scipy (`find_peaks`), NumPy, QGIS | Seluruhnya open source. 🔄 Untuk pipeline batch MVP, `h3-py` dan `scikit-learn` **tidak dipakai** (lihat baris Unit agregasi & KDE di atas); tetap relevan untuk pipeline penuh pasca-MVP. |
 
-### 5.2 Formula skoring — FINAL (dikonfirmasi identik di PRD)
+### 5.2 Formula skoring — rencana produk penuh (lihat catatan MVP di bawah)
 
 ```
 Skor Kesesuaian = 100 × (w1·D + w2·T + w3·C + w4·S) − λ·P_KDE     (Σw = 1)
@@ -196,7 +215,7 @@ Skor Kesesuaian = 100 × (w1·D + w2·T + w3·C + w4·S) − λ·P_KDE     (Σw 
 `skor_kompetisi_kde` — **jangan dipakai lagi di mana pun**, termasuk kode/skema yang mungkin
 masih mengacu ke nama itu.
 
-**Bobot arketipe (sudah diisi PRD, dianggap final):**
+**Bobot arketipe (sudah diisi PRD, dianggap final untuk rencana produk penuh):**
 
 | Arketipe | w1 (D) | w2 (T) | w3 (C) | w4 (S) |
 |---|---|---|---|---|
@@ -206,6 +225,29 @@ masih mengacu ke nama itu.
 
 ❓ λ (koefisien penalti KDE) **belum dikalibrasi** — masih menunggu grid search Jalur 2.
 Jangan tulis angka final di PRD/kode sebelum ini selesai.
+
+---
+
+🔄 **Formula MVP — mengikuti `context-mvp.md` 6.1–6.5, menggantikan formula di atas untuk
+scope MVP:**
+
+```
+skor = 100 × (0,25·D + 0,50·C + 0,25·S)
+```
+
+Bukan 4 variabel + penalti KDE seperti di atas, melainkan 3 variabel: `demand`,
+`competitive_headroom`, `segment_match`. `temporal_fitness` (T) dan `kde_penalty` (P_KDE)
+**dicabut dari formula MVP** — bukan karena rumusnya salah, tapi karena sumber datanya
+(Struk Go untuk T, KDE untuk P_KDE) tidak layak dibangun dalam sisa waktu MVP (lihat catatan
+Struk Go di 3.1 dan baris KDE di 5.1).
+
+Bobot MVP **tunggal, bukan per-arketipe** — tabel tiga arketipe (Bisnis Arus/Tujuan/Harian)
+di atas **tidak dipakai untuk MVP**: empat set bobot diuji pada data yang sama dan
+peringkatnya identik di seluruh baris uji (rentang C 14× lebih lebar dari D), sehingga
+dipilih satu bobot 0,25 D : 0,50 C : 0,25 S dari rasio 2:1 studi AHP-TOPSIS (lihat
+`context-mvp.md` 6.5 untuk detail dan rujukan). λ juga tidak relevan lagi untuk MVP karena
+P_KDE dicabut. Formula & tabel bobot arketipe di atas tetap berlaku sebagai rencana produk
+penuh pasca-MVP, bukan dihapus permanen.
 
 ### 5.3 Skema keluaran (satu baris per sel H3, final dari Jalur 2)
 
@@ -237,12 +279,52 @@ sesuai formula bagian 5.2. Prinsip yang berlaku: *"Simpan skor komponen, bukan s
 Bobot berubah tergantung arketipe pengguna, jadi skor final dihitung saat request. Kalau
 menyimpan skor final, seluruh tabel harus dihitung ulang setiap ada pengguna baru."* Prinsip
 ini berlaku sama persis di level kawasan seperti di level sel — tidak ada pengecualian untuk
-`scored_areas`.
+`scored_areas`. **Prinsip "skor akhir tidak pernah disimpan" ini tetap berlaku untuk MVP**,
+lihat skema konkret MVP di bawah.
 
 **Konsekuensi ke PRD:** kalimat PRD bagian 7.4 ("scored_areas — skor 0–100 dan level
 risiko") **perlu direvisi** jadi "scored_areas — komponen D/T/C/S/P_KDE teragregasi
 persentil ke-75 per kawasan; skor 0–100 dan level risiko dihitung live oleh backend saat
 request, tidak disimpan di tabel ini."
+
+---
+
+🔄 **Skema `scored_areas` MVP — final, menggantikan skema di atas untuk scope MVP**
+(`context-mvp.md` 6.7). Bukan hasil agregasi persentil ke-75 dari sel H3 seperti
+dideskripsikan di atas, melainkan diisi langsung lewat spatial join pengamatan ke poligon
+isokron kawasan (`context-mvp.md` 6.9) — satu baris per kawasan/stasiun, bukan per
+`(station_id, isochrone_band)`:
+
+```sql
+create table scored_areas (
+  area_id            text primary key,
+  station_name       text not null,
+  geom               geometry(Polygon, 4326) not null,
+  area_km2           double precision not null,
+
+  demand             double precision,
+  n_observations     integer not null default 0,
+  price_median       integer,
+  n_price            integer not null default 0,
+
+  competitor_counts  jsonb not null default '{}'::jsonb,
+  total_restaurants  integer not null default 0,
+
+  temporal_fitness   double precision,          -- selalu NULL di MVP
+  kde_penalty        double precision,          -- selalu NULL di MVP
+
+  is_rankable        boolean not null default false,
+  updated_at         timestamptz not null default now()
+);
+
+create index scored_areas_geom_idx on scored_areas using gist (geom);
+```
+
+Prinsip "skor akhir 0–100 tidak pernah disimpan, dihitung live" di atas tetap berlaku persis
+sama untuk skema MVP ini — hanya struktur kolom komponennya yang berbeda. Kolom
+`temporal_fitness` dan `kde_penalty` tetap ada di skema (mengikuti aturan penamaan kolom
+`CLAUDE.md` Bagian 7) tapi selalu `NULL` karena T dan P_KDE dicabut dari formula MVP (lihat
+5.2). `scored_cells` **tidak dipakai sama sekali di MVP**.
 
 ### 5.4 Dua fungsi AI batch (milik Jalur 2, bukan runtime)
 
@@ -307,6 +389,12 @@ skor final kawasan **selalu dihitung live** di langkah ke-2 di atas, untuk arket
 sekali. `scored_areas` cuma menyimpan komponen teragregasi (persentil ke-75), bukan skor
 0–100.
 
+🔄 **Untuk MVP** (`context-mvp.md` 6.5): tidak ada lagi "bobot arketipe" atau "bobot hasil
+edit pengguna" — layar edit bobot manual **dihapus permanen**, bukan ditunda. Bobot MVP
+tunggal (0,25/0,50/0,25) dan ditetapkan di server, `/api/score` tidak menerima `weights`
+dari klien sama sekali (lihat kontrak MVP di 7.3). Prinsip "skor selalu dihitung live, tidak
+pernah pra-dihitung" tetap berlaku sama persis.
+
 ---
 
 ## 7. Frontend & AI (Jalur 3 — final)
@@ -332,19 +420,30 @@ model besar), `gemini-2.5-flash` untuk narasi insight. Nama model **wajib** di e
 variable (Google merotasi model cepat).
 
 ✅ **LIMA titik sentuh AI** (bukan empat — direvisi 2 September 2026 setelah diskusi MVP,
-titik #5 ditambahkan). **Prinsip yang tidak berubah di kelimanya: AI tidak pernah menghitung
-skor akhir** — skor 100% dihitung `lib/scoring.ts`, AI cuma menerjemahkan masuk atau
-meringkas keluar.
+titik #5 ditambahkan) — ini tetap peta lengkap rencana produk penuh. **Prinsip yang tidak
+berubah di kelimanya: AI tidak pernah menghitung skor akhir** — skor 100% dihitung
+`lib/scoring.ts`, AI cuma menerjemahkan masuk atau meringkas keluar.
+
+🔄 **Diperbarui mengikuti `context-mvp.md` Bagian 3:** status titik #1 dan #2 di tabel di
+bawah bukan lagi "di luar MVP, milik Jalur 2" — keduanya **dicabut permanen**, bukan
+ditunda. `TIPE_3` sensus restoran sudah baku (tidak perlu normalisasi AI), dan Community
+Activity tidak lagi menyentuh formula skor sama sekali. Jumlah titik sentuh yang masih
+relevan turun dari 5 menjadi 3 (#3, #4 non-MVP, #5), dua di antaranya (#3, #5) masuk MVP.
 
 | # | Nama | Kapan | Status di MVP 5 hari (2 Sept 2026) |
 |---|---|---|---|
-| 1 | Normalisasi kategori merchant | Batch (Jalur 2) | Di luar MVP — milik Jalur 2 |
-| 2 | Klasifikasi Community Activity per-laporan | Batch (Jalur 2) | Di luar MVP — milik Jalur 2 |
-| 3 | Parse Business Brief → arketipe+bobot | Runtime | ✅ **Masuk MVP** |
+| 1 | Normalisasi kategori merchant | Batch (Jalur 2) | ❌ **Dicabut permanen** — `TIPE_3` sensus restoran sudah baku, tidak perlu dinormalisasi AI |
+| 2 | Klasifikasi Community Activity per-laporan | Batch (Jalur 2) | ❌ **Dicabut permanen** — Community Activity tidak lagi menyentuh formula |
+| 3 | Parse Business Brief → arketipe+bobot | Runtime | ✅ **Masuk MVP** (skema diganti, lihat catatan di titik #3 di bawah) |
 | 4 | AI Area Insight (narasi dari skor) | Runtime | ❌ **Di luar MVP** — ditunda setelah MVP |
 | 5 | Ringkasan sentimen Community Activity | Runtime | ✅ **Masuk MVP** |
 
-#### Titik #1 — Normalisasi semantik kategori merchant (batch, Jalur 2)
+#### Titik #1 — Normalisasi semantik kategori merchant (batch, Jalur 2) ❌ DICABUT PERMANEN UNTUK MVP
+
+🔄 Untuk MVP, titik ini **tidak dikerjakan sama sekali** — `TIPE_3` sensus restoran sudah
+baku dari sumbernya, tidak perlu dinormalisasi AI (`context-mvp.md` 3). Tetap berlaku
+sebagai rencana produk penuh pasca-MVP bila normalisasi kategori merchant crowdsourced
+dibutuhkan lagi.
 
 **Masalah:** Menu Go/Struk Go itu crowdsourced dari banyak surveyor berbeda, jadi kategori
 usaha ditulis tidak konsisten ("Coffee Shop" vs "Kopi" vs "Minuman" untuk hal yang sama).
@@ -358,7 +457,13 @@ skema di sisi Python pakai **Pydantic** (bukan Zod — beda bahasa, konsep sama)
 **Output:** kolom "kategori baku" tambahan di Menu Go/Struk Go, dipakai downstream untuk
 hitung kompetitor per kategori (variabel C dan P_KDE).
 
-#### Titik #2 — Klasifikasi Community Activity per-laporan (batch, Jalur 2)
+#### Titik #2 — Klasifikasi Community Activity per-laporan (batch, Jalur 2) ❌ DICABUT PERMANEN UNTUK MVP
+
+🔄 Untuk MVP, titik ini **tidak dikerjakan sama sekali** — Community Activity tidak lagi
+menyentuh formula skor dalam bentuk apa pun, jadi klasifikasi tag terstruktur per-laporan
+tidak dibutuhkan (`context-mvp.md` 3). Community Activity tetap dipakai di MVP, tapi hanya
+lewat titik #5 (ringkasan sentimen live, bukan klasifikasi batch per-laporan). Tetap berlaku
+sebagai rencana produk penuh pasca-MVP.
 
 **Masalah:** Community Activity **wajib** dipakai (ketentuan lomba), tapi isinya narasi
 bebas (`title`, `description`) — tidak terstruktur, tidak bisa langsung dianalisis spasial.
@@ -373,12 +478,13 @@ diputuskan sebelumnya, PRD pilih opsi "konteks UI saja").
 **Beda dengan titik #5:** ini per-laporan individual dan offline. Titik #5 menggabungkan
 BANYAK laporan sekaligus dan jalan live saat user klik.
 
-#### Titik #3 — Parse Business Brief → arketipe + bobot (runtime) ✅ MASUK MVP
+#### Titik #3 — Parse Business Brief → arketipe + bobot (runtime) ✅ MASUK MVP (skema diganti)
 
 **Fungsi:** pintu masuk *need-first* produk. User ketik kalimat bebas ("toko roti pagi buat
 pekerja kantoran") → AI ubah jadi parameter terstruktur yang dipakai mesin skoring.
 
-**Alur teknis:**
+~~**Alur teknis (rencana produk penuh, tidak berlaku lagi untuk MVP — lihat skema MVP di
+bawah):**~~
 ```
 1. Client submit teks → POST /api/parse-intent { teks: "..." }
 2. Route Handler kirim teks ke Gemini lewat Vercel AI SDK (generateObject)
@@ -413,6 +519,27 @@ pakai nama lama itu, **wajib direvisi** sebelum dipakai.
 **Untuk MVP:** alurnya **one-shot** — langsung lanjut ke Top 5 tanpa layar edit bobot manual
 (beda dari desain PRD lengkap yang punya chip+slider bisa disunting). Lihat
 `context/context-mvp.md`.
+
+---
+
+🔄 **`IntentSchema` MVP — final, menggantikan skema di atas untuk scope MVP**
+(`context-mvp.md` 6.6). `kategori_usaha`, `target_jam`, `segmen`, `skala`, dan `weights`
+**dilarang dipakai** — AI tidak lagi menentukan bobot apa pun, hanya jenis usaha (dipetakan
+ke `TIPE_3` sensus restoran) dan perkiraan harga:
+
+```ts
+export const IntentSchema = z.object({
+  tipe_3: z.enum([...TIPE_3_VALUES, 'SEMUA']),
+  harga_target: z.number().int().min(1000).max(1_000_000),
+  harga_sumber: z.enum(['pengguna', 'perkiraan']),
+  confidence: z.number().min(0).max(1),
+});
+```
+
+Tidak ada field `null` — semua selalu terisi, alur one-shot tidak pernah berhenti di tengah.
+`harga_sumber = 'perkiraan'` dan `tipe_3 = 'SEMUA'` dipakai UI untuk menampilkan konfirmasi
+penafsiran (lihat tabel penanganan di `context-mvp.md` Langkah 2). `confidence` tetap tidak
+masuk rumus, sama seperti skema lama.
 
 #### Titik #4 — AI Area Insight: narasi dari skor komponen (runtime) ❌ DI LUAR MVP
 
@@ -495,7 +622,7 @@ bukan per key (WebGIS publik berbagi satu kuota); RPD reset tengah malam Pasifik
 15.00 WIB). Mitigasi wajib: cache hasil per (kawasan × arketipe/pertanyaan) di DB, rate
 limit per IP, degradasi anggun (peta/skor/filter manual tetap jalan kalau AI mati).
 
-### 7.3 Kontrak data endpoint
+### 7.3 Kontrak data endpoint — rencana produk penuh (lihat kontrak MVP di bawah)
 
 ```
 POST /api/score
@@ -518,6 +645,41 @@ POST /api/insight            [DI LUAR SCOPE MVP — lihat titik #4]
 GET /api/community-sentiment?station_id=...   [BARU, MASUK MVP — lihat titik #5]
   response: ringkasan sentimen (skema masih ❓, belum diputuskan)
 ```
+
+---
+
+🔄 **Kontrak `/api/score` dan `/api/parse-intent` MVP — final, menggantikan kontrak di atas
+untuk scope MVP** (`context-mvp.md` 6.6, 6.8):
+
+```
+POST /api/parse-intent
+  request:  { teks: string }
+  response: hasil IntentSchema MVP (lihat titik #3 — tipe_3, harga_target, harga_sumber, confidence)
+
+POST /api/score
+  request:  { tipe_3, harga_target }
+  response:
+```
+```json
+{
+  "areas": [{
+    "area_id": "st_tanah_abang",
+    "station_name": "Tanah Abang",
+    "skor": 78.3,
+    "komponen": { "demand": 0.528, "competitive_headroom": 0.927, "segment_match": 0.750 },
+    "bobot": { "wD": 0.25, "wC": 0.50, "wS": 0.25 },
+    "n_observations": 28, "n_price": 28, "is_rankable": true
+  }],
+  "catatan": { "harga_sumber": "pengguna" }
+}
+```
+
+`/api/score` MVP **tidak lagi menerima `weights`** dari klien — bobot tunggal ditetapkan di
+server (6.5). Respons juga tidak berisi `risk_level`, `isochrone_5min`, atau `property_count`
+seperti kontrak lama — `risk_level` dicabut dari MVP (tidak ada rumusnya di model baru), dan
+hanya isokron 10 menit yang dipakai. `/api/insight` (titik #4) tetap di luar scope MVP,
+kontraknya di atas tidak berubah untuk rencana pasca-MVP. Kontrak `/api/properties` dan
+`/api/community-sentiment` di atas tidak berubah untuk MVP.
 
 `property_count` sengaja ikut di response ranking supaya UI bisa tandai kawasan skor tinggi
 tanpa properti **sebelum** diklik (state kosong eksplisit, bukan panel kosong seperti bug —
@@ -558,7 +720,9 @@ Diurutkan dari yang paling mendesak/berdampak struktural:
    pengguna. PRD bagian 7.4 perlu direvisi mengikuti rumusan ini.
 2. ❓ **Kunci gabungan `(h3_index, station_id)`** — Jalur 2 minta ini disepakati dengan
    Jalur 1 sebelum tabel `scored_cells` dibuat (satu sel bisa masuk isokron 2 stasiun
-   berdekatan). Belum ada konfirmasi eksplisit dari Jalur 1.
+   berdekatan). Belum ada konfirmasi eksplisit dari Jalur 1. 🔄 **Moot untuk MVP** —
+   `scored_cells` tidak dipakai sama sekali di MVP (`context-mvp.md` 4), pertanyaan ini
+   hanya relevan lagi kalau/ketika `scored_cells` dibangun pasca-MVP.
 3. ❓ **`competitive_headroom` per kategori usaha atau generik?** Bagian metode Jalur 2
    bilang C "difilter per kategori, berubah tergantung arketipe", tapi skema keluaran final
    cuma satu kolom generik per sel — potensi inkonsistensi di dalam dokumen Jalur 2 sendiri.
@@ -566,7 +730,9 @@ Diurutkan dari yang paling mendesak/berdampak struktural:
    nama stasiun KRL Tangsel yang eksplisit (itu pun untuk survey, bukan daftar lengkap).
 5. ✅ ~~Resolusi H3: 9 vs 10~~ **Selesai** — dikonfirmasi koordinator 31 Agustus 2026: tetap
    **resolusi 9** sesuai PRD, rekomendasi pindah ke 10 ditolak.
-6. ❓ λ (koefisien penalti KDE) belum dikalibrasi — masih grid search.
+6. ❓ λ (koefisien penalti KDE) belum dikalibrasi — masih grid search. 🔄 **Moot untuk MVP** —
+   P_KDE/KDE dicabut dari formula MVP (`context-mvp.md` 4), λ tidak dibutuhkan sampai KDE
+   dibangun lagi pasca-MVP.
 7. ❓ Jenis `SUPABASE_KEY` (anon/service role) dan region project Supabase — belum dicek.
 8. ❓ Repo `sigmaWebgis` — akun personal atau GitHub organization? (Blocking untuk Vercel
    Hobby kalau ternyata organization.)
@@ -575,8 +741,10 @@ Diurutkan dari yang paling mendesak/berdampak struktural:
    trade-off ini, bukan berarti harus diubah, tapi siapkan jawaban kalau ditanya.
 10. ❓ **Skema Zod Jalur 3 (`IntentSchema`) belum direvisi** mengikuti nama kolom final Jalur
     2 — masih 3 bobot nama lama, seharusnya 4 bobot nama baku. Aksi: kabari Anggota 3.
-11. ❓ Verifikasi Struk Go simpan jam transaksi dari **data nyata** (bukan cuma konfirmasi
-    lisan) — pilot Cisauk masih nol baris Struk Go, cek ulang begitu ada data nyata masuk.
+11. ✅ ~~Verifikasi Struk Go simpan jam transaksi dari **data nyata**~~ **Terjawab** —
+    `context-mvp.md` Bagian 7 mengonfirmasi dari 100 sampel se-Jabodetabek: kolom `tanggal`
+    kosong di 100/100 baris, tidak ada kolom nominal transaksi. Struk Go mati, tidak dipakai
+    sebagai sumber D/T di MVP (lihat catatan 3.1).
 12. ❓ Cakupan Menu Go dibanding kepadatan riil (dicek via OSM POI) — belum dilakukan.
 13. ❓ Kepemilikan Jalur 2 (William vs Dimas) — **sengaja tidak dipersoalkan** atas arahan
     koordinator, dicatat di sini hanya supaya tidak hilang sebagai keputusan sadar, bukan
@@ -629,7 +797,8 @@ penanggung jawab supaya jelas siapa yang perlu bergerak duluan:
   belum mencerminkan itu).
 - Daftar pasti stasiun yang masuk scope (berapa jumlahnya persis, nama-namanya) — belum ada
   di dokumen manapun selain angka "12" dan 5 nama stasiun survei.
-- Kalibrasi λ (koefisien penalti KDE) — masih menunggu hasil grid search.
+- Kalibrasi λ (koefisien penalti KDE) — masih menunggu hasil grid search. 🔄 Moot untuk MVP,
+  lihat item 6 di Bagian 9.
 
 **Perlu keputusan/konfirmasi Jalur 1 (Data & Backend):**
 - Jenis `SUPABASE_KEY` yang dipakai (anon vs service role) dan region project Supabase —
@@ -646,9 +815,8 @@ penanggung jawab supaya jelas siapa yang perlu bergerak duluan:
 - Slot Community Activity di formula skor — sudah dipilih "konteks UI saja" lewat PRD, tapi
   ini opsi yang disebut "paling lemah kalau ditanya juri" — pastikan tim sudah sadar dan
   siap menjawab kalau ditanya, bukan cuma default tanpa disadari.
-- Verifikasi dari data nyata (bukan konfirmasi lisan) bahwa Struk Go benar-benar menyimpan
-  jam transaksi — baru bisa dicek begitu ada data nyata masuk (area pilot saat ini nol
-  baris Struk Go).
+- ✅ Verifikasi dari data nyata bahwa Struk Go benar-benar menyimpan jam transaksi — **sudah
+  terjawab**, lihat item 11 di Bagian 9: Struk Go mati, tidak dipakai di MVP.
 
 Sampai poin-poin di atas terjawab, anggap dokumen ini **stabil untuk mulai bekerja** tapi
 **belum boleh dianggap tidak akan berubah lagi** — terutama untuk apa pun yang menyentuh
