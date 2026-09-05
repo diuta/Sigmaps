@@ -1,32 +1,58 @@
 import { generateText } from 'ai'
 import { geminiFlashLite } from '@/lib/ai/gemini'
-import { buildIntentSchema, type Intent } from '@/lib/schemas/prompt-request'
-import { getTipe3Values } from '@/lib/tipe3'
+import { buildGeminiRawSchema, type Intent } from '@/lib/schemas/prompt-request'
+
+// Tiga kelas error ini dipetakan ke kode HTTP spesifik oleh app/api/prompt-request/route.ts
+// sesuai kode galat wajib di context/context-mvp.md §6.8b (400/422/503) — jangan tangkap
+// sebagai Error generik di route.ts, harus `instanceof` supaya kode statusnya benar.
+export class NonCulinaryError extends Error {}
+export class IntentValidationError extends Error {}
+export class GeminiUnavailableError extends Error {}
 
 function buildSystemPrompt(tipe3Values: string[]): string {
   // generateObject sengaja tidak dipakai — instruksi tim, lihat riwayat diskusi.
-  // Struktur dipaksa lewat prompt, lalu divalidasi manual pakai IntentSchema (CLAUDE.md #6:
+  // Struktur dipaksa lewat prompt, lalu divalidasi manual pakai skema Zod (CLAUDE.md #6:
   // output Gemini wajib divalidasi Zod sebelum dipakai).
-  return `Kamu mengubah kalimat bebas rencana usaha kuliner jadi JSON.
+  return `Kamu mengubah kalimat bebas rencana usaha jadi JSON.
 Balas HANYA dengan JSON valid, tanpa markdown/backtick, persis mengikuti bentuk ini:
 {
-  "tipe_3": salah satu dari [${tipe3Values.map((v) => `"${v}"`).join(', ')}, "SEMUA"],
+  "is_kuliner": true kalau usaha yang disebut usaha makanan/minuman, false kalau bukan sama sekali (misal laundry, bengkel, salon, toko baju),
+  "tipe_3": salah satu dari [${tipe3Values.map((v) => `"${v}"`).join(', ')}, "SEMUA"] — isi "SEMUA" kalau is_kuliner true tapi jenis kulinernya tidak disebut jelas; kalau is_kuliner false, isi "SEMUA" juga (tidak dipakai kalau ditolak),
   "harga_target": angka rupiah antara 1000 dan 1000000,
   "harga_sumber": "pengguna" kalau user menyebut harga eksplisit, atau "perkiraan" kalau kamu menebak dari jenis usaha,
   "confidence": angka 0-1 seberapa yakin kamu terhadap tipe_3
+}`
 }
-Kalau usaha yang disebut bukan kuliner atau tidak jelas jenisnya, tetap balas JSON dengan tipe_3 "SEMUA".`
-}
 
-export async function parseIntent(prompt: string): Promise<Intent> {
-  const tipe3Values = await getTipe3Values()
+export async function parseIntent(prompt: string, tipe3Values: string[]): Promise<Intent> {
+  let text: string
+  try {
+    ;({ text } = await generateText({
+      model: geminiFlashLite,
+      system: buildSystemPrompt(tipe3Values),
+      prompt: prompt,
+    }))
+  } catch (error) {
+    throw new GeminiUnavailableError('Gagal memanggil Gemini', { cause: error })
+  }
 
-  const { text } = await generateText({
-    model: geminiFlashLite,
-    system: buildSystemPrompt(tipe3Values),
-    prompt: prompt,
-  })
+  let raw: { tipe_3: string; harga_target: number; harga_sumber: 'pengguna' | 'perkiraan'; confidence: number; is_kuliner: boolean }
+  try {
+    raw = buildGeminiRawSchema(tipe3Values).parse(JSON.parse(text))
+  } catch (error) {
+    throw new IntentValidationError('Hasil Gemini tidak sesuai skema yang diharapkan', { cause: error })
+  }
 
-  const IntentSchema = buildIntentSchema(tipe3Values)
-  return IntentSchema.parse(JSON.parse(text))
+  if (!raw.is_kuliner) {
+    throw new NonCulinaryError('Usaha yang disebut bukan usaha kuliner')
+  }
+
+  // Pilih field secara eksplisit (bukan destructure-and-discard) — `is_kuliner` tidak boleh
+  // ikut ke response publik, dan daftar field di sini harus persis cocok `Intent`.
+  return {
+    tipe_3: raw.tipe_3,
+    harga_target: raw.harga_target,
+    harga_sumber: raw.harga_sumber,
+    confidence: raw.confidence,
+  }
 }

@@ -23,6 +23,17 @@ export function buildIntentSchema(tipe3Values: string[]) {
   })
 }
 
+// Skema INTERNAL untuk parsing output mentah Gemini (lib/ai/parseIntent.ts) — superset dari
+// IntentSchema publik di atas, menambahkan `is_kuliner`. Field ini TIDAK masuk kontrak publik
+// (§6.6 cuma tipe_3/harga_target/harga_sumber/confidence, persis 4 field) — dipakai internal
+// supaya parseIntent bisa menolak usaha non-kuliner (context-mvp.md §6.8b: "'SEMUA' bukan
+// tempat pembuangan, usaha non-kuliner wajib ditolak 400") sebelum melepas hasil ke luar.
+export function buildGeminiRawSchema(tipe3Values: string[]) {
+  return buildIntentSchema(tipe3Values).extend({
+    is_kuliner: z.boolean(),
+  })
+}
+
 // Tipe manual, bukan z.infer — enum tipe_3 dinamis jadi hasil infer-nya cuma `string`.
 export type Intent = {
   tipe_3: string
