@@ -518,7 +518,7 @@ pekerja kantoran") → AI ubah jadi parameter terstruktur yang dipakai mesin sko
 ~~**Alur teknis (rencana produk penuh, tidak berlaku lagi untuk MVP — lihat skema MVP di
 bawah):**~~
 ```
-1. Client submit teks → POST /api/prompt-request { teks: "..." }
+1. Client submit teks → POST /api/prompt-request { prompt: "..." }
 2. Route Handler kirim teks ke Gemini lewat Vercel AI SDK (generateObject)
 3. Gemini dipaksa balikin JSON sesuai skema Zod berikut:
 
@@ -667,7 +667,7 @@ GET /api/properties?station_id=...
   response: FeatureCollection Properti Go (sudah difilter dalam isokron)
 
 POST /api/prompt-request
-  request:  { teks: string }
+  request:  { prompt: string }
   response: hasil IntentSchema (lihat titik #3 di atas)
 
 POST /api/insight            [DI LUAR SCOPE MVP — lihat titik #4]
@@ -690,8 +690,8 @@ GET /api/stations
   request:  tanpa parameter
   response: FeatureCollection stasiun (station_id, nama, tipe, kecamatan, kabkot, geom)
 
-POST /api/parse-intent
-  request:  { teks: string }
+POST /api/prompt-request
+  request:  { prompt: string }
   response: hasil IntentSchema MVP (lihat titik #3 — tipe_3, harga_target, harga_sumber, confidence)
 
 POST /api/score

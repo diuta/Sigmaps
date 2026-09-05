@@ -74,7 +74,7 @@ bobotnya tunggal dan tidak ada lagi yang bisa disunting (Bagian 6.5).
 **Alur teknis:**
 ```
 Sidebar (Client Component)
-  → POST /api/prompt-request { teks: "..." }
+  → POST /api/prompt-request { prompt: "..." }
       → Gemini + Zod (IntentSchema: kategori_usaha, target_jam, segmen, skala, weights, confidence)
   → POST /api/score { weights }
       → baca scored_areas/scored_cells dari Supabase
