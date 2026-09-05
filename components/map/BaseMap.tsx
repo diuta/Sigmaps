@@ -10,7 +10,7 @@ export default function BaseMap() {
       style: `https://v2.basemap.mapid.io/styles/street-v2.0/style.json?key=${process.env.NEXT_PUBLIC_MAPID_MAPS_KEY}`,
       center: [106.8271129, -6.1754398],
       zoom: 15.5,
-      pitch: 0,
+      pitch: 60,
       bearing: 0,
     });
 
