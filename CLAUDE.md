@@ -115,7 +115,7 @@ tidak**:
 
 | | `helper/` | `lib/` |
 |---|---|---|
-| Contoh | `hexArea()` (hitung koordinat heksagon dari titik+radius) | `hitungSkorWLC()` (rumus skor SIGMAPS: `100×(w1·D+...)−λ·P`) |
+| Contoh | `hexArea()` (hitung koordinat heksagon dari titik+radius) | `hitungSkorWLC()` (rumus skor SIGMAPS MVP: `100×(0,25·D+0,50·C+0,25·S)`, lihat `context/context-mvp.md` 6.1) |
 | Tahu soal data SIGMAPS (skor, arketipe, stasiun)? | **Tidak** — dia akan berfungsi sama persis di project lain manapun | **Ya** — dia dibuat khusus untuk rumus/aturan produk SIGMAPS |
 | Boleh dipanggil dari Client Component? | Ya, bebas | Boleh, tapi hanya isi yang memang aman di client (lihat bagian 3) — logic scoring/AI tetap harus lewat server |
 
