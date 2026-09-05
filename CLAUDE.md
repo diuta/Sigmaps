@@ -12,19 +12,20 @@ kebenaran untuk seluruh keputusan produk/arsitektur SIGMAPS.
 
 Bingung taruh kode di mana? Cek baris yang cocok:
 
-| Saya mau bikin... | Taruh di | Baca bagian |
-|---|---|---|
-| Endpoint API baru (misal `/api/xxx`) | `app/api/xxx/route.ts` (tipis!) | [2](#2-struktur-folder--wajib-diikuti-persis), [6](#6-validasi--error-handling--wajib-konsisten-di-semua-endpoint) |
-| Logic hitung/proses data (dipakai backend) | `lib/xxx.ts` (fungsi murni, tanpa HTTP) | [1](#1-model-arsitektur-monolith-nextjs), [2](#2-struktur-folder--wajib-diikuti-persis) |
-| Halaman/komponen UI baru | `components/xxx.tsx` | [3](#3-batas-server-vs-client-component--wajib-dipatuhi) |
-| Utilitas kecil generik (format tanggal, hitung jarak, dll) | `helper/xxx.ts` | [2b](#2b-helper-vs-lib--bedanya-apa) |
-| Sesuatu yang berkaitan dengan peta (layer, kontrol) | `components/map/...` | [11](#11-arsitektur-peta--basemap--layer-wajib-dipisah) |
-| Zod schema request/response | `lib/schemas/xxx.ts` | [6](#6-validasi--error-handling--wajib-konsisten-di-semua-endpoint) |
-| Env var / API key baru | `.env.local` + **wajib** tambahkan ke `.env.example` | [4](#4-environment-variable--secret--aturan-keamanan-wajib) |
-| Skrip Python analisis data | `etl/` (dunia terpisah, tidak nyambung ke `app/`/`lib/`) | [2](#2-struktur-folder--wajib-diikuti-persis) |
-| Selesai bikin fitur, sebelum dianggap "done" | Tambah `docs/<nama-fitur>.md` | [10](#10-dokumentasi-fitur--wajib-ditulis-di-docs) |
+| Saya mau bikin...                                          | Taruh di                                                 | Baca bagian                                                                                                        |
+| ---------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Endpoint API baru (misal `/api/xxx`)                       | `app/api/xxx/route.ts` (tipis!)                          | [2](#2-struktur-folder--wajib-diikuti-persis), [6](#6-validasi--error-handling--wajib-konsisten-di-semua-endpoint) |
+| Logic hitung/proses data (dipakai backend)                 | `lib/xxx.ts` (fungsi murni, tanpa HTTP)                  | [1](#1-model-arsitektur-monolith-nextjs), [2](#2-struktur-folder--wajib-diikuti-persis)                            |
+| Halaman/komponen UI baru                                   | `components/xxx.tsx`                                     | [3](#3-batas-server-vs-client-component--wajib-dipatuhi)                                                           |
+| Utilitas kecil generik (format tanggal, hitung jarak, dll) | `helper/xxx.ts`                                          | [2b](#2b-helper-vs-lib--bedanya-apa)                                                                               |
+| Sesuatu yang berkaitan dengan peta (layer, kontrol)        | `components/map/...`                                     | [11](#11-arsitektur-peta--basemap--layer-wajib-dipisah)                                                            |
+| Zod schema request/response                                | `lib/schemas/xxx.ts`                                     | [6](#6-validasi--error-handling--wajib-konsisten-di-semua-endpoint)                                                |
+| Env var / API key baru                                     | `.env.local` + **wajib** tambahkan ke `.env.example`     | [4](#4-environment-variable--secret--aturan-keamanan-wajib)                                                        |
+| Skrip Python analisis data                                 | `etl/` (dunia terpisah, tidak nyambung ke `app/`/`lib/`) | [2](#2-struktur-folder--wajib-diikuti-persis)                                                                      |
+| Selesai bikin fitur, sebelum dianggap "done"               | Tambah `docs/<nama-fitur>.md`                            | [10](#10-dokumentasi-fitur--wajib-ditulis-di-docs)                                                                 |
 
 **Tiga aturan paling sering dilanggar (baca ini dulu kalau buru-buru):**
+
 1. `route.ts` **tidak boleh** berisi logic — cuma validasi → panggil `lib/` → balas.
 2. Secret (`SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY`, `MAPID_API_KEY`) **tidak boleh**
    pernah dipakai di komponen `'use client'` — kalau kamu ragu, taruh di server.
@@ -97,6 +98,7 @@ middleware.ts                   → BELUM DIBUAT. Nanti: rate limiting per-IP di
 ```
 
 **ATURAN:**
+
 1. Endpoint API baru **wajib** dibuat sebagai `app/api/<nama>/route.ts` — jangan bikin pola
    routing lain (tidak ada `pages/api`, ini App Router, bukan Pages Router).
 2. `route.ts` **wajib tipis** — isinya cuma: validasi input (Zod dari `lib/schemas/`) →
@@ -110,14 +112,14 @@ middleware.ts                   → BELUM DIBUAT. Nanti: rate limiting per-IP di
 ### 2b. `helper/` vs `lib/` — bedanya apa?
 
 Ini pertanyaan yang paling sering bikin bingung karena dua-duanya "fungsi murni tanpa HTTP".
-Bedanya bukan soal *bentuk kode*, tapi soal **apakah fungsinya tahu soal bisnis SIGMAPS atau
+Bedanya bukan soal _bentuk kode_, tapi soal **apakah fungsinya tahu soal bisnis SIGMAPS atau
 tidak**:
 
-| | `helper/` | `lib/` |
-|---|---|---|
-| Contoh | `hexArea()` (hitung koordinat heksagon dari titik+radius) | `hitungSkorWLC()` (rumus skor SIGMAPS MVP: `100×(0,25·D+0,50·C+0,25·S)`, lihat `context/context-mvp.md` 6.1) |
-| Tahu soal data SIGMAPS (skor, arketipe, stasiun)? | **Tidak** — dia akan berfungsi sama persis di project lain manapun | **Ya** — dia dibuat khusus untuk rumus/aturan produk SIGMAPS |
-| Boleh dipanggil dari Client Component? | Ya, bebas | Boleh, tapi hanya isi yang memang aman di client (lihat bagian 3) — logic scoring/AI tetap harus lewat server |
+|                                                   | `helper/`                                                          | `lib/`                                                                                                        |
+| ------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| Contoh                                            | `hexArea()` (hitung koordinat heksagon dari titik+radius)          | `hitungSkorWLC()` (rumus skor SIGMAPS MVP: `100×(0,25·D+0,50·C+0,25·S)`, lihat `context/context-mvp.md` 6.1)  |
+| Tahu soal data SIGMAPS (skor, arketipe, stasiun)? | **Tidak** — dia akan berfungsi sama persis di project lain manapun | **Ya** — dia dibuat khusus untuk rumus/aturan produk SIGMAPS                                                  |
+| Boleh dipanggil dari Client Component?            | Ya, bebas                                                          | Boleh, tapi hanya isi yang memang aman di client (lihat bagian 3) — logic scoring/AI tetap harus lewat server |
 
 Kalau ragu: tanya "kalau fungsi ini saya copy-paste ke project lain yang sama sekali tidak
 berhubungan dengan SIGMAPS, apakah dia masih masuk akal dipakai?" — kalau **ya**, taruh di
@@ -143,16 +145,33 @@ berhubungan dengan SIGMAPS, apakah dia masih masuk akal dipakai?" — kalau **ya
 
 - Variabel **tanpa** prefix `NEXT_PUBLIC_` = server-only, otomatis `undefined` kalau diakses
   dari Client Component. Ini untuk: `SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY`,
-  `MAPID_API_KEY` (Competition API).
+  `MAPID_API_KEY` (Competition API, header `x-api-key` — dipakai `etl/script.py`, akses data
+  Struk Go/Menu Go/Property Go/Activities).
 - Variabel **dengan** prefix `NEXT_PUBLIC_` = sengaja dibundel ke browser, visible siapa
-  saja lewat DevTools. **Hanya** untuk yang memang didesain publik: `NEXT_PUBLIC_MAPID_MAPS_KEY`
-  (basemap), `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (kalau nanti dipakai).
+  saja lewat DevTools. **Hanya** untuk yang memang didesain publik:
+  `NEXT_PUBLIC_MAPID_MAPS_KEY` (basemap MAPID MAPS), `NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY` (kalau nanti dipakai).
+- ⚠️ **`MAPID_API_KEY` (Competition API) dan `NEXT_PUBLIC_MAPID_MAPS_KEY` (basemap) WAJIB
+  jadi dua nama variabel yang terpisah**, walaupun kebetulan nilai key-nya sama (satu key
+  MAPID dipakai untuk dua kebutuhan) — **jangan pernah** ganti nama `MAPID_API_KEY` jadi
+  `NEXT_PUBLIC_MAPID_API_KEY` atau sejenisnya untuk "menghemat" satu variabel. Begitu prefix
+  `NEXT_PUBLIC_` menempel di nama yang juga dipakai sebagai header `x-api-key` Competition
+  API, key itu ikut ter-bundle ke browser dan bisa diambil siapa saja lewat DevTools untuk
+  memanggil Competition API sebagai kamu — walau nilainya identik dengan key basemap yang
+  memang didesain publik, **jalur aksesnya beda** dan tidak boleh disatukan.
 - **Dilarang keras** hardcode API key/secret langsung di kode — selalu lewat
   `process.env.*`. **Kasus nyata yang baru ditemukan & diperbaiki (31 Agustus 2026):**
   `components/BaseMap.tsx` sempat hardcode key basemap langsung di URL style
   (`?key=6a3255...`). Ini sudah diperbaiki jadi `process.env.NEXT_PUBLIC_MAPID_MAPS_KEY` —
   jadikan ini pengingat: **key yang "aman untuk publik" pun tetap wajib lewat env var**,
   bukan berarti boleh ditulis langsung di kode.
+  🔄 **Regresi ditemukan & diperbaiki lagi 6 September 2026:** sempat diedit ulang jadi
+  `process.env.MAPID_API_KEY` (tanpa prefix `NEXT_PUBLIC_`) di `components/map/BaseMap.tsx`
+  hasil pemindahan komponen ke `components/map/` — menyebabkan basemap gagal total
+  (`?key=undefined` di browser, lihat poin ⚠️ di atas untuk alasannya). Kalau kasus ini
+  terulang lagi, itu tandanya seseorang menyamakan nama variabel basemap dengan
+  `MAPID_API_KEY` server-only — perbaikannya selalu: nama variabel client **harus** pakai
+  prefix `NEXT_PUBLIC_MAPID_MAPS_KEY`, terlepas dari isi nilainya.
 - `.env.local` (atau `.env` — dua-duanya diabaikan git) **tidak pernah** di-commit. Setiap
   penambahan variabel baru **wajib** ditambahkan juga ke **`.env.example`** (tanpa isi
   nilainya) supaya anggota lain tahu variabel itu perlu diminta. File `.env.example` sudah
@@ -236,11 +255,13 @@ sebelum dianggap selesai/di-merge. Tujuannya: anggota lain (atau kamu sendiri 2 
 kemudian) tidak perlu baca kode dulu buat tahu cara pakainya. Lihat juga `docs/README.md`.
 
 **Aturan penamaan file:** `docs/<nama-fitur-kebab-case>.md`, mengikuti path fiturnya. Contoh:
+
 - `app/api/score/route.ts` → `docs/api-score.md`
 - `components/BusinessBrief.tsx` → `docs/component-business-brief.md`
 - `lib/scoring.ts` → `docs/lib-scoring.md`
 
 **Isi minimal wajib ada di tiap file dokumentasi:**
+
 1. **Apa fungsinya** — satu-dua kalimat.
 2. **Cara pakai** — contoh pemanggilan nyata (request/response untuk API, contoh props untuk
    komponen, contoh input/output untuk fungsi `lib/`).
@@ -262,10 +283,12 @@ membuat ulang instance `maplibregl.Map` itu mahal (flicker, reset zoom/posisi), 
 **wajib dibuat sekali** dan tidak pernah di-remount hanya karena satu layer di-toggle.
 
 **Pembagian tanggung jawab, wajib diikuti:**
+
 - **`components/map/MapProvider.tsx`** — cuma definisi React Context + hook (`useMap()`)
   untuk membagikan map instance ke komponen lain. Tidak tahu apa pun soal MAPID/style.
 - **`components/map/BaseMap.tsx`** — membuat instance `maplibregl.Map` (style URL MAPID
-  MAPS, key dari `NEXT_PUBLIC_MAPID_MAPS_KEY`) **sekali**, menaruh hasilnya ke context dari
+  MAPS, key dari `NEXT_PUBLIC_MAPID_MAPS_KEY` — **bukan** `MAPID_API_KEY`, lihat bagian 4)
+  **sekali**, menaruh hasilnya ke context dari
   `MapProvider`. **Dilarang** menerima prop berisi daftar layer — Basemap tidak boleh tahu
   layer apa saja yang aktif.
 - **`components/map/layers/*.tsx`** — satu file per layer (isokron, hex-score, stasiun,
@@ -290,18 +313,18 @@ membuat ulang instance `maplibregl.Map` itu mahal (flicker, reset zoom/posisi), 
 
 ```tsx
 // app/page.tsx — TETAP Server Component, boleh await data langsung
-import { MapProvider } from '@/components/map/MapProvider'
-import { BaseMap } from '@/components/map/BaseMap'
-import { StationLayer } from '@/components/map/layers/StationLayer'
+import { MapProvider } from "@/components/map/MapProvider";
+import { BaseMap } from "@/components/map/BaseMap";
+import { StationLayer } from "@/components/map/layers/StationLayer";
 
 export default async function Page() {
-  const stations = await getStations() // Server Component, lewat lib/supabase/server.ts
+  const stations = await getStations(); // Server Component, lewat lib/supabase/server.ts
   return (
     <MapProvider>
       <BaseMap />
       <StationLayer stations={stations} />
     </MapProvider>
-  )
+  );
 }
 ```
 

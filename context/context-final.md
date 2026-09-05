@@ -308,7 +308,17 @@ create table stasiun (
   kabkot      text,
   geom        geometry(Point, 4326) not null
 );
+```
 
+🔄 **Skema `stasiun` yang benar-benar dijalankan di Supabase berbeda dari SQL di atas,
+ditemukan 6 September 2026** — kolom aslinya `tipe_3` (bukan `tipe`, kemungkinan copy-paste
+dari `katalog_restoran`) dan `longitude`/`latitude` (bukan kolom `geom`). **Keputusan: tabel
+tidak diubah**, dan selisihnya ditutup **di TypeScript** (`lib/stations.ts`), bukan SQL view —
+karena tidak ada spatial join maupun kolom geometry PostGIS yang perlu diproses database
+untuk tabel ini (beda dari `properti_go`/`community_activity`, lihat `supabase/views.sql`).
+Detail lengkap & SQL asli di `context/context-mvp.md` §6.7.
+
+```sql
 create table scored_areas (
   area_id            text primary key,
   station_id         text not null references stasiun(station_id),
@@ -414,6 +424,13 @@ tinggal konfirmasi resmi di sesi sinkronisasi.
    tersembunyi di server.
 2. Baca skor komponen dari Supabase, hitung WLC pakai bobot arketipe/hasil edit pengguna.
 3. Spatial join Properti Go ke kawasan terpilih (`ST_Within`/`ST_DWithin`).
+
+🔄 **Mekanisme spatial join poin 3, ditetapkan untuk MVP 5 September 2026:** backend memakai
+`supabase-js` (bicara ke PostgREST), yang tidak bisa menjalankan `ST_Within` antar tabel
+lewat query builder biasa. Join dibungkus sebagai **SQL view** di Supabase
+(`properti_go_by_station`, `community_activity_by_station`, lihat `supabase/views.sql`),
+dipanggil dari route dengan `.from(view).select().eq('station_id', ...)` seperti tabel biasa.
+Detail lengkap & kenapa bukan RPC function di `context-mvp.md` §6.8b.
 
 ✅ **Diselesaikan, dikonfirmasi ulang 31 Agustus 2026** (lihat detail penuh di bagian 5.3):
 skor final kawasan **selalu dihitung live** di langkah ke-2 di atas, untuk arketipe preset
