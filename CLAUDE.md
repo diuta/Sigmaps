@@ -22,6 +22,7 @@ Bingung taruh kode di mana? Cek baris yang cocok:
 | Zod schema request/response                                | `lib/schemas/xxx.ts`                                     | [6](#6-validasi--error-handling--wajib-konsisten-di-semua-endpoint)                                                |
 | Env var / API key baru                                     | `.env.local` + **wajib** tambahkan ke `.env.example`     | [4](#4-environment-variable--secret--aturan-keamanan-wajib)                                                        |
 | Skrip Python analisis data                                 | `etl/` (dunia terpisah, tidak nyambung ke `app/`/`lib/`) | [2](#2-struktur-folder--wajib-diikuti-persis)                                                                      |
+| SQL view/grant baru untuk Supabase (spatial join, dll)      | `supabase/views.sql` (dijalankan manual di SQL Editor)   | [2](#2-struktur-folder--wajib-diikuti-persis)                                                                      |
 | Selesai bikin fitur, sebelum dianggap "done"               | Tambah `docs/<nama-fitur>.md`                            | [10](#10-dokumentasi-fitur--wajib-ditulis-di-docs)                                                                 |
 
 **Tiga aturan paling sering dilanggar (baca ini dulu kalau buru-buru):**
@@ -90,6 +91,13 @@ components/                     → FRONTEND murni (Client & Server Component UI
 
 helper/                         → utilitas sisi klien murni, generik, TANPA business logic
 etl/                            → Python, batch/offline, TIDAK pernah di-import dari app/ atau lib/
+supabase/                       → SQL murni (view, grant) yang dijalankan MANUAL di Supabase
+                                   SQL Editor — bukan kode aplikasi, tidak pernah di-import
+                                   Next.js. Kode di app/lib merujuk objek yang dibuat file ini
+                                   lewat nama string (mis. `.from('tipe3_values')`), jadi file
+                                   ini WAJIB dijalankan lebih dulu di project Supabase sebelum
+                                   endpoint yang bergantung padanya bisa jalan. Perlakukan
+                                   seperti file migrasi database, bukan seperti `lib/`.
 public/                         → aset statis
 docs/                           → dokumentasi cara pakai tiap fitur (wajib, lihat bagian 10)
 middleware.ts                   → BELUM DIBUAT. Nanti: rate limiting per-IP di root, jalan
