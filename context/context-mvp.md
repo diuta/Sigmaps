@@ -74,11 +74,11 @@ bobotnya tunggal dan tidak ada lagi yang bisa disunting (Bagian 6.5).
 **Alur teknis:**
 ```
 Sidebar (Client Component)
-  → POST /api/parse-intent { teks: "..." }
-      → Gemini + Zod (IntentSchema, lihat Bagian 6.6)
-  → POST /api/score { tipe_3, harga_target }
-      → baca scored_areas dari Supabase
-      → hitung C dan S, gabung dengan D (lib/scoring.ts), DETERMINISTIK
+  → POST /api/prompt-request { prompt: "..." }
+      → Gemini + Zod (IntentSchema: kategori_usaha, target_jam, segmen, skala, weights, confidence)
+  → POST /api/score { weights }
+      → baca scored_areas/scored_cells dari Supabase
+      → hitung WLC live (lib/scoring.ts) — DETERMINISTIK, bukan AI
       → urutkan, ambil Top 5
   → tampilkan Top 5 + skor + dekomposisi komponen mentah (angka/chart)
 ```
@@ -205,18 +205,17 @@ terlihat seperti janji yang tidak ditepati saat demo.
 
 ## 5. Pemetaan kerja per jalur
 
-**Jalur 1 (Data/Backend):** `app/api/parse-intent`, `app/api/score`, `app/api/properties`,
-`app/api/community-sentiment`, tabel Community Activity di Supabase + loader.
-✅ Skema `scored_areas` (Bagian 6.7) sudah final dan dapat dipakai sekarang.
-
-**Jalur 2 (Analisis Spasial/Skoring):** poligon isokron sudah aman datanya, pipeline batch
-Python, isi tabel `scored_areas`, dua tabel padanan manual (Bagian 6.6) sudah aman datanya.
-Semua mengikuti skema Zod yang akan dibuat di kode.
-
-**Jalur 3 (Frontend/AI):** `components/map/*`, sidebar Business Brief, panel Top 5 +
-dekomposisi (angka/chart, tanpa narasi AI), panel klik stasiun (2 tab), property card.
-Zod schema yang dipakai: `IntentSchema` (Bagian 6.6) dan schema output titik #5.
-`InsightSchema` tidak perlu dikerjakan.
+- **Jalur 1 (Data/Backend):** `app/api/prompt-request`, `app/api/score`, `app/api/properties`,
+  `app/api/community-sentiment` (baru, untuk Langkah 3a), skema tabel sementara (dummy/seed)
+  sambil nunggu Jalur 2, tabel Community Activity di Supabase (belum ada, cuma di ETL).
+- **Jalur 2 (Analisis Spasial/Skoring):** **blocking item** — skema & isi `scored_areas`/
+  `scored_cells` final, status poligon isokron semua stasiun. MVP Langkah 2 & 3b menunggu ini.
+- **Jalur 3 (Frontend/AI):** `components/map/*`, sidebar Business Brief (UI one-shot), panel
+  hasil Top 5 + dekomposisi komponen (angka/chart, **tanpa** narasi AI — titik #4 di luar
+  scope), panel klik stasiun (2 tab: sentimen + katalog), property card. Zod schema yang
+  dipakai MVP cuma dua: `IntentSchema` (titik #3, wajib pakai nama final Jalur 2 — lihat
+  `context-final.md` §7.2) dan schema output titik #5 (nama masih ❓, lihat §7.2).
+  `InsightSchema` (titik #4) **tidak perlu dikerjakan** untuk MVP ini.
 
 ---
 
