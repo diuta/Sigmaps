@@ -93,7 +93,7 @@ public/                         → aset statis
 docs/                           → dokumentasi cara pakai tiap fitur (wajib, lihat bagian 10)
 middleware.ts                   → BELUM DIBUAT. Nanti: rate limiting per-IP di root, jalan
                                    sebelum app/api/* — wajib ada sebelum endpoint AI live
-                                   (`/api/parse-intent`, `/api/insight`) diaktifkan ke publik.
+                                   (`/api/prompt-request`, `/api/insight`) diaktifkan ke publik.
 ```
 
 **ATURAN:**
@@ -211,7 +211,7 @@ berhubungan dengan SIGMAPS, apakah dia masih masuk akal dipakai?" — kalau **ya
 - Default Node.js runtime untuk semua `route.ts` (jangan set `export const runtime = 'edge'`
   kecuali ada alasan terdokumentasi — banyak library di stack ini, termasuk Supabase client,
   tidak kompatibel penuh dengan Edge runtime).
-- Endpoint yang memanggil Gemini (`/api/parse-intent`, `/api/insight`) **wajib** melalui
+- Endpoint yang memanggil Gemini (`/api/prompt-request`, `/api/insight`) **wajib** melalui
   `middleware.ts` untuk rate limit per-IP.
 - **Batas waktu function Vercel Hobby: default 10 detik, maksimum 60 detik.** Ini alasan
   keras kenapa isokron/H3/KDE **tidak boleh** dihitung di dalam `route.ts` — itu tugas
@@ -313,7 +313,7 @@ Supaya tidak ada gaya campur-campur antar anggota tim:
   (`BusinessBrief.tsx`, `ScoreCard.tsx`).
 - **Route Handler**: selalu nama file `route.ts` (ini konvensi wajib Next.js, tidak bisa
   diganti), yang membedakan endpoint adalah nama **foldernya** (`app/api/score/route.ts`),
-  pakai kebab-case untuk nama folder kalau lebih dari satu kata (`app/api/parse-intent/`).
+  pakai kebab-case untuk nama folder kalau lebih dari satu kata (`app/api/prompt-request/`).
 - **File `lib/` dan `helper/`**: `camelCase.ts` untuk file berisi satu fungsi utama
   (`scoring.ts`, `hexArea.ts`), atau nama folder kebab-case untuk grup (`lib/schemas/score.ts`).
 - **Environment variable**: selalu `UPPER_SNAKE_CASE`, prefix `NEXT_PUBLIC_` hanya kalau
@@ -338,3 +338,13 @@ belakangan (bukan blocker foundation sekarang, tapi jangan dilupakan):
 
 Sampai salah satu di atas benar-benar dipasang, **code review manual tetap jadi satu-satunya
 garis pertahanan** — jangan asumsikan "aturan sudah ditulis" berarti "aturan pasti diikuti".
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
