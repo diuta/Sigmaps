@@ -293,11 +293,25 @@ request, tidak disimpan di tabel ini."
 (`context-mvp.md` 6.7). Bukan hasil agregasi persentil ke-75 dari sel H3 seperti
 dideskripsikan di atas, melainkan diisi langsung lewat spatial join pengamatan ke poligon
 isokron kawasan (`context-mvp.md` 6.9) — satu baris per kawasan/stasiun, bukan per
-`(station_id, isochrone_band)`:
+`(station_id, isochrone_band)`. Bagian dari ERD MVP lengkap **enam tabel** (`stasiun`,
+`scored_areas`, `menu_go`, `katalog_restoran`, `properti_go`, `community_activity`) — detail
+penuh tiap kolom ada di `context/dokumentasi-erd-mvp.md`, ground truth data/ERD MVP sejak 4
+September 2026 (menang atas selisih detail kecil di dokumen ini):
 
 ```sql
+create table stasiun (
+  station_id  text primary key,
+  nama        text not null,
+  tipe        text,
+  alamat      text,
+  kecamatan   text,
+  kabkot      text,
+  geom        geometry(Point, 4326) not null
+);
+
 create table scored_areas (
   area_id            text primary key,
+  station_id         text not null references stasiun(station_id),
   station_name       text not null,
   geom               geometry(Polygon, 4326) not null,
   area_km2           double precision not null,
@@ -318,7 +332,21 @@ create table scored_areas (
 );
 
 create index scored_areas_geom_idx on scored_areas using gist (geom);
+create index stasiun_geom_idx on stasiun using gist (geom);
 ```
+
+🔄 **`station_id` ditambahkan 4 September 2026** — versi sebelumnya di dokumen ini tidak
+punya kolom ini sama sekali, padahal ini satu-satunya foreign key sungguhan di seluruh ERD
+MVP (`scored_areas.station_id → stasiun.station_id`, satu-ke-satu). Tabel `stasiun` juga
+baru ditambahkan di sini — sebelumnya tidak ada definisi SQL-nya di dokumen ini sama sekali.
+
+⚠️ **`is_rankable` MVP dua syarat, bukan satu**: `n_observations >= 10 AND n_price >= 5`
+(bukan cuma `n_observations >= 10` seperti sempat tertulis) — lihat `context-mvp.md` 6.9.
+
+✅ **Nama tabel restoran: `katalog_restoran`** — dikonfirmasi langsung koordinator 4
+September 2026. Prosa `dokumentasi-erd-mvp.md` dan contoh query di `daftar-api-sigmaps.xlsx`
+sebelumnya memakai `sensus_restoran` untuk tabel yang sama; itu nama lama yang sudah
+diperbaiki. Lihat catatan penamaan di `context-mvp.md` 6.7.
 
 Prinsip "skor akhir 0–100 tidak pernah disimpan, dihitung live" di atas tetap berlaku persis
 sama untuk skema MVP ini — hanya struktur kolom komponennya yang berbeda. Kolom
@@ -361,8 +389,12 @@ Cisauk sudah ter-upload lewat `etl/load_supabase.py`.
 ❓ Tabel Struk Go/Menu Go/Activity **belum dibuat** di Supabase (baru file `.geojson` hasil
 ETL, belum ada loader ke DB).
 
-❓ **RLS belum diaktifkan** di `properti_go` — 🔶 rekomendasi: `enable row level security`
-+ policy `SELECT` publik, `INSERT/UPDATE/DELETE` hanya lewat service role key.
+✅ **RLS untuk MVP — diputuskan 4 September 2026** (`dokumentasi-erd-mvp.md` bagian
+"Keamanan"), bukan lagi rekomendasi terbuka: seluruh enam tabel MVP mengaktifkan Row Level
+Security dengan policy `SELECT` publik; tulis/ubah/hapus hanya lewat pipeline batch memakai
+service role key (yang melewati RLS, tidak perlu policy tersendiri untuk itu). ⚠️ RLS aktif
+tanpa policy mengembalikan nol baris **tanpa pesan galat** — buat tabel dan policy dalam
+satu sesi yang sama; hasil kosong tanpa galat adalah tersangka pertama.
 
 ❓ **Jenis `SUPABASE_KEY` yang dipakai sekarang** (anon vs service role) — belum dicek/dicatat.
 
@@ -648,10 +680,16 @@ GET /api/community-sentiment?station_id=...   [BARU, MASUK MVP — lihat titik #
 
 ---
 
-🔄 **Kontrak `/api/score` dan `/api/parse-intent` MVP — final, menggantikan kontrak di atas
-untuk scope MVP** (`context-mvp.md` 6.6, 6.8):
+🔄 **Kontrak endpoint MVP — final, menggantikan kontrak di atas untuk scope MVP**
+(`context-mvp.md` 6.6, 6.8, 6.8b; ground truth persis: `context/daftar-api-sigmaps.xlsx`).
+Lima endpoint masuk MVP (`/api/insight` di atas tetap di luar MVP, kontraknya tidak
+berubah):
 
 ```
+GET /api/stations
+  request:  tanpa parameter
+  response: FeatureCollection stasiun (station_id, nama, tipe, kecamatan, kabkot, geom)
+
 POST /api/parse-intent
   request:  { teks: string }
   response: hasil IntentSchema MVP (lihat titik #3 — tipe_3, harga_target, harga_sumber, confidence)
@@ -664,6 +702,7 @@ POST /api/score
 {
   "areas": [{
     "area_id": "st_tanah_abang",
+    "station_id": "st_tanah_abang",
     "station_name": "Tanah Abang",
     "skor": 78.3,
     "komponen": { "demand": 0.528, "competitive_headroom": 0.927, "segment_match": 0.750 },
@@ -674,12 +713,21 @@ POST /api/score
 }
 ```
 
+🔄 **`station_id` ditambahkan 4 September 2026** — sebelumnya hilang dari contoh respons di
+dokumen ini, padahal wajib ada (frontend memakainya memanggil `/api/properties` dan
+`/api/community-sentiment` saat kawasan diklik).
+
 `/api/score` MVP **tidak lagi menerima `weights`** dari klien — bobot tunggal ditetapkan di
 server (6.5). Respons juga tidak berisi `risk_level`, `isochrone_5min`, atau `property_count`
 seperti kontrak lama — `risk_level` dicabut dari MVP (tidak ada rumusnya di model baru), dan
 hanya isokron 10 menit yang dipakai. `/api/insight` (titik #4) tetap di luar scope MVP,
 kontraknya di atas tidak berubah untuk rencana pasca-MVP. Kontrak `/api/properties` dan
 `/api/community-sentiment` di atas tidak berubah untuk MVP.
+
+🔄 **`GET /api/stations` menggantikan pola lama** — versi dokumen ini sebelumnya
+mengasumsikan data stasiun diambil Server Component langsung dari Supabase tanpa lewat route
+API. Ground truth `daftar-api-sigmaps.xlsx` menetapkan `/api/stations` sebagai endpoint
+sungguhan yang dipanggil saat halaman dibuka; lihat `context-mvp.md` Langkah 1.
 
 `property_count` sengaja ikut di response ranking supaya UI bisa tandai kawasan skor tinggi
 tanpa properti **sebelum** diklik (state kosong eksplisit, bukan panel kosong seperti bug —
@@ -773,10 +821,15 @@ Diurutkan dari yang paling mendesak/berdampak struktural:
 
 ## 11. Referensi
 
-- `context/Kamehameha_SIGMAPS_PRD_MAPID_WebGIS_Competition_2026 (1).md` — PRD resmi tim.
+- `context/PRD.md` — PRD resmi tim.
 - `context/context-mvp.md` — scope MVP 5 hari (turunan dokumen ini, baca bersamaan).
 - `CLAUDE.md` (root repo) — aturan struktur folder & kode.
 - Kode: `etl/script.py`, tabel `properti_go` di Supabase.
+
+🔄 **Ground truth data/ERD/API, ditetapkan 4 September 2026** — lihat daftar lengkap dan
+catatan penyelesaian konflik antar sumber di `context/context-mvp.md` Bagian 11:
+`context/dokumentasi-erd-mvp.md`, `context/daftar-api-sigmaps.xlsx`, dan diagram ERD
+dbdiagram.io (PDF).
 
 ---
 

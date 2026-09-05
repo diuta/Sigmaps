@@ -558,9 +558,25 @@ Kontrak antarmuka utama:
 
                        *→ FeatureCollection (sudah difilter dalam isokron)*
 
+🔄 **Untuk MVP** (`context-mvp.md` 6.8, 6.8b; ground truth persis: `daftar-api-sigmaps.xlsx`
+dan `dokumentasi-erd-mvp.md`): kontrak di atas rencana produk penuh, bukan yang dipakai MVP.
+MVP punya **lima** endpoint — `GET /api/stations`, `POST /api/parse-intent`,
+`POST /api/score`, `GET /api/properties`, `GET /api/community-sentiment` (`POST /api/insight`
+di luar MVP). `/api/score` MVP: `request { tipe_3, harga_target }` (bukan `weights`),
+`response` berisi `area_id, station_id, station_name, skor, komponen (demand,
+competitive_headroom, segment_match), bobot, n_observations, n_price, is_rankable` — tanpa
+`risk_level`, `isochrone_5min`/`isochrone_10min`, atau `property_count`.
+
 **Database**
 
 **Supabase** (PostgreSQL dengan ekstensi PostGIS), dipakai sebagai lapisan penyimpanan hasil praperhitungan. Tabel dibagi menjadi kelompok raw\_\* untuk data mentah dan scored\_\* untuk komponen ternormalisasi. Kolom geometri disimpan sebagai geometry(Point, 4326\) dengan indeks GiST. Koneksi dari lingkungan serverless dilakukan melalui connection *pooler*.
+
+🔄 **Untuk MVP** (ground truth: `dokumentasi-erd-mvp.md`, `daftar-api-sigmaps.xlsx`): tidak
+ada prefiks `raw_`/`scored_` — enam tabel MVP bernama langsung `stasiun`, `scored_areas`,
+`menu_go`, `katalog_restoran`, `properti_go`, `community_activity`. Hampir tidak ada foreign
+key (keanggotaan kawasan lewat `ST_Within`, bukan kolom kunci); satu-satunya FK sungguhan
+adalah `scored_areas.station_id → stasiun.station_id`. Seluruh tabel mengaktifkan RLS dengan
+policy `SELECT` publik, tulis hanya lewat service role key dari pipeline batch.
 
 Backend hanya menjalankan kueri pembacaan dan satu operasi spatial join; tidak ada fungsi PostGIS kompleks pada jalur runtime.
 
