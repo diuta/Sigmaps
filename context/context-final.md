@@ -447,8 +447,8 @@ di client, beda dari key Competition `x-api-key` yang wajib server-side). MapLib
 ✅ **Google Gemini** via Google AI Studio (free tier), **Vercel AI SDK** (`ai` +
 `@ai-sdk/google`) + **Zod** untuk validasi skema output (`generateObject`).
 
-🔶 Model: `gemini-2.5-flash-lite` untuk parse intent & filter (task terstruktur, tidak perlu
-model besar), `gemini-2.5-flash` untuk narasi insight. Nama model **wajib** di environment
+🔶 Model: `gemini-3.5-flash-lite` untuk parse intent & filter (task terstruktur, tidak perlu
+model besar), `gemini-3.5-flash` untuk narasi insight. Nama model **wajib** di environment
 variable (Google merotasi model cepat).
 
 ✅ **LIMA titik sentuh AI** (bukan empat — direvisi 2 September 2026 setelah diskusi MVP,
@@ -518,7 +518,7 @@ pekerja kantoran") → AI ubah jadi parameter terstruktur yang dipakai mesin sko
 ~~**Alur teknis (rencana produk penuh, tidak berlaku lagi untuk MVP — lihat skema MVP di
 bawah):**~~
 ```
-1. Client submit teks → POST /api/parse-intent { teks: "..." }
+1. Client submit teks → POST /api/prompt-request { prompt: "..." }
 2. Route Handler kirim teks ke Gemini lewat Vercel AI SDK (generateObject)
 3. Gemini dipaksa balikin JSON sesuai skema Zod berikut:
 
@@ -666,8 +666,8 @@ POST /api/score
 GET /api/properties?station_id=...
   response: FeatureCollection Properti Go (sudah difilter dalam isokron)
 
-POST /api/parse-intent
-  request:  { teks: string }
+POST /api/prompt-request
+  request:  { prompt: string }
   response: hasil IntentSchema (lihat titik #3 di atas)
 
 POST /api/insight            [DI LUAR SCOPE MVP — lihat titik #4]
@@ -690,8 +690,8 @@ GET /api/stations
   request:  tanpa parameter
   response: FeatureCollection stasiun (station_id, nama, tipe, kecamatan, kabkot, geom)
 
-POST /api/parse-intent
-  request:  { teks: string }
+POST /api/prompt-request
+  request:  { prompt: string }
   response: hasil IntentSchema MVP (lihat titik #3 — tipe_3, harga_target, harga_sumber, confidence)
 
 POST /api/score
