@@ -8,6 +8,8 @@
 // /api/score response (context-mvp §6.8)
 // ---------------------------------------------------------------------------
 
+export type ScoreComponentKey = "demand" | "competitive_headroom" | "segment_match";
+
 export interface AreaScore {
   /** Match ke area_id di scored_areas & StationRanking */
   area_id: string;

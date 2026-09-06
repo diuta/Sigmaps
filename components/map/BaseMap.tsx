@@ -18,6 +18,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapInstanceProvider } from "@/hooks/useMapInstance";
 import { useSelectedStation } from "@/hooks/useSelectedStation";
+import { basemapStyleUrl, DEFAULT_BASEMAP_ID } from "@/lib/fixtures/layers";
 
 interface BaseMapProps {
   children?: ReactNode;
@@ -36,8 +37,7 @@ export default function BaseMap({ children }: BaseMapProps) {
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style:
-        "https://v2.basemap.mapid.io/styles/street-v2.0/style.json?key=6a3255374eed59093aba9c32",
+      style: basemapStyleUrl(DEFAULT_BASEMAP_ID),
       center: [106.8271129, -6.1754398], // Jakarta default center
       zoom: 13,
       pitch: 0,

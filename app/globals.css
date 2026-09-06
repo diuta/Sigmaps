@@ -1,26 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand Colors (DESIGN.md / ARCHITECTURE.md §6) */
-  --color-brand:          #1E40AF;  /* Cobalt Metro */
+  /* Brand — Cobalt Metro */
+  --color-brand:          #1E40AF;
   --color-brand-hover:    #1D4ED8;
   --color-brand-active:   #172554;
 
-  /* Accent */
-  --color-accent:         #4F46E5;  /* Electric Ultramarine */
+  /* AI / Intelligence accent — Electric Ultramarine.
+     RESERVED: konten hasil generasi AI saja. */
+  --color-accent:         #4F46E5;
   --color-accent-surface: #EEF2FF;
 
-  /* Opportunity */
-  --color-opportunity:    #10B981;  /* Neon Emerald */
+  /* Deterministic scoring — Neon Emerald.
+     RESERVED: output skor deterministik saja (bar D/C/S, angka skor). */
+  --color-opportunity:    #10B981;
   --color-opportunity-bg: #ECFDF5;
   --color-opportunity-tx: #065F46;
 
-  /* Property Pin */
-  --color-pin:            #F97316;  /* Warm Tangerine */
+  /* Property pin — Warm Tangerine */
+  --color-pin:            #F97316;
   --color-pin-hover:      #EA580C;
   --color-pin-surface:    #FFF7ED;
 
-  /* Warning */
+  /* Warning — Amber Orange */
   --color-warning:        #F59E0B;
   --color-warning-bg:     #FEF3C7;
   --color-warning-tx:     #92400E;
@@ -33,7 +35,7 @@
   --color-text:           #0F172A;
   --color-text-sub:       #64748B;
 
-  /* Spacing */
+  /* Spacing (4px base) */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
@@ -45,8 +47,57 @@
   --radius-pill: 9999px;
 
   /* Elevation */
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  --shadow-float: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --shadow-card:  0 1px 3px 0 rgba(0,0,0,.05), 0 1px 2px 0 rgba(0,0,0,.03);
+  --shadow-float: 0 10px 15px -3px rgba(0,0,0,.08), 0 4px 6px -2px rgba(0,0,0,.03);
+
+  /* Layout */
+  --sidebar-width: 380px;
+
+  /* Motion — tidak ada di DESIGN.md, tambahan pass 3. Semua transisi memakai token ini. */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 320ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-jakarta), -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+/* Typography tokens — DESIGN.md §3 */
+.t-display-score { font-size: 28px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em; }
+.t-heading-1     { font-size: 18px; line-height: 24px; font-weight: 700; letter-spacing: -0.01em; }
+.t-heading-2     { font-size: 15px; line-height: 20px; font-weight: 600; }
+.t-body          { font-size: 13px; line-height: 18px; font-weight: 400; }
+.t-button        { font-size: 13px; line-height: 16px; font-weight: 600; letter-spacing: 0.01em; }
+.t-tabular       { font-size: 12px; line-height: 16px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.t-micro         { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.02em; }
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.motion-rise-in { animation: rise-in var(--motion-base) var(--ease-out) both; }
+.motion-pop-in  { animation: pop-in var(--motion-fast) var(--ease-out) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
 }
 
 /* =========================================================================
@@ -186,4 +237,3 @@
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   backdrop-filter: blur(4px) !important;
 }
-

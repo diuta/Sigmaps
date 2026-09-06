@@ -13,11 +13,11 @@
  */
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import type { StationRanking } from "@/types/station";
+import type { StationLocation } from "@/types/station";
 
 interface SelectedStationContextValue {
-  selectedStation: StationRanking | null;
-  setSelectedStation: (station: StationRanking | null) => void;
+  selectedStation: StationLocation | null;
+  setSelectedStation: (station: StationLocation | null) => void;
 }
 
 const SelectedStationContext = createContext<SelectedStationContextValue | undefined>(
@@ -25,7 +25,7 @@ const SelectedStationContext = createContext<SelectedStationContextValue | undef
 );
 
 export function SelectedStationProvider({ children }: { children: ReactNode }) {
-  const [selectedStation, setSelectedStation] = useState<StationRanking | null>(
+  const [selectedStation, setSelectedStation] = useState<StationLocation | null>(
     null
   );
 

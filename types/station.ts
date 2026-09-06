@@ -65,3 +65,18 @@ export interface StationRanking {
    */
   is_rankable: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// Lokasi stasiun saja — tanpa skor
+// Dipakai untuk sinkronisasi sidebar ↔ peta (useSelectedStation) dan lookup
+// geografis (mis. klik ranking card di sidebar → tahu ke mana flyTo()).
+// StationRanking di atas adalah superset ini, jadi selalu bisa dioper ke sini.
+// ---------------------------------------------------------------------------
+
+export interface StationLocation {
+  area_id: string;
+  station_name: string;
+  lng: number;
+  lat: number;
+  is_rankable: boolean;
+}
