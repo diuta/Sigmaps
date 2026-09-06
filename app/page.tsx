@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 "use client";
 
 import BaseMap from "@/components/map/BaseMap";
@@ -8,6 +9,9 @@ import DevToolsOverlay from "@/components/map/dev/DevToolsOverlay";
 import { SelectedStationProvider } from "@/hooks/useSelectedStation";
 import { IsochroneConfigProvider } from "@/hooks/useIsochroneConfig";
 import { PropertyPopupConfigProvider } from "@/hooks/usePropertyPopupConfig";
+=======
+import BaseMap from "@/components/map/BaseMap";
+>>>>>>> Stashed changes
 
 export default function Home() {
   return (
