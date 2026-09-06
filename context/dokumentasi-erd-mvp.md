@@ -51,6 +51,25 @@ Katalog titik stasiun. Sumber daftar kawasan, sekaligus masukan MAPID Isochrone 
 | `alamat`, `kecamatan`, `kabkot` | Konteks wilayah. `kabkot` berguna memfilter per kota saat menambah cakupan |
 | `geom` | Titik stasiun. **Masukan Isochrone Tool** untuk menghasilkan poligon |
 
+🔄 **Skema di atas adalah rencana — tabel yang benar-benar dijalankan di Supabase berbeda,
+ditemukan 6 September 2026.** Kolom aslinya: `tipe_3` (bukan `tipe` — nama ini keliru,
+kemungkinan besar sisa copy-paste dari `katalog_restoran`, di mana `tipe_3` memang berarti
+kategori restoran; di `stasiun` tidak ada artinya selain tipe layanan transportasi) dan
+`longitude`/`latitude` bertipe `double precision` (bukan kolom `geom` PostGIS sama sekali).
+
+**Keputusan 6 September 2026: tabel `stasiun` tidak diubah** (tidak di-`ALTER`/rename) —
+selisihnya ditutup **di TypeScript** (`lib/stations.ts`), **bukan** SQL view seperti tabel
+lain di dokumen ini. Sempat dibuat view `stasiun_geojson`, tapi dicabut hari yang sama karena
+kelebihan rekayasa: `properti_go`/`community_activity` butuh view karena ada spatial join
+(`ST_Within`) DAN kolom geometry PostGIS asli yang cuma bisa dikonversi ke GeoJSON lewat
+`ST_AsGeoJSON()` di database. `stasiun` tidak punya keduanya — tidak ada join, dan
+koordinatnya sudah dua kolom angka biasa (`longitude`, `latitude`). Menyusun
+`{ type: 'Point', coordinates: [lng, lat] }` dari dua angka itu tidak butuh SQL sama sekali,
+jadi `app/api/stations/route.ts` query tabel `stasiun` langsung, dan `lib/stations.ts` yang
+menyusun geometry-nya. Nama kolom `tipe_3` dipertahankan apa adanya di response (tidak
+dialiaskan jadi `tipe`) — keputusan 6 September 2026 untuk menghindari terjemahan nama yang
+tidak perlu; lihat `docs/lib-stations.md`.
+
 ### Kenapa tabel ini terpisah dari `scored_areas`
 
 Relasinya satu-ke-satu, dan itu biasanya tanda dua tabel yang seharusnya digabung. Di sini
@@ -318,13 +337,17 @@ Pengamatan lapangan dari API lomba. **Sumber langsung variabel D dan S.**
 
 | Kolom | Untuk apa |
 |---|---|
-| `obs_id` | Kunci utama |
+| `id` | Kunci utama |
 | `nama_tempat` | Identifikasi saat verifikasi |
 | `jenis_tempat` | Kaki Lima, Restoran, Warung, Fast Food, Kafe. Tidak dipakai perhitungan, tetapi menjelaskan sifat sampel |
-| `kondisi_tempat` | Sepi / Sedang / Ramai. **Masukan D** |
+| `kondisi_tempat` | Sepi / Sedang / Ramai (dijaga `CHECK` constraint di tabel). **Masukan D** |
 | `harga_bersih` | Harga setelah koreksi satuan. **Masukan S**. `NULL` bila gugur pembersihan |
 | `harga_asli` | Nilai mentah sebelum dibersihkan |
 | `geom` | Koordinat, untuk `ST_Within` ke poligon kawasan |
+
+🔄 **Kolom kunci utama bernama `id`, bukan `obs_id`** seperti tertulis sebelumnya di dokumen
+ini — dikonfirmasi dari skema live Supabase 6 September 2026. Tidak ada dampak ke kode API
+(`menu_go` tidak pernah di-query oleh `app/api/*`, cuma dipakai pipeline batch).
 
 ### Kenapa `harga_asli` disimpan juga
 
@@ -373,11 +396,22 @@ Sensus titik restoran. **Sumber tunggal variabel C.**
 | `tipe_3` | Salah satu dari 24 kategori. **Kunci perhitungan C** dan sumber daftar enum Zod |
 | `alamat`, `kecamatan`, `kabkot` | Konteks wilayah |
 | `status` | Seragam `BUKA` |
-| `tanggal_pengumpulan` | `Q4 2023` |
-| `geom` | Koordinat, untuk `ST_Within` ke poligon kawasan |
+| `longitude`, `latitude` | Koordinat mentah (`double precision`, `NOT NULL`) |
+| `geom` | Diturunkan dari `longitude`/`latitude` (`DEFAULT st_setsrid(st_makepoint(longitude, latitude), 4326)`), untuk `ST_Within` ke poligon kawasan |
 
 `tipe_3` diberi indeks B-tree tersendiri karena batch mengelompokkan restoran per kategori
 untuk membentuk `competitor_counts`.
+
+🔄 **Diperbaiki 6 September 2026, dari skema live Supabase:**
+- **Tidak ada kolom `tanggal_pengumpulan`** — baris di atas yang mengklaimnya sudah dihapus.
+  Klaim "Q4 2023" di bagian "Empat batasan" di bawah **tidak bisa diverifikasi lewat query ke
+  tabel ini** (tidak ada kolom tanggal sama sekali) — itu murni fakta tim yang harus
+  didokumentasikan di luar database, bukan sesuatu yang bisa dicek `select` kapan pun.
+- `geom` **bukan** generated/computed column yang auto-update — dia cuma `DEFAULT`
+  (dihitung sekali saat `INSERT` kalau `geom` tidak diisi eksplisit). Kalau `longitude`/
+  `latitude` sebuah baris diubah belakangan tanpa ikut mengubah `geom`, `geom`-nya jadi basi.
+  Tidak berdampak ke `app/api/*` (cuma baca, tidak pernah update baris ini), tapi relevan
+  untuk siapa pun yang mengelola pipeline batch/ETL tabel ini.
 
 ### Empat batasan yang wajib disebut di PRD
 

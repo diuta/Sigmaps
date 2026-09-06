@@ -560,7 +560,7 @@ Kontrak antarmuka utama:
 
 🔄 **Untuk MVP** (`context-mvp.md` 6.8, 6.8b; ground truth persis: `daftar-api-sigmaps.xlsx`
 dan `dokumentasi-erd-mvp.md`): kontrak di atas rencana produk penuh, bukan yang dipakai MVP.
-MVP punya **lima** endpoint — `GET /api/stations`, `POST /api/parse-intent`,
+MVP punya **lima** endpoint — `GET /api/stations`, `POST /api/prompt-request`,
 `POST /api/score`, `GET /api/properties`, `GET /api/community-sentiment` (`POST /api/insight`
 di luar MVP). `/api/score` MVP: `request { tipe_3, harga_target }` (bukan `weights`),
 `response` berisi `area_id, station_id, station_name, skor, komponen (demand,

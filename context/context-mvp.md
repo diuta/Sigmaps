@@ -404,7 +404,46 @@ create table stasiun (
   kabkot      text,
   geom        geometry(Point, 4326) not null
 );
+```
 
+🔄 **Skema `stasiun` yang benar-benar dijalankan di Supabase, ditemukan 6 September 2026,
+berbeda dari SQL di atas.** Kolom aslinya:
+
+```sql
+create table stasiun (
+  station_id  text primary key,
+  nama        text not null,
+  tipe_3      text,               -- BUKAN 'tipe' — nama ini keliru, kemungkinan besar
+                                   -- copy-paste dari katalog_restoran (di sana `tipe_3`
+                                   -- memang berarti kategori restoran, di sini cuma
+                                   -- kebetulan sama nama untuk arti yang beda: tipe layanan
+                                   -- transportasi)
+  alamat      text,
+  kecamatan   text,
+  kabkot      text,
+  longitude   double precision,   -- BUKAN kolom `geom`
+  latitude    double precision
+);
+```
+
+**Keputusan 6 September 2026: tabel TIDAK diubah** (tidak di-`ALTER`/rename), supaya tidak
+menyentuh data yang sudah ada tanpa perlu.
+
+🔄 **Diperbarui lagi 6 September 2026 (revisi kedua, hari yang sama):** selisih ini sempat
+ditutup lewat SQL view `stasiun_geojson`, tapi itu **kelebihan rekayasa** — dicabut. Beda dari
+`properti_go`/`community_activity` yang butuh view karena ada spatial join (`ST_Within`) DAN
+kolom geometry PostGIS asli (butuh `ST_AsGeoJSON` di database, tidak bisa di-parse di JS),
+tabel `stasiun` **tidak punya keduanya**: tidak ada join, dan koordinatnya sudah berupa dua
+kolom angka biasa (`longitude`, `latitude`). Menyusun `{ type: 'Point', coordinates: [lng,
+lat] }` dari dua angka itu tidak butuh SQL sama sekali. `app/api/stations/route.ts` sekarang
+query tabel `stasiun` langsung, dan `lib/stations.ts` yang menyusun GeoJSON-nya — semuanya di
+TypeScript. 🔄 **Revisi ketiga, hari yang sama:** nama kolom `tipe_3` juga dipertahankan apa
+adanya di response (sempat dialiaskan jadi `tipe`, tapi dicabut — itu perubahan yang tidak
+perlu, cuma menambah satu terjemahan nama lagi tanpa manfaat nyata). Lihat
+`docs/lib-stations.md` untuk kriteria lengkap kapan sesuatu butuh view vs cukup di kode
+aplikasi.
+
+```sql
 create table scored_areas (
   area_id            text primary key,
   station_id         text not null references stasiun(station_id),
@@ -504,12 +543,12 @@ dan skor tetap keluar terlihat wajar padahal salah (gagal diam-diam juga).
 ### 6.8b Endpoint lain, kode galat, dan pengaman — ringkasan (ground truth: `daftar-api-sigmaps.xlsx`)
 
 🔄 **Ditambahkan 4 September 2026.** Lima endpoint masuk MVP: `GET /api/stations`,
-`POST /api/parse-intent`, `POST /api/score`, `GET /api/properties`,
+`POST /api/prompt-request`, `POST /api/score`, `GET /api/properties`,
 `GET /api/community-sentiment`. `POST /api/insight` di luar MVP (titik AI #4). Tiga dari
-lima endpoint MVP memanggil AI: `parse-intent`, `community-sentiment`, dan (di luar MVP)
+lima endpoint MVP memanggil AI: `prompt-request`, `community-sentiment`, dan (di luar MVP)
 `insight` — `score`, `properties`, `stations` murni deterministik/baca data.
 
-Urutan pemanggilan satu sesi: `/api/stations` → `/api/parse-intent` → `/api/score` → klik
+Urutan pemanggilan satu sesi: `/api/stations` → `/api/prompt-request` → `/api/score` → klik
 stasiun → `/api/properties` + `/api/community-sentiment`.
 
 **Kode galat wajib** (daftar lengkap ada di xlsx, sheet Kode Galat — ringkasan yang paling
@@ -517,9 +556,9 @@ gampang salah dilewatkan):
 
 | Endpoint | Kondisi | Kode | Catatan |
 |---|---|---|---|
-| `/api/parse-intent` | Usaha non-kuliner | 400 | `'SEMUA'` bukan tempat pembuangan, tetap tolak |
-| `/api/parse-intent` | Zod gagal setelah retry AI SDK | 422 | — |
-| `/api/parse-intent` / `/api/community-sentiment` | Kuota Gemini habis | 503 | Kuota per project, bukan per key |
+| `/api/prompt-request` | Usaha non-kuliner | 400 | `'SEMUA'` bukan tempat pembuangan, tetap tolak |
+| `/api/prompt-request` | Zod gagal setelah retry AI SDK | 422 | — |
+| `/api/prompt-request` / `/api/community-sentiment` | Kuota Gemini habis | 503 | Kuota per project, bukan per key |
 | `/api/score` | `tipe_3` tak dikenali | 400 | Harus persis sama dengan isi `competitor_counts` |
 | `/api/score` | Tidak ada kawasan `is_rankable` | 200 + array kosong | **Bukan galat** — state kosong di frontend |
 | `/api/properties` | Kawasan tanpa properti | 200 + FeatureCollection kosong | Kondisi normal |
@@ -549,10 +588,43 @@ join scored_areas a on ST_Within(c.geom, a.geom)
 where a.station_id = $1;
 ```
 
+🔄 **Konflik dengan implementasi nyata, dicatat 5 September 2026** — keempat query "baku" di
+atas ditulis seolah bisa dieksekusi persis begitu (SQL mentah, parameter `$1`), tapi backend
+sebenarnya jalan lewat `supabase-js` yang bicara ke PostgREST, bukan koneksi Postgres
+langsung. Dua akibat konkret:
+
+1. **`/api/properties` dan `/api/community-sentiment` tidak bisa menjalankan `JOIN ...
+   WHERE a.station_id = $1` sebagai satu query parameterized** — PostgREST tidak expose
+   spatial join (`ST_Within` antar tabel) maupun parameter positional lewat query builder
+   biasa (`.from().select().eq()`). Diselesaikan dengan membungkus join itu sebagai **SQL
+   view** (`properti_go_by_station`, `community_activity_by_station` di
+   `supabase/views.sql`), lalu route.ts memfilter `station_id` di luar lewat
+   `.from(view).select().eq('station_id', id)` — hasil akhir sama, tapi secara teknis join
+   dihitung untuk semua baris dulu baru difilter, bukan `WHERE` di dalam satu query seperti
+   ditulis di atas.
+2. **Query `/api/stations` di atas mengasumsikan kolom `geom` bertipe PostGIS `geometry`**,
+   padahal (temuan terpisah 6 September 2026, lihat baris "Skema `stasiun`" di §6.7 atas)
+   tabel `stasiun` yang sebenarnya berjalan di Supabase tidak punya kolom `geom` sama sekali
+   — cuma `longitude`/`latitude` sebagai angka biasa. Karena tidak ada geometry PostGIS yang
+   perlu dikonversi dan tidak ada join, ini **tidak** butuh view — `app/api/stations/route.ts`
+   query tabel `stasiun` langsung, dan `lib/stations.ts` menyusun `{ type: 'Point',
+   coordinates: [longitude, latitude] }` di TypeScript.
+
+Dua view untuk poin 1 (`properti_go_by_station`, `community_activity_by_station`) plus satu
+view lagi untuk `TIPE_3_VALUES` (`tipe3_values`, lihat §6.8b di bawah) ada di
+`supabase/views.sql` — jalankan sekali di Supabase SQL Editor setelah keenam tabel MVP
+dibuat. Kode galat, urutan pemanggilan, dan kolom yang dikembalikan tetap sama persis seperti
+tabel di atas; yang berubah cuma jalur
+teknis mengeksekusi join & konversi geometry-nya.
+
 **Pengaman wajib lain** (selain hi===lo dan pencocokan `tipe_3` persis di 6.8):
 - `TIPE_3_VALUES` (enum Zod `IntentSchema`) **wajib dihasilkan dari query**
   (`select distinct tipe_3 from katalog_restoran order by tipe_3;`), bukan diketik manual —
-  mencegah enum kode dan isi tabel diam-diam berbeda.
+  mencegah enum kode dan isi tabel diam-diam berbeda. ✅ **Diimplementasikan 5 September
+  2026** lewat view `tipe3_values` (`supabase/views.sql`) + `lib/tipe3.ts` (`getTipe3Values()`,
+  cache in-memory 10 menit) — dipakai `buildIntentSchema`/`buildScoreRequestSchema`
+  (`lib/schemas/prompt-request.ts`, `lib/schemas/score.ts`) untuk membangun enum Zod dinamis
+  per request, bukan lagi daftar hardcode di kode.
 - Tidak ada endpoint yang menulis ke database — seluruh tulis hanya dari pipeline batch
   dengan service role key.
 - Jangan kirim `segment_match` bernilai `0` untuk kawasan yang belum dinilai — nol dibaca
