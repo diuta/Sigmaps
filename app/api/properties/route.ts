@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
-import { toPropertiesFeatureCollection, type PropertyRow } from '@/lib/properties'
+import { toPropertiesFeatureCollection, type PropertyRow } from '@/lib/property'
 
 export async function GET(request: Request) {
   const stationId = new URL(request.url).searchParams.get('station_id')

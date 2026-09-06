@@ -22,7 +22,7 @@ export const DUMMY_SENTIMENT: Record<string, CommunitySentimentResponse> = {
       "Beberapa laporan menyebut kurangnya pilihan warung makan terjangkau " +
       "di sekitar gedung perkantoran, yang menjadi peluang bagi pelaku usaha kuliner. " +
       "Tidak ada keluhan signifikan terkait keamanan atau kebersihan area.",
-    n_laporan: 18,
+    jumlah_laporan: 18,
   },
 
   st_manggarai: {
@@ -33,7 +33,7 @@ export const DUMMY_SENTIMENT: Record<string, CommunitySentimentResponse> = {
       "Terdapat beberapa laporan tentang kondisi trotoar yang perlu perbaikan, " +
       "namun kegiatan jual-beli di sekitar stasiun dinilai aktif. " +
       "Potensi usaha kuliner cepat saji atau minuman dinilai baik oleh warga.",
-    n_laporan: 24,
+    jumlah_laporan: 24,
   },
 
   st_sudirman: {
@@ -44,13 +44,13 @@ export const DUMMY_SENTIMENT: Record<string, CommunitySentimentResponse> = {
       "Persaingan usaha kuliner di area ini disebut cukup ketat oleh beberapa laporan, " +
       "terutama di jam makan siang. Namun volume pembeli yang besar " +
       "tetap memberikan ruang bagi pendatang baru yang menawarkan konsep berbeda.",
-    n_laporan: 31,
+    jumlah_laporan: 31,
   },
 
   // st_karet: is_rankable=false → sentiment tidak diminta. Tapi tetap sediakan fallback.
   st_karet: {
     ringkasan:
       "Data komunitas untuk kawasan Karet belum cukup untuk menghasilkan ringkasan yang representatif.",
-    n_laporan: 2,
+    jumlah_laporan: 2,
   },
 };

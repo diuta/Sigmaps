@@ -13,16 +13,7 @@
 //    Update saat dataset sensus restoran dikonfirmasi.
 // ---------------------------------------------------------------------------
 
-export const TIPE_3_VALUES = [
-  "KAFE DAN RESTO",
-  "CEPAT SAJI",
-  "WARUNG MAKAN",
-  "BAKERY DAN KUE",
-  "MINUMAN DAN DESSERT",
-  "KATERING",
-] as const;
-
-export type Tipe3 = (typeof TIPE_3_VALUES)[number] | "SEMUA";
+export type Tipe3 = string;
 
 // ---------------------------------------------------------------------------
 // /api/prompt-request
@@ -100,5 +91,5 @@ export interface CommunitySentimentResponse {
    */
   ringkasan: string;
   /** Jumlah laporan Activity yang jadi input ringkasan */
-  n_laporan: number;
+  jumlah_laporan: number;
 }
