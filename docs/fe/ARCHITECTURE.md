@@ -3,8 +3,14 @@
 Dokumen acuan teknis struktur direktori dan aturan kolaborasi untuk **Caca & Clement**
 selama proses *vibe coding* MVP SIGMAPS.
 
-> **Sumber kebenaran:** `docs/fe/context-mvp.md` (v2, 2 Sep 2026). Bila ada konflik
-> antara dokumen ini dan context-mvp, **context-mvp yang berlaku**.
+> **Sumber kebenaran:** `context/context-mvp.md` (v3, 3 Sep 2026 — pindah dari
+> `docs/fe/context-mvp.md` v2, sudah dihapus). Bila ada konflik antara dokumen ini dan
+> context-mvp, **context-mvp yang berlaku**.
+>
+> ⚠️ Dokumen ARCHITECTURE.md ini sendiri **belum disinkronkan ke v3** (masih menyebut
+> `/api/parse-intent`, dsb. — nama endpoint sudah berubah jadi `/api/prompt-request` per
+> v3 §2 Langkah 2). Untuk kontrak endpoint/skema yang akurat, rujuk `context/context-mvp.md`
+> langsung, bukan detail di bawah ini.
 
 > **Tujuan dokumen ini:** supaya dua orang tidak saling injak, AI yang membantu tidak
 > menebak-nebak "file ini milik siapa", dan setiap file punya rumah yang jelas.

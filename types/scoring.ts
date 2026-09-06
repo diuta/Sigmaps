@@ -1,6 +1,6 @@
 /**
  * types/scoring.ts
- * Shape output dari /api/score — cerminan context-mvp.md §6.8 persis.
+ * Shape output dari /api/score — cerminan context/context-mvp.md §6.8 persis.
  * Jangan ubah tanpa diskusi bersama.
  */
 
@@ -13,6 +13,12 @@ export type ScoreComponentKey = "demand" | "competitive_headroom" | "segment_mat
 export interface AreaScore {
   /** Match ke area_id di scored_areas & StationRanking */
   area_id: string;
+  /**
+   * Ditambahkan context-mvp.md §6.8 (4 Sep 2026) — dipakai frontend untuk
+   * memanggil /api/properties dan /api/community-sentiment saat kawasan diklik.
+   * Nilainya sama dengan area_id untuk MVP (relasi stasiun↔kawasan 1:1).
+   */
+  station_id: string;
   station_name: string;
   /** 0–100 = 100 × (0.25·D + 0.50·C + 0.25·S) */
   skor: number;

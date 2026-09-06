@@ -10,8 +10,9 @@ export const SUGGESTION_CHIPS: readonly string[] = [
 ];
 
 /**
- * 🟡 FASE DUMMY — hasil /api/parse-intent untuk brief contoh.
- * harga_sumber = 'perkiraan' supaya perilaku wajib di §11 ikut terlihat.
+ * 🟡 FASE DUMMY — hasil /api/prompt-request untuk brief contoh.
+ * harga_sumber = 'perkiraan' supaya perilaku wajib di context/context-mvp.md
+ * §2 Langkah 2 ("Yang wajib ditangani UI") ikut terlihat.
  */
 export const INTENT_OUTPUT: IntentOutput = {
   tipe_3: "KAFE DAN RESTO",

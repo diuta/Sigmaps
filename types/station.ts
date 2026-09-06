@@ -1,7 +1,7 @@
 /**
  * types/station.ts
  * Kontrak data stasiun — jangan ubah tanpa diskusi bersama.
- * Sumber: docs/fe/context-mvp.md §2 Langkah 1 & §6.8
+ * Sumber: context/context-mvp.md §2 Langkah 1 & §6.8
  */
 
 import type { Feature, FeatureCollection, Point } from "geojson";

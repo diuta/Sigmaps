@@ -25,6 +25,7 @@ export const DUMMY_SCORE_RESPONSE: ScoreResponse = {
     {
       // rank 1
       area_id: "st_bni_city",
+      station_id: "st_bni_city",
       station_name: "BNI City",
       skor: 74.8,
       komponen: {
@@ -40,6 +41,7 @@ export const DUMMY_SCORE_RESPONSE: ScoreResponse = {
     {
       // rank 2
       area_id: "st_manggarai",
+      station_id: "st_manggarai",
       station_name: "Manggarai",
       skor: 70.3,
       komponen: {
@@ -55,6 +57,7 @@ export const DUMMY_SCORE_RESPONSE: ScoreResponse = {
     {
       // rank 3
       area_id: "st_sudirman",
+      station_id: "st_sudirman",
       station_name: "Sudirman",
       skor: 56.3,
       komponen: {
@@ -70,6 +73,7 @@ export const DUMMY_SCORE_RESPONSE: ScoreResponse = {
     {
       // not ranked — is_rankable=false, muncul di peta saja
       area_id: "st_karet",
+      station_id: "st_karet",
       station_name: "Karet",
       skor: 48.0,
       komponen: {

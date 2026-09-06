@@ -1,7 +1,7 @@
 /**
  * types/property.ts
  * Shape data properti dari /api/properties (tabel properti_go Supabase).
- * Sumber: docs/fe/context-mvp.md §2 Langkah 4
+ * Sumber: context/context-mvp.md §2 Langkah 4
  */
 
 export interface PropertyUnit {

@@ -1,7 +1,7 @@
 /**
  * types/api.ts
  * Kontrak request/response semua API route — cerminan Zod schema di server.
- * Sumber: docs/fe/context-mvp.md §6.6
+ * Sumber: context/context-mvp.md §6.6
  *
  * ⚠️ NAMA LAMA DILARANG: kategori_usaha, target_jam, segmen, skala, weights
  * Semua sudah dicabut di context-mvp §8.
@@ -25,15 +25,19 @@ export const TIPE_3_VALUES = [
 export type Tipe3 = (typeof TIPE_3_VALUES)[number] | "SEMUA";
 
 // ---------------------------------------------------------------------------
-// /api/parse-intent
+// /api/prompt-request
+// ⚠️ Nama endpoint & field body diperbarui menyusul implementasi nyata (lihat
+// context/context-mvp.md §2 Langkah 2 & lib/schemas/prompt-request.ts di jalur backend):
+// endpoint-nya /api/prompt-request (bukan /api/parse-intent), body-nya { prompt }
+// (bukan { teks }).
 // ---------------------------------------------------------------------------
 
-export interface ParseIntentRequest {
-  teks: string; // Business Brief mentah dari user input
+export interface PromptRequestBody {
+  prompt: string; // Business Brief mentah dari user input
 }
 
 /**
- * Output dari /api/parse-intent — cerminan IntentSchema Zod di server.
+ * Output dari /api/prompt-request — cerminan IntentSchema Zod di server.
  * Semua field SELALU terisi (tidak ada null) supaya alur one-shot terjaga.
  */
 export interface IntentOutput {

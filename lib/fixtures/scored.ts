@@ -1,7 +1,7 @@
 import { observedRange } from "@/lib/score-explanations";
 import type { AreaScore, ScoreResponse } from "@/types/scoring";
 
-/** 🟡 FASE DUMMY — bobot tunggal, ditetapkan di server (context-mvp.md §6.5). */
+/** 🟡 FASE DUMMY — bobot tunggal, ditetapkan di server (context/context-mvp.md §6.5). */
 const BOBOT = { wD: 0.25, wC: 0.5, wS: 0.25 } as const;
 
 /** 🟡 FASE DUMMY — hasil /api/score untuk brief "kedai kopi, sekitar Rp25.000". */
@@ -10,6 +10,7 @@ export const SCORE_RESPONSE: ScoreResponse = {
   areas: [
     {
       area_id: "st_tanah_abang",
+      station_id: "st_tanah_abang",
       station_name: "Tanah Abang",
       skor: 78.3,
       komponen: { demand: 0.54, competitive_headroom: 0.92, segment_match: 0.75 },
@@ -20,6 +21,7 @@ export const SCORE_RESPONSE: ScoreResponse = {
     },
     {
       area_id: "st_juanda",
+      station_id: "st_juanda",
       station_name: "Juanda",
       skor: 71.6,
       komponen: { demand: 0.49, competitive_headroom: 0.83, segment_match: 0.68 },
@@ -30,6 +32,7 @@ export const SCORE_RESPONSE: ScoreResponse = {
     },
     {
       area_id: "st_sawah_besar",
+      station_id: "st_sawah_besar",
       station_name: "Sawah Besar",
       skor: 64.2,
       komponen: { demand: 0.47, competitive_headroom: 0.71, segment_match: 0.58 },
@@ -40,6 +43,7 @@ export const SCORE_RESPONSE: ScoreResponse = {
     },
     {
       area_id: "st_sudirman",
+      station_id: "st_sudirman",
       station_name: "Sudirman",
       skor: 55.9,
       komponen: { demand: 0.52, competitive_headroom: 0.48, segment_match: 0.66 },
@@ -50,6 +54,7 @@ export const SCORE_RESPONSE: ScoreResponse = {
     },
     {
       area_id: "st_manggarai",
+      station_id: "st_manggarai",
       station_name: "Manggarai",
       skor: 41.4,
       komponen: { demand: 0.45, competitive_headroom: 0.31, segment_match: 0.52 },
@@ -60,6 +65,7 @@ export const SCORE_RESPONSE: ScoreResponse = {
     },
     {
       area_id: "st_karet",
+      station_id: "st_karet",
       station_name: "Karet",
       skor: 0,
       komponen: { demand: 0, competitive_headroom: 0, segment_match: 0 },
@@ -70,6 +76,7 @@ export const SCORE_RESPONSE: ScoreResponse = {
     },
     {
       area_id: "st_cikini",
+      station_id: "st_cikini",
       station_name: "Cikini",
       skor: 0,
       komponen: { demand: 0, competitive_headroom: 0, segment_match: 0 },
