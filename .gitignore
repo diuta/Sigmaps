@@ -30,7 +30,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files — SEMUA .env* diabaikan KECUALI .env.example (itu sengaja wajib di-commit,
+# lihat CLAUDE.md bagian "Environment variable & secret")
 .env*
 !.env.example
 
@@ -40,5 +41,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-CLAUDE.md
