@@ -33,9 +33,26 @@ DASAR = "https://server.mapid.io/web/competition"
 SUMBER = {
     "menugo": "menugo.geojson",
     "propertigo": "propertigo.geojson",
+    "activities": "activities.geojson",
 }
 
-BATAS_HALAMAN = 100   
+# WAJIB dikirim, jangan dihapus.
+#
+# Endpoint /activities diam-diam membatasi ke jendela waktu terbaru bila
+# start_date/end_date tidak diberikan — dan meta.total ikut memantulkan batas
+# itu, sehingga angkanya TERLIHAT seperti jumlah sebenarnya. Terukur 7 September
+# 2026 pada kotak DKI yang sama:
+#     tanpa filter tanggal ....    60
+#     Agustus 2026 saja ....... 1.298
+#     2015-2030 ............... 1.542
+# Tanpa rentang ini, 96% laporan hilang tanpa satu pun pesan galat.
+#
+# /menugo dan /propertigo TIDAK terpengaruh — keduanya memakai paginasi
+# sungguhan (hasMore/limit/offset) dan total-nya tetap 176 dan 191 dengan atau
+# tanpa filter. Rentang ini tetap dikirim ke semuanya karena tidak merugikan.
+RENTANG_TANGGAL = {"start_date": "2015-01-01", "end_date": "2030-12-31"}
+
+BATAS_HALAMAN = 100
 
 def tarik(nama: str, kunci: str) -> dict:
     url = f"{DASAR}/{nama}"
@@ -51,8 +68,9 @@ def tarik(nama: str, kunci: str) -> dict:
 
         r = requests.post(url, headers=headers,
                           json={"feature": {"type": "Polygon", "coordinates": KOTAK_DKI},
-                                "offset": offset},
-                          timeout=60)
+                                "offset": offset,
+                                **RENTANG_TANGGAL},
+                          timeout=120)
         if r.status_code == 401 or r.status_code == 403:
             sys.exit(f"{nama}: ditolak ({r.status_code}). Periksa MAPID_API_KEY.")
         if r.status_code != 200:
