@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
-import { toStationsFeatureCollection, type StationRow } from '@/lib/stations'
+import { toStationsFeatureCollection, type StationRow } from '@/lib/station'
 
 export async function GET() {
   // Tabel langsung, BUKAN view — beda dari /api/properties dan /api/community-sentiment.
