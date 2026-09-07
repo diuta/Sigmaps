@@ -8,7 +8,6 @@ import DevToolsOverlay from "@/components/map/dev/DevToolsOverlay";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { SelectedStationProvider } from "@/hooks/station/useSelectedStation";
 import { IsochroneConfigProvider } from "@/hooks/isochrone/useIsochroneConfig";
-import { PropertyPopupConfigProvider } from "@/hooks/property/usePropertyPopupConfig";
 import { BriefResultProvider } from "@/hooks/brief/useBriefResult";
 import { SelectedPropertyProvider } from "@/hooks/property/useSelectedProperty";
 
@@ -21,27 +20,25 @@ export default function Home() {
           di atas keduanya, bukan di dalam Sidebar saja. */}
       <BriefResultProvider>
         <IsochroneConfigProvider>
-          <PropertyPopupConfigProvider>
-            <main className="flex h-screen w-screen overflow-hidden bg-slate-900">
-              <Sidebar />
+          <main className="flex h-screen w-screen overflow-hidden bg-slate-900">
+            <Sidebar />
 
-              <div className="relative flex-1 overflow-hidden">
-                <BaseMap>
-                  {/* 1. Poligon Isokron 10 Menit (muncul saat stasiun aktif) */}
-                  <IsochroneLayer />
+            <div className="relative flex-1 overflow-hidden">
+              <BaseMap>
+                {/* 1. Poligon Isokron 10 Menit (muncul saat stasiun aktif) */}
+                <IsochroneLayer />
 
-                  {/* 2. Titik-titik properti dalam isokron stasiun aktif */}
-                  <PropertyLayer />
+                {/* 2. Titik-titik properti dalam isokron stasiun aktif */}
+                <PropertyLayer />
 
-                  {/* 3. Layer stasiun KRL dengan 3 state interaktif (Idle, Hover, Active) */}
-                  <StationLayer />
-                </BaseMap>
+                {/* 3. Layer stasiun KRL dengan 3 state interaktif (Idle, Hover, Active) */}
+                <StationLayer />
+              </BaseMap>
 
-                {/* 🟡 UNIFIED DEV TOOLS OVERLAY (Tunggal di bottom-center, mudah dihapus) */}
-                <DevToolsOverlay />
-              </div>
-            </main>
-          </PropertyPopupConfigProvider>
+              {/* 🟡 DEV TOOLS OVERLAY (Simulasi & visualisasi Isochrone) */}
+              <DevToolsOverlay />
+            </div>
+          </main>
         </IsochroneConfigProvider>
       </BriefResultProvider>
       </SelectedPropertyProvider>
