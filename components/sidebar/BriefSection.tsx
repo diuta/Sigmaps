@@ -12,6 +12,7 @@ interface Props {
   editing: boolean;
   onEdit: () => void;
   onSubmit: () => void;
+  loading: boolean;
 }
 
 /**
@@ -25,6 +26,7 @@ export default function BriefSection({
   editing,
   onEdit,
   onSubmit,
+  loading,
 }: Props) {
   if (submitted !== null && !editing) {
     return <SubmittedBrief value={submitted} onEdit={onEdit} />;
@@ -35,7 +37,8 @@ export default function BriefSection({
       value={draft}
       onChange={onDraftChange}
       onSubmit={onSubmit}
-      submitLabel={submitted === null ? "Nilai kawasan" : "Nilai ulang kawasan"}
+      submitLabel={loading ? "Menilai..." : submitted === null ? "Nilai kawasan" : "Nilai ulang kawasan"}
+      disabled={loading}
     />
   );
 }

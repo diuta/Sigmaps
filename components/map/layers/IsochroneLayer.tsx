@@ -16,9 +16,9 @@
  */
 
 import { useEffect } from "react";
-import { useMapInstance } from "@/hooks/useMapInstance";
-import { useSelectedStation } from "@/hooks/useSelectedStation";
-import { useIsochroneConfig } from "@/hooks/useIsochroneConfig";
+import { useMapInstance } from "@/hooks/map/useMapInstance";
+import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { useIsochroneConfig } from "@/hooks/isochrone/useIsochroneConfig";
 import { generateIsochroneGeoJSON } from "@/lib/map/isochrone-generator";
 import type { FeatureCollection, Polygon } from "geojson";
 

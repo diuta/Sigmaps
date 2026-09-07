@@ -9,56 +9,88 @@
  * - State B: Hover (scale 1.08, translateY -4px, glow halus, label stasiun)
  * - State C: Active (scale 1.22, translateY -8px, multi-layer shadow + pulsing radar ring)
  *
- * Mendukung status `is_rankable = false` dengan marker abu-abu (marker-station-inactive.svg)
- * dan label "Data belum cukup".
+ * Data stasiun (lokasi) datang dari /api/stations (useStations) — SEMUA stasiun, termasuk
+ * yang belum berskor. Data skor datang dari /api/score (useBriefResult), yang HANYA berisi
+ * kawasan is_rankable=true (lihat docs/api-score.md) — jadi digabung di sini, bukan salah
+ * satu dianggap superset dari yang lain:
+ *
+ *   - Belum ada brief disubmit  -> pin polos, tanpa badge rank, tanpa label "data belum cukup"
+ *   - Brief disubmit & muncul di scoreResult.areas -> pin aktif, badge #rank + skor
+ *   - Brief disubmit & TIDAK muncul di scoreResult.areas -> "data belum cukup" (bukan galat,
+ *     lihat docs/api-stations.md: frontend yang menyimpulkan ini, bukan backend)
  */
 
 import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
-import { useMapInstance } from "@/hooks/useMapInstance";
-import { useSelectedStation } from "@/hooks/useSelectedStation";
-import type { StationRanking } from "@/types/station";
+import { useMapInstance } from "@/hooks/map/useMapInstance";
+import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { useStations } from "@/hooks/station/useStations";
+import { useBriefResult } from "@/hooks/brief/useBriefResult";
 
-// 🟡 FASE DUMMY: swap ke props/fetch saat API real Supabase siap
-import { DUMMY_STATIONS } from "@/lib/dummy/stations";
+interface StationMarkerData {
+  station_id: string;
+  station_name: string;
+  lng: number;
+  lat: number;
+  rank: number | null;
+  /** true hanya kalau brief sudah disubmit DAN kawasan ini tidak dinilai. */
+  dataBelumCukup: boolean;
+}
 
 export default function StationLayer() {
   const { map } = useMapInstance();
   const { selectedStation, setSelectedStation } = useSelectedStation();
+  const { stations } = useStations();
+  const { scoreResult } = useBriefResult();
   const markersRef = useRef<Map<string, { marker: maplibregl.Marker; el: HTMLDivElement }>>(
     new Map()
   );
 
-  // 1. Mount dan render markers satu kali ke peta
+  const stationMarkers: StationMarkerData[] = (stations?.features ?? [])
+    .filter((feature) => feature.geometry !== null)
+    .map((feature) => {
+      const areaIndex = scoreResult?.areas.findIndex(
+        (area) => area.station_id === feature.properties.station_id
+      );
+      const found = areaIndex !== undefined && areaIndex >= 0;
+
+      return {
+        station_id: feature.properties.station_id,
+        station_name: feature.properties.nama,
+        lng: feature.geometry!.coordinates[0],
+        lat: feature.geometry!.coordinates[1],
+        rank: found ? areaIndex! + 1 : null,
+        dataBelumCukup: scoreResult !== null && !found,
+      };
+    });
+
+  // 1. Render markers setiap kali daftar stasiun/skor berubah
   useEffect(() => {
     if (!map) return;
 
-    // Bersihkan marker lama jika ada
     markersRef.current.forEach(({ marker }) => marker.remove());
     markersRef.current.clear();
 
-    DUMMY_STATIONS.forEach((station: StationRanking) => {
+    stationMarkers.forEach((station) => {
       const el = document.createElement("div");
       el.className = "station-marker-container state-idle";
-      el.setAttribute("data-area-id", station.area_id);
+      el.setAttribute("data-area-id", station.station_id);
 
-      // Tentukan icon SVG berdasarkan is_rankable
-      const svgSrc = station.is_rankable
-        ? "/assets/map/marker-station-active.svg"
-        : "/assets/map/marker-station-inactive.svg";
+      const svgSrc = station.dataBelumCukup
+        ? "/assets/map/marker-station-inactive.svg"
+        : "/assets/map/marker-station-active.svg";
 
-      if (!station.is_rankable) {
+      if (station.dataBelumCukup) {
         el.classList.add("is-inactive");
       }
 
       el.innerHTML = `
         <div class="marker-active-pulse-container"></div>
         <div class="relative flex flex-col items-center select-none pointer-events-auto">
-          <!-- Floating Name & Rank Header Pill (Bersih di atas pin, tidak menutupi icon kereta) -->
           <div class="station-label mb-1.5 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-tight whitespace-nowrap shadow-xl backdrop-blur-md transition-all duration-200 ${
-            station.is_rankable
-              ? "bg-slate-900/90 text-white border border-slate-700/70"
-              : "bg-slate-800/85 text-slate-300 border border-slate-600/40 text-[10px]"
+            station.dataBelumCukup
+              ? "bg-slate-800/85 text-slate-300 border border-slate-600/40 text-[10px]"
+              : "bg-slate-900/90 text-white border border-slate-700/70"
           }">
             ${
               station.rank !== null
@@ -68,43 +100,45 @@ export default function StationLayer() {
                 : ""
             }
             <span>${station.station_name}</span>
-            ${!station.is_rankable ? ' <span class="text-[9px] text-amber-300 font-normal">· Data belum cukup</span>' : ""}
+            ${station.dataBelumCukup ? ' <span class="text-[9px] text-amber-300 font-normal">· Data belum cukup</span>' : ""}
           </div>
 
-          <!-- Marker Pin Wrapper (Icon kereta bebas & bersih tanpa tertimpa) -->
           <div class="relative flex items-center justify-center">
-            <img 
-              src="${svgSrc}" 
-              alt="${station.station_name}" 
-              class="w-[54px] h-[60px] object-contain drop-shadow-md transition-transform duration-200" 
+            <img
+              src="${svgSrc}"
+              alt="${station.station_name}"
+              class="w-[54px] h-[60px] object-contain drop-shadow-md transition-transform duration-200"
               draggable="false"
             />
           </div>
         </div>
       `;
 
-      // Hover Interaction (State B)
       el.addEventListener("mouseenter", () => {
-        if (selectedStation?.area_id !== station.area_id) {
+        if (selectedStation?.area_id !== station.station_id) {
           el.classList.remove("state-idle");
           el.classList.add("state-hover");
         }
       });
 
       el.addEventListener("mouseleave", () => {
-        if (selectedStation?.area_id !== station.area_id) {
+        if (selectedStation?.area_id !== station.station_id) {
           el.classList.remove("state-hover");
           el.classList.add("state-idle");
         }
       });
 
-      // Click Interaction -> Set Selected Station (State C)
       el.addEventListener("click", (e) => {
         e.stopPropagation();
-        setSelectedStation(station);
+        setSelectedStation({
+          area_id: station.station_id,
+          station_name: station.station_name,
+          lng: station.lng,
+          lat: station.lat,
+          is_rankable: !station.dataBelumCukup,
+        });
       });
 
-      // Pasang ke MapLibre
       const marker = new maplibregl.Marker({
         element: el,
         anchor: "bottom",
@@ -112,30 +146,30 @@ export default function StationLayer() {
         .setLngLat([station.lng, station.lat])
         .addTo(map);
 
-      markersRef.current.set(station.area_id, { marker, el });
+      markersRef.current.set(station.station_id, { marker, el });
     });
 
+    const markersAtMount = markersRef.current;
     return () => {
-      markersRef.current.forEach(({ marker }) => marker.remove());
-      markersRef.current.clear();
+      markersAtMount.forEach(({ marker }) => marker.remove());
+      markersAtMount.clear();
     };
-  }, [map]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, stations, scoreResult]);
 
   // 2. React to selectedStation changes (Update visual State A / State C)
   useEffect(() => {
-    markersRef.current.forEach(({ el }, areaId) => {
-      const isSelected = selectedStation?.area_id === areaId;
+    markersRef.current.forEach(({ el }, stationId) => {
+      const isSelected = selectedStation?.area_id === stationId;
       const pulseContainer = el.querySelector(".marker-active-pulse-container");
 
       if (isSelected) {
-        // State C: Active
         el.classList.remove("state-idle", "state-hover");
         el.classList.add("state-active");
         if (pulseContainer && !pulseContainer.querySelector(".marker-active-pulse")) {
           pulseContainer.innerHTML = '<div class="marker-active-pulse"></div>';
         }
       } else {
-        // State A: Idle
         el.classList.remove("state-active", "state-hover");
         el.classList.add("state-idle");
         if (pulseContainer) {

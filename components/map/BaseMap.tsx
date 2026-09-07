@@ -16,8 +16,8 @@
 import React, { useEffect, useRef, useState, ReactNode } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { MapInstanceProvider } from "@/hooks/useMapInstance";
-import { useSelectedStation } from "@/hooks/useSelectedStation";
+import { MapInstanceProvider } from "@/hooks/map/useMapInstance";
+import { useSelectedStation } from "@/hooks/station/useSelectedStation";
 import { basemapStyleUrl, DEFAULT_BASEMAP_ID } from "@/lib/fixtures/layers";
 
 interface BaseMapProps {
@@ -26,16 +26,32 @@ interface BaseMapProps {
 
 export default function BaseMap({ children }: BaseMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<maplibregl.Map | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
+  // Instance map disimpan di state (bukan hanya ref) supaya bisa dipakai langsung
+  // saat render (mis. dioper ke MapInstanceProvider) tanpa membaca ref.current di
+  // render — membaca ref value saat render tidak dijamin React, beda dari state.
+  const [map, setMap] = useState<maplibregl.Map | null>(null);
 
   const { selectedStation } = useSelectedStation();
 
-  // 1. Inisialisasi MapLibre GL
+  // 1. Inisialisasi MapLibre GL + jaga canvas tetap sama besar dengan kontainernya.
+  //
+  // Insiden nyata (ditemukan lewat pengecekan di browser, bukan cuma baca kode):
+  // saat efek ini jalan, mapContainerRef.current masih berukuran 0x0 — flex layout
+  // (`h-screen`/`w-full h-full`) belum "commit" ke ukuran final pas render pertama.
+  // MapLibre yang dikonstruksi dari kontainer 0x0 TIDAK PERNAH memicu event 'load'
+  // sama sekali, jadi resize yang cuma digantung di `.on('load', ...)` tidak pernah
+  // jalan — canvas terkunci selamanya di ukuran fallback-nya (400x300), sementara
+  // marker (StationLayer, dll) dihitung dari ukuran kontainer sungguhan yang jauh
+  // lebih besar → marker "melayang" di luar area peta yang benar-benar tergambar.
+  //
+  // Perbaikan: ResizeObserver dipasang ke instance MENTAH begitu dibuat, TIDAK
+  // digantung ke state `map` atau event 'load' — begitu kontainer dapat ukuran
+  // sungguhannya (biasanya langsung di frame berikutnya), observer memanggil
+  // `.resize()` dan itu yang akhirnya membuat MapLibre benar-benar merender & 'load'.
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    const map = new maplibregl.Map({
+    const mapInstance = new maplibregl.Map({
       container: mapContainerRef.current,
       style: basemapStyleUrl(DEFAULT_BASEMAP_ID),
       center: [106.8271129, -6.1754398], // Jakarta default center
@@ -44,22 +60,23 @@ export default function BaseMap({ children }: BaseMapProps) {
       bearing: 0,
     });
 
-    map.on("load", () => {
-      mapInstanceRef.current = map;
-      setMapLoaded(true);
+    const resizeObserver = new ResizeObserver(() => mapInstance.resize());
+    resizeObserver.observe(mapContainerRef.current);
+
+    mapInstance.on("load", () => {
+      setMap(mapInstance);
     });
 
     return () => {
-      map.remove();
-      mapInstanceRef.current = null;
-      setMapLoaded(false);
+      resizeObserver.disconnect();
+      mapInstance.remove();
+      setMap(null);
     };
   }, []);
 
   // 2. Unidirectional Reaction: Fly to selectedStation
   // Berjalan saat stasiun berubah (Top 1-5 maupun stasiun non-rank/bebas)
   useEffect(() => {
-    const map = mapInstanceRef.current;
     if (!map || !selectedStation) return;
 
     map.flyTo({
@@ -69,16 +86,12 @@ export default function BaseMap({ children }: BaseMapProps) {
       curve: 1.4,
       essential: true, // Hormati user preference tapi prioritaskan kelancaran animasi navigasi
     });
-  }, [selectedStation]);
+  }, [map, selectedStation]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
       <div ref={mapContainerRef} className="w-full h-full" />
-      {mapLoaded && (
-        <MapInstanceProvider map={mapInstanceRef.current}>
-          {children}
-        </MapInstanceProvider>
-      )}
+      {map && <MapInstanceProvider map={map}>{children}</MapInstanceProvider>}
     </div>
   );
 }

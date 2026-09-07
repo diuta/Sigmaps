@@ -1,12 +1,19 @@
-import type { AreaScore } from "@/types/scoring";
-
-interface Props {
-  areas: readonly AreaScore[];
+interface UnrankableStation {
+  station_id: string;
+  station_name: string;
 }
 
-/** Kawasan tanpa data cukup: tidak diberi skor dan tidak diberi nomor peringkat. */
-export default function UnrankableNotice({ areas }: Props) {
-  if (areas.length === 0) return null;
+interface Props {
+  stations: readonly UnrankableStation[];
+}
+
+/**
+ * Kawasan tanpa data cukup: tidak diberi skor dan tidak diberi nomor peringkat.
+ * /api/score tidak pernah mengirim kawasan is_rankable=false (lihat docs/api-score.md),
+ * jadi tidak ada n_observations untuk ditampilkan di sini — hanya nama stasiunnya.
+ */
+export default function UnrankableNotice({ stations }: Props) {
+  if (stations.length === 0) return null;
 
   return (
     <section className="flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-[var(--space-md)]">
@@ -16,9 +23,9 @@ export default function UnrankableNotice({ areas }: Props) {
         terlalu sedikit.
       </p>
       <ul className="flex flex-col gap-[var(--space-xs)]">
-        {areas.map((area) => (
-          <li key={area.area_id} className="t-body text-[var(--color-warning-tx)]">
-            {area.station_name} — {area.n_observations} pengamatan
+        {stations.map((station) => (
+          <li key={station.station_id} className="t-body text-[var(--color-warning-tx)]">
+            {station.station_name}
           </li>
         ))}
       </ul>

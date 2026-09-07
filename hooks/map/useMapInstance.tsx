@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * hooks/useMapInstance.tsx
+ * hooks/map/useMapInstance.tsx
  * Context internal untuk zona Map (ZONA CACA)
  *
  * Sesuai ARCHITECTURE.md §4.2:
@@ -11,11 +11,7 @@
  */
 
 import React, { createContext, useContext, ReactNode } from "react";
-import type maplibregl from "maplibre-gl";
-
-interface MapInstanceContextValue {
-  map: maplibregl.Map | null;
-}
+import type { MapInstanceContextValue } from "./useMapInstance.types";
 
 const MapInstanceContext = createContext<MapInstanceContextValue>({
   map: null,
@@ -25,7 +21,7 @@ export function MapInstanceProvider({
   map,
   children,
 }: {
-  map: maplibregl.Map | null;
+  map: MapInstanceContextValue["map"];
   children: ReactNode;
 }) {
   return (

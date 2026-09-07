@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * hooks/useSelectedStation.tsx
+ * hooks/station/useSelectedStation.tsx
  * Jembatan Komunikasi Utama Map <-> Sidebar
  *
  * Sesuai ARCHITECTURE.md §4.1:
@@ -14,11 +14,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import type { StationLocation } from "@/types/station";
-
-interface SelectedStationContextValue {
-  selectedStation: StationLocation | null;
-  setSelectedStation: (station: StationLocation | null) => void;
-}
+import type { SelectedStationContextValue } from "./useSelectedStation.types";
 
 const SelectedStationContext = createContext<SelectedStationContextValue | undefined>(
   undefined

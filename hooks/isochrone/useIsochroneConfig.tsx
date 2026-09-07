@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * hooks/useIsochroneConfig.tsx
+ * hooks/isochrone/useIsochroneConfig.tsx
  * 🟡 DEV / EXPERIMENTAL ONLY — Pengaturan Parameter Isokron
  *
  * Dipakai oleh IsochroneDevTool dan dibaca oleh IsochroneLayer.
@@ -9,21 +9,14 @@
  */
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import type { IsochroneOptions } from "@/lib/map/isochrone-generator";
-
-interface IsochroneConfigContextValue {
-  options: IsochroneOptions;
-  setOptions: React.Dispatch<React.SetStateAction<IsochroneOptions>>;
-  calculatedAreaKm2: number;
-  setCalculatedAreaKm2: (area: number) => void;
-}
+import type { IsochroneConfigContextValue } from "./useIsochroneConfig.types";
 
 const IsochroneConfigContext = createContext<IsochroneConfigContextValue | undefined>(
   undefined
 );
 
 export function IsochroneConfigProvider({ children }: { children: ReactNode }) {
-  const [options, setOptions] = useState<IsochroneOptions>({
+  const [options, setOptions] = useState<IsochroneConfigContextValue["options"]>({
     mode: "organic",
     radiusMeter: 800, // Default 10 Menit (~800m)
   });

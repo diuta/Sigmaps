@@ -1,25 +1,14 @@
 /**
- * types/station.ts
+ * types/station/index.ts
  * Kontrak data stasiun — jangan ubah tanpa diskusi bersama.
  * Sumber: context/context-mvp.md §2 Langkah 1 & §6.8
+ *
+ * Catatan bersih-bersih: tipe raw GeoJSON dari public/geojson/krl.geojson (StationFeature,
+ * StationGeoJSONProperties, StationFeatureCollection versi lama) sudah dihapus dari sini —
+ * tidak ada satupun konsumen nyata yang mengimpornya (dicek via grep sebelum dihapus), dan
+ * namanya bentrok dengan StationFeatureCollection versi asli /api/stations di lib/station.
+ * Bentuk GeoJSON yang sebenarnya dipakai sekarang ada di lib/station/index.ts.
  */
-
-import type { Feature, FeatureCollection, Point } from "geojson";
-
-// ---------------------------------------------------------------------------
-// Raw GeoJSON (dari public/geojson/krl.geojson)
-// ---------------------------------------------------------------------------
-
-export interface StationGeoJSONProperties {
-  /** Nama stasiun lowercase-kebab, e.g. "manggarai" */
-  name: string;
-}
-
-export type StationFeature = Feature<Point, StationGeoJSONProperties>;
-export type StationFeatureCollection = FeatureCollection<
-  Point,
-  StationGeoJSONProperties
->;
 
 // ---------------------------------------------------------------------------
 // Enriched station — lokasi + skor dari /api/score

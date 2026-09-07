@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * hooks/usePropertyPopupConfig.tsx
+ * hooks/property/usePropertyPopupConfig.tsx
  * 🟡 DEV / EXPERIMENTAL ONLY — State Controller untuk Eksplorasi Desain Property Popup
  *
  * Mendukung opsi style:
@@ -11,15 +11,7 @@
  */
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-
-export type PropertyPopupStyle = "sleek" | "slender-detail" | "vertical-card";
-
-interface PropertyPopupConfigContextValue {
-  popupStyle: PropertyPopupStyle;
-  setPopupStyle: (style: PropertyPopupStyle) => void;
-  themeMode: "light" | "dark";
-  setThemeMode: (theme: "light" | "dark") => void;
-}
+import type { PropertyPopupStyle, PropertyPopupConfigContextValue } from "./usePropertyPopupConfig.types";
 
 const PropertyPopupConfigContext = createContext<
   PropertyPopupConfigContextValue | undefined

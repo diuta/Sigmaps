@@ -7,9 +7,10 @@ interface Props {
   onChange: (value: string) => void;
   onSubmit: () => void;
   submitLabel: string;
+  disabled: boolean;
 }
 
-export default function BusinessBriefInput({ value, onChange, onSubmit, submitLabel }: Props) {
+export default function BusinessBriefInput({ value, onChange, onSubmit, submitLabel, disabled }: Props) {
   const kosong = value.trim().length === 0;
 
   return (
@@ -50,7 +51,7 @@ export default function BusinessBriefInput({ value, onChange, onSubmit, submitLa
       <button
         type="button"
         onClick={onSubmit}
-        disabled={kosong}
+        disabled={kosong || disabled}
         className="t-button w-full rounded-[var(--radius-card)] bg-[var(--color-text)] py-[10px] text-[var(--color-surface)] transition-all duration-[var(--motion-fast)] hover:bg-[var(--color-brand)] active:translate-y-[1px] disabled:cursor-not-allowed disabled:bg-[var(--color-muted)]"
       >
         {submitLabel}

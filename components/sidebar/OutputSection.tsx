@@ -4,9 +4,8 @@ import PriceAssumptionNotice from "@/components/sidebar/PriceAssumptionNotice";
 import ScoredPanel from "@/components/sidebar/ScoredPanel";
 import StaleOutputNotice from "@/components/sidebar/StaleOutputNotice";
 import StationNoBriefPanel from "@/components/sidebar/StationNoBriefPanel";
-import { useSelectedStation } from "@/hooks/useSelectedStation";
-import { INTENT_OUTPUT } from "@/lib/fixtures/brief";
-import { SCORE_RESPONSE } from "@/lib/fixtures/scored";
+import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { useBriefResult } from "@/hooks/brief/useBriefResult";
 
 interface Props {
   /** Ada brief yang sudah dinilai. */
@@ -14,20 +13,20 @@ interface Props {
   /** Rencana sedang disunting, jadi hasil di bawah belum tentu cocok lagi. */
   stale: boolean;
   onEditBrief: () => void;
-  onPrefill: (text: string) => void;
 }
 
 /**
  * Bagian bawah sidebar. Berdiri sendiri dari bagian rencana di atasnya: membuka
  * penyunting rencana hanya meredupkan bagian ini, tidak melepasnya dari layar.
  */
-export default function OutputSection({ scored, stale, onEditBrief, onPrefill }: Props) {
+export default function OutputSection({ scored, stale, onEditBrief }: Props) {
   const { selectedStation } = useSelectedStation();
+  const { intent, scoreResult } = useBriefResult();
 
   // Tampilan awal: hanya bagian rencana. Belum ada kawasan yang dipilih di peta.
   if (!scored && !selectedStation) return null;
 
-  const perkiraanHarga = SCORE_RESPONSE.catatan.harga_sumber === "perkiraan";
+  const perkiraanHarga = scoreResult?.catatan.harga_sumber === "perkiraan";
 
   return (
     <div className="flex flex-col gap-[var(--space-xl)]">
@@ -42,16 +41,16 @@ export default function OutputSection({ scored, stale, onEditBrief, onPrefill }:
       >
         {scored ? (
           <>
-            {perkiraanHarga && (
+            {perkiraanHarga && intent && (
               <PriceAssumptionNotice
-                hargaTarget={INTENT_OUTPUT.harga_target}
+                hargaTarget={intent.harga_target}
                 onEdit={onEditBrief}
               />
             )}
             <ScoredPanel />
           </>
         ) : (
-          <StationNoBriefPanel onPrefill={onPrefill} />
+          <StationNoBriefPanel />
         )}
       </div>
     </div>

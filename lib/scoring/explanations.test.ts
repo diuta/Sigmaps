@@ -3,7 +3,7 @@ import {
   explainComponent,
   explainNeutralPull,
   observedRange,
-} from "./score-explanations.ts";
+} from "./explanations.ts";
 
 // Setiap ambang batas jatuh ke pita yang benar, termasuk tepat di titik batasnya.
 assert.match(explainComponent("competitive_headroom", 0), /belum bisa dibedakan/);

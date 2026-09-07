@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMapInstance } from "@/hooks/useMapInstance";
+import { useMapInstance } from "@/hooks/map/useMapInstance";
 import { BASEMAPS, MAP_LAYERS } from "@/lib/fixtures/layers";
 
 interface Props {

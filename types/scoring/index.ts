@@ -1,8 +1,19 @@
 /**
- * types/scoring.ts
- * Shape output dari /api/score — cerminan context/context-mvp.md §6.8 persis.
+ * types/scoring/index.ts
+ * Kontrak request/response /api/score — cerminan context/context-mvp.md §6.8 persis.
  * Jangan ubah tanpa diskusi bersama.
  */
+
+import type { Tipe3 } from "@/types/tipe3";
+
+// ---------------------------------------------------------------------------
+// /api/score request
+// ---------------------------------------------------------------------------
+
+export interface ScoreRequest {
+  tipe_3: Tipe3;
+  harga_target: number;
+}
 
 // ---------------------------------------------------------------------------
 // /api/score response (context-mvp §6.8)

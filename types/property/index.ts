@@ -1,8 +1,20 @@
 /**
- * types/property.ts
- * Shape data properti dari /api/properties (tabel properti_go Supabase).
+ * types/property/index.ts
+ * Kontrak request/response /api/properties (tabel properti_go Supabase).
  * Sumber: context/context-mvp.md §2 Langkah 4
  */
+
+// ---------------------------------------------------------------------------
+// Request
+// ---------------------------------------------------------------------------
+
+export interface PropertiesRequest {
+  station_id: string; // match ke area_id di StationRanking
+}
+
+// ---------------------------------------------------------------------------
+// Response
+// ---------------------------------------------------------------------------
 
 export interface PropertyUnit {
   id: string;

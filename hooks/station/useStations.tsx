@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * hooks/useStations.tsx
+ * hooks/station/useStations.tsx
  * Ambil semua stasiun (lokasi + metadata) dari /api/stations, sekali saat mount.
  * Tidak membawa skor — skor datang dari /api/score dan digabung terpisah (lihat
  * StationLayer.tsx untuk penggabungannya).
@@ -9,12 +9,7 @@
 
 import { useEffect, useState } from "react";
 import type { StationFeatureCollection } from "@/lib/station";
-
-interface UseStationsResult {
-  stations: StationFeatureCollection | null;
-  loading: boolean;
-  error: string | null;
-}
+import type { UseStationsResult } from "./useStations.types";
 
 export function useStations(): UseStationsResult {
   const [stations, setStations] = useState<StationFeatureCollection | null>(null);

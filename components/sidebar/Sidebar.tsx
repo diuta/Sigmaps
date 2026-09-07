@@ -3,21 +3,23 @@
 import { useState } from "react";
 import BriefSection from "@/components/sidebar/BriefSection";
 import OutputSection from "@/components/sidebar/OutputSection";
+import { useBriefResult } from "@/hooks/brief/useBriefResult";
 
 export default function Sidebar() {
   const [draft, setDraft] = useState("");
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const { scoreResult, loading, error, submitBrief } = useBriefResult();
 
   function openEditor() {
     setDraft(submitted ?? "");
     setEditing(true);
   }
 
-  function submit() {
+  async function submit() {
     const teks = draft.trim();
     if (!teks) return;
-    // 🟡 FASE DUMMY: ganti dengan useParseIntent + useScore saat API siap
+    await submitBrief(teks);
     setSubmitted(teks);
     setEditing(false);
   }
@@ -31,13 +33,19 @@ export default function Sidebar() {
         editing={editing}
         onEdit={openEditor}
         onSubmit={submit}
+        loading={loading}
       />
 
+      {error && (
+        <p className="t-body rounded-[var(--radius-card)] border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-[var(--space-md)] text-[var(--color-warning-tx)]">
+          {error}
+        </p>
+      )}
+
       <OutputSection
-        scored={submitted !== null}
+        scored={submitted !== null && scoreResult !== null}
         stale={editing && submitted !== null}
         onEditBrief={openEditor}
-        onPrefill={setDraft}
       />
     </aside>
   );

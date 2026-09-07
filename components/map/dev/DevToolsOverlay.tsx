@@ -9,9 +9,9 @@
  */
 
 import React, { useState } from "react";
-import { useIsochroneConfig } from "@/hooks/useIsochroneConfig";
-import { usePropertyPopupConfig } from "@/hooks/usePropertyPopupConfig";
-import { useSelectedStation } from "@/hooks/useSelectedStation";
+import { useIsochroneConfig } from "@/hooks/isochrone/useIsochroneConfig";
+import { usePropertyPopupConfig } from "@/hooks/property/usePropertyPopupConfig";
+import { useSelectedStation } from "@/hooks/station/useSelectedStation";
 
 export default function DevToolsOverlay() {
   const [isExpanded, setIsExpanded] = useState(false);

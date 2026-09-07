@@ -1,4 +1,4 @@
-import type { ObservedRange } from "@/lib/score-explanations";
+import type { ObservedRange } from "@/lib/scoring/explanations";
 
 interface Props {
   label: string;

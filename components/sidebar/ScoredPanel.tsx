@@ -7,19 +7,15 @@ import RankStrip from "@/components/sidebar/RankStrip";
 import ScoreComponentBar from "@/components/sidebar/ScoreComponentBar";
 import UnrankableNotice from "@/components/sidebar/UnrankableNotice";
 import {
-  AREA_INSIGHTS,
-  DEMAND_OBSERVED_RANGE,
-  RANKED_AREAS,
-  UNRANKABLE_AREAS,
-} from "@/lib/fixtures/scored";
-import {
   COMPONENT_LABELS,
   explainComponent,
   explainNeutralPull,
-} from "@/lib/score-explanations";
-import { useSelectedStation } from "@/hooks/useSelectedStation";
-import { STATIONS } from "@/lib/fixtures/stations";
-import { findStation } from "@/lib/map/stations-geojson";
+  observedRange,
+} from "@/lib/scoring/explanations";
+import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { useBriefResult } from "@/hooks/brief/useBriefResult";
+import { useStations } from "@/hooks/station/useStations";
+import { useCommunitySentiment } from "@/hooks/sentiment/useCommunitySentiment";
 import type { ScoreComponentKey } from "@/types/scoring";
 
 const COMPONENT_ORDER: readonly { key: ScoreComponentKey; weight: number }[] = [
@@ -30,9 +26,51 @@ const COMPONENT_ORDER: readonly { key: ScoreComponentKey; weight: number }[] = [
 
 export default function ScoredPanel() {
   const { setSelectedStation } = useSelectedStation();
-  const [activeAreaId, setActiveAreaId] = useState(RANKED_AREAS[0].area_id);
-  const area = RANKED_AREAS.find((a) => a.area_id === activeAreaId) ?? RANKED_AREAS[0];
-  const peringkat = RANKED_AREAS.findIndex((a) => a.area_id === area.area_id) + 1;
+  const { scoreResult } = useBriefResult();
+  const { stations } = useStations();
+
+  // Sudah terurut skor tertinggi -> terendah oleh scoreAreas() di server. Kawasan
+  // is_rankable=false TIDAK PERNAH ada di sini (/api/score memang tidak mengirimnya,
+  // lihat docs/api-score.md) — makanya "kawasan mana yang belum cukup data" dihitung
+  // di bawah dengan membandingkan ke daftar semua stasiun, bukan dibaca dari sini.
+  const rankedAreas = scoreResult?.areas ?? [];
+
+  const [activeAreaId, setActiveAreaId] = useState<string | null>(rankedAreas[0]?.area_id ?? null);
+
+  // rankedAreas berubah tiap kali brief baru disubmit — reset area aktif ke #1 supaya
+  // panel tidak diam-diam menunjuk kawasan dari hasil brief sebelumnya. Disesuaikan LANGSUNG
+  // saat render (pola resmi React untuk "adjusting state when a prop changes"), bukan lewat
+  // useEffect — tidak ada efek samping ke luar React di sini, cuma turunan dari scoreResult.
+  const [prevScoreResult, setPrevScoreResult] = useState(scoreResult);
+  if (scoreResult !== prevScoreResult) {
+    setPrevScoreResult(scoreResult);
+    setActiveAreaId(rankedAreas[0]?.area_id ?? null);
+  }
+
+  const unrankableStations = (stations?.features ?? [])
+    .filter((feature) => !rankedAreas.some((area) => area.station_id === feature.properties.station_id))
+    .map((feature) => ({
+      station_id: feature.properties.station_id,
+      station_name: feature.properties.nama,
+    }));
+
+  const demandObservedRange = observedRange(rankedAreas.map((area) => area.komponen.demand));
+
+  const area = rankedAreas.find((a) => a.area_id === activeAreaId) ?? rankedAreas[0] ?? null;
+  const { sentiment } = useCommunitySentiment(area?.station_id ?? null);
+
+  if (!area) {
+    return (
+      <section className="flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-[var(--space-md)]">
+        <h2 className="t-heading-2 text-[var(--color-warning-tx)]">Belum ada kawasan yang bisa dinilai</h2>
+        <p className="t-body text-[var(--color-warning-tx)]">
+          Semua kawasan untuk kategori usaha ini belum punya cukup data pengamatan.
+        </p>
+      </section>
+    );
+  }
+
+  const peringkat = rankedAreas.findIndex((a) => a.area_id === area.area_id) + 1;
 
   /**
    * Pilih peringkat lain. Kamera peta digeser dengan mengubah stasiun aktif, bukan
@@ -40,7 +78,17 @@ export default function ScoredPanel() {
    */
   function selectArea(areaId: string) {
     setActiveAreaId(areaId);
-    setSelectedStation(findStation(STATIONS, areaId));
+    const target = rankedAreas.find((a) => a.area_id === areaId);
+    const feature = stations?.features.find((f) => f.properties.station_id === target?.station_id);
+    if (target && feature?.geometry) {
+      setSelectedStation({
+        area_id: target.area_id,
+        station_name: target.station_name,
+        lng: feature.geometry.coordinates[0],
+        lat: feature.geometry.coordinates[1],
+        is_rankable: true,
+      });
+    }
   }
 
   return (
@@ -50,13 +98,13 @@ export default function ScoredPanel() {
           Peringkat › {area.station_name}
         </nav>
 
-        <RankStrip areas={RANKED_AREAS} activeAreaId={activeAreaId} onSelect={selectArea} />
+        <RankStrip areas={rankedAreas} activeAreaId={area.area_id} onSelect={selectArea} />
 
         <div className="flex items-baseline gap-[var(--space-md)]">
           <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-xs)]">
             <h1 className="t-heading-1">{area.station_name}</h1>
             <p className="t-micro font-normal text-[var(--color-text-sub)]">
-              Peringkat {peringkat} dari {RANKED_AREAS.length} · {area.n_observations} pengamatan
+              Peringkat {peringkat} dari {rankedAreas.length} · {area.n_observations} pengamatan
             </p>
           </div>
           <span className="t-display-score text-right tabular-nums text-[var(--color-opportunity-tx)]">
@@ -77,14 +125,14 @@ export default function ScoredPanel() {
             weight={weight}
             explanation={explainComponent(key, area.komponen[key])}
             caveat={key === "demand" ? explainNeutralPull(area.n_observations) : null}
-            range={key === "demand" ? DEMAND_OBSERVED_RANGE : null}
+            range={key === "demand" ? demandObservedRange : null}
           />
         ))}
       </div>
 
-      <AreaInsightBlock paragraf={AREA_INSIGHTS[area.area_id] ?? ""} />
-      <UnrankableNotice areas={UNRANKABLE_AREAS} />
-      <PropertyList />
+      {sentiment?.ringkasan && <AreaInsightBlock paragraf={sentiment.ringkasan} />}
+      <UnrankableNotice stations={unrankableStations} />
+      <PropertyList stationId={area.station_id} />
     </div>
   );
 }

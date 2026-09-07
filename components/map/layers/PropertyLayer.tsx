@@ -12,13 +12,12 @@
 
 import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
-import { useMapInstance } from "@/hooks/useMapInstance";
-import { useSelectedStation } from "@/hooks/useSelectedStation";
-import { usePropertyPopupConfig, PropertyPopupStyle } from "@/hooks/usePropertyPopupConfig";
+import { useMapInstance } from "@/hooks/map/useMapInstance";
+import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { usePropertyPopupConfig } from "@/hooks/property/usePropertyPopupConfig";
+import type { PropertyPopupStyle } from "@/hooks/property/usePropertyPopupConfig.types";
 import type { PropertyUnit } from "@/types/property";
-
-// 🟡 FASE DUMMY: swap ke fetch(/api/properties?station_id=...) saat backend siap
-import { DUMMY_PROPERTIES } from "@/lib/dummy/properties";
+import { useProperties } from "@/hooks/property/useProperties";
 
 function renderPopupHTML(
   prop: PropertyUnit,
@@ -132,6 +131,7 @@ export default function PropertyLayer() {
   const { map } = useMapInstance();
   const { selectedStation } = useSelectedStation();
   const { popupStyle, themeMode } = usePropertyPopupConfig();
+  const { properties } = useProperties(selectedStation?.area_id ?? null);
 
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const activePopupRef = useRef<maplibregl.Popup | null>(null);
@@ -148,9 +148,6 @@ export default function PropertyLayer() {
     markersRef.current = [];
 
     if (!selectedStation) return;
-
-    const properties: PropertyUnit[] =
-      DUMMY_PROPERTIES[selectedStation.area_id] || [];
 
     properties.forEach((prop) => {
       const el = document.createElement("div");
@@ -211,7 +208,7 @@ export default function PropertyLayer() {
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
     };
-  }, [map, selectedStation, popupStyle, themeMode]);
+  }, [map, selectedStation, popupStyle, themeMode, properties]);
 
   return null;
 }
