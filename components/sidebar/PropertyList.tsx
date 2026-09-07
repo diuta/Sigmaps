@@ -1,32 +1,39 @@
 "use client";
 
-import { useProperties } from "@/hooks/property/useProperties";
+import type { PropertyUnit } from "@/types/property";
 
 interface Props {
-  stationId: string;
+  properties: readonly PropertyUnit[];
+  loading: boolean;
 }
 
-/** Empat field per unit: kategori, jenis, alamat, foto. Tanpa luas, harga, kontak. */
-export default function PropertyList({ stationId }: Props) {
-  const { properties, loading } = useProperties(stationId);
-
+/**
+ * Empat field per unit: kategori, jenis, alamat, foto. Tanpa luas, harga, kontak.
+ *
+ * Presentational — datanya diambil pemanggil (`useProperties`), bukan di sini, supaya
+ * pemanggil bisa memakai jumlahnya untuk label tab tanpa memicu fetch kedua untuk stasiun
+ * yang sama.
+ */
+export default function PropertyList({ properties, loading }: Props) {
   if (loading) {
     return <p className="t-body text-[var(--color-text-sub)]">Memuat properti...</p>;
   }
 
   return (
     <section className="flex flex-col gap-[var(--space-md)]">
-      <div className="flex flex-col gap-[var(--space-xs)]">
-        <h2 className="t-heading-2">Properti di kawasan</h2>
-        <p className="t-micro font-normal text-[var(--color-text-sub)]">
-          {properties.length} unit dari Properti Go, tidak ikut menentukan skor
-        </p>
-      </div>
+      <p className="t-micro font-normal text-[var(--color-text-sub)]">
+        {properties.length} unit dari Properti Go, tidak ikut menentukan skor
+      </p>
 
       {properties.length === 0 ? (
         <p className="t-body text-[var(--color-text-sub)]">Belum ada properti tercatat di kawasan ini.</p>
       ) : (
-        <ul className="grid max-h-[420px] grid-cols-2 gap-[var(--space-sm)] overflow-y-auto pr-[var(--space-xs)]">
+        /*
+          Tanpa max-h dan overflow sendiri: kolom sidebar sudah jadi satu-satunya kontainer
+          scroll. Dua kontainer scroll bertumpuk di panel 380px membuat daftar dalam menelan
+          event roda trackpad, lalu halaman melompat begitu daftar itu mentok.
+        */
+        <ul className="grid grid-cols-2 gap-[var(--space-sm)]">
           {properties.map((unit) => (
             <li
               key={unit.id}

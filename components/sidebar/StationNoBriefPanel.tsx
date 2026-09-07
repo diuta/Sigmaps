@@ -2,6 +2,7 @@
 
 import PropertyList from "@/components/sidebar/PropertyList";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { useProperties } from "@/hooks/property/useProperties";
 
 /**
  * Keadaan "kawasan dipilih di peta, rencana belum diisi" — belum ada skor apa pun.
@@ -13,6 +14,13 @@ import { useSelectedStation } from "@/hooks/station/useSelectedStation";
  */
 export default function StationNoBriefPanel() {
   const { selectedStation } = useSelectedStation();
+
+  // Sengaja TANPA tab bar: di sini cuma ada satu hal untuk ditampilkan, jadi tab tunggal
+  // hanya jadi derau. Bandingkan dengan ScoredPanel yang punya dua tampilan.
+  const { properties, loading } = useProperties(
+    selectedStation?.is_rankable ? selectedStation.area_id : null,
+  );
+
   if (!selectedStation) return null;
 
   return (
@@ -28,7 +36,7 @@ export default function StationNoBriefPanel() {
       </div>
 
       {selectedStation.is_rankable ? (
-        <PropertyList stationId={selectedStation.area_id} />
+        <PropertyList properties={properties} loading={loading} />
       ) : (
         <section className="flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-[var(--space-md)]">
           <h2 className="t-heading-2 text-[var(--color-warning-tx)]">Data belum cukup</h2>

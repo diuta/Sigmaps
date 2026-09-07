@@ -42,7 +42,7 @@ Respons gagal (Supabase tidak merespons → `503`):
 ## Dependency/prasyarat
 
 - [lib/supabase/server.ts](lib-supabase-server.md).
-- [lib/stations.ts](lib-stations.md) — transform baris tabel mentah ke FeatureCollection (pure).
+- [lib/station/index.ts](lib-stations.md) — transform baris tabel mentah ke FeatureCollection (pure).
 - Tabel `stasiun` sudah diisi ETL (lihat `context/dokumentasi-erd-mvp.md` bagian 1) dan
   `service_role` sudah punya GRANT `SELECT` (lihat bagian GRANT di `supabase/views.sql`).
 
@@ -52,7 +52,7 @@ Respons gagal (Supabase tidak merespons → `503`):
   [api-properties.md](api-properties.md) dan [api-community-sentiment.md](api-community-sentiment.md)
   yang wajib lewat view. `stasiun` menyimpan koordinat sebagai kolom `longitude`/`latitude`
   biasa (bukan geometry PostGIS) dan tidak butuh spatial join apa pun untuk endpoint ini, jadi
-  penyusunan GeoJSON-nya cukup di JavaScript (`lib/stations.ts`) — lihat catatan lengkap di
+  penyusunan GeoJSON-nya cukup di JavaScript (`lib/station/index.ts`) — lihat catatan lengkap di
   `docs/lib-stations.md` kenapa kasus ini beda dari dua endpoint lain itu.
 - Field `tipe_3` di response ini **memakai nama kolom mentah apa adanya**, sengaja tidak
   dialiaskan — walau namanya membingungkan (di tabel lain, `katalog_restoran`, `tipe_3`

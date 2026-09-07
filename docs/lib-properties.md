@@ -1,4 +1,4 @@
-# lib/properties.ts
+# lib/property/index.ts
 
 Fungsi murni: ubah baris hasil query view `properti_go_by_station` jadi GeoJSON
 FeatureCollection. Tidak menyentuh Supabase/HTTP — query dilakukan di
@@ -7,7 +7,7 @@ FeatureCollection. Tidak menyentuh Supabase/HTTP — query dilakukan di
 ## Cara pakai
 
 ```ts
-import { toPropertiesFeatureCollection, type PropertyRow } from '@/lib/properties'
+import { toPropertiesFeatureCollection, type PropertyRow } from '@/lib/property'
 
 const rows: PropertyRow[] = [
   {
@@ -26,6 +26,6 @@ Tidak ada — hanya transformasi data.
 
 ## Batasan/gotcha
 
-- Sama seperti `lib/stations.ts`: `geom` diasumsikan sudah GeoJSON (hasil view), bukan raw
+- Sama seperti `lib/station/index.ts`: `geom` diasumsikan sudah GeoJSON (hasil view), bukan raw
   PostGIS.
 - Sengaja **tidak** memuat luas/harga/kontak pemilik — Properti Go tidak punya kolom itu.

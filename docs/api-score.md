@@ -1,6 +1,6 @@
 # app/api/score/route.ts
 
-Hitung skor kesesuaian tiap kawasan (WLC deterministik, `lib/scoring.ts`) berdasarkan jenis
+Hitung skor kesesuaian tiap kawasan (WLC deterministik, `lib/scoring/index.ts`) berdasarkan jenis
 usaha dan target harga, urutkan tertinggi ke terendah. Dipanggil setelah
 `POST /api/prompt-request` menghasilkan `tipe_3` + `harga_target`
 (`context/context-mvp.md` §2 Langkah 2).
@@ -50,21 +50,22 @@ Respons gagal:
 ## Dependency/prasyarat
 
 - [lib/schemas/score.ts](../lib/schemas/score.ts) — `buildScoreRequestSchema(tipe3Values)`.
-- [lib/tipe3.ts](lib-tipe3.md) — sumber `tipe_3` yang sah, dibaca dari Supabase.
-- [lib/scoring.ts](lib-scoring.md) — mesin WLC.
+- [lib/tipe3/index.ts](lib-tipe3.md) — sumber `tipe_3` yang sah, dibaca dari Supabase.
+- [lib/scoring/index.ts](lib-scoring.md) — mesin WLC.
 - [lib/supabase/server.ts](lib-supabase-server.md).
 - Tabel `scored_areas` sudah diisi pipeline batch Python (`context/dokumentasi-erd-mvp.md`
-  bagian 2) — **belum ada** per saat dokumen ini ditulis, endpoint balas `503` sampai tabel
-  tersedia.
+  bagian 2). Kalau tabelnya belum ada/kosong, endpoint balas `503` (tabel tidak ada) atau `200`
+  dengan `areas: []` (tabel ada tapi tidak ada baris `is_rankable = true`) — dua kondisi berbeda,
+  jangan disamakan saat men-debug sidebar yang tampak kosong.
 
 ## Batasan/gotcha
 
 - **Tidak menerima `weights` dari klien.** Bobot tunggal `0,25/0,50/0,25` ditetapkan di
-  server (`lib/scoring.ts`) — layar edit bobot manual dihapus permanen untuk MVP.
+  server (`lib/scoring/index.ts`) — layar edit bobot manual dihapus permanen untuk MVP.
 - `tipe_3` **harus persis sama** (huruf besar semua) dengan nilai di kolom `competitor_counts`
   tabel `scored_areas`/`katalog_restoran` — kalau ejaannya beda, pencarian selalu bernilai 0
   dan `competitive_headroom` seragam 0,33 di semua kawasan (gagal diam-diam, bukan galat).
-  Enum divalidasi dinamis lewat [lib/tipe3.ts](lib-tipe3.md), jadi kelas kesalahan ini
+  Enum divalidasi dinamis lewat [lib/tipe3/index.ts](lib-tipe3.md), jadi kelas kesalahan ini
   seharusnya sudah tertutup selama `tipe3_values` sinkron dengan `katalog_restoran`.
 - **Query menarik SELURUH baris `is_rankable = true` dalam satu `SELECT`**, tanpa filter
   kategori — normalisasi min-max pada `competitive_headroom` butuh nilai kepadatan terkecil &

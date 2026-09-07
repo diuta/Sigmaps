@@ -1,3 +1,22 @@
+> 🗄️ **ARSIP — status per 29 Agustus 2026. Jangan dipakai sebagai acuan kerja.**
+>
+> Dokumen ini dipertahankan utuh sebagai jejak keputusan, bukan sebagai gambaran keadaan
+> sekarang. Beberapa isinya sudah **dicabut**:
+>
+> - Proposal tabel `hex_scores`, `kde_scores`, dan `archetype_presets` (bagian 5) tidak pernah
+>   dibuat. ERD yang berlaku enam tabel, lihat `context/dokumentasi-erd-mvp.md`.
+> - Nama kolom `skor_daya_beli`, `skor_jam_pagi`, `skor_kompetisi_kde` di bagian itu sekarang
+>   **dilarang dipakai di mana pun** (`CLAUDE.md` bagian 7). Nama yang sah: `demand`,
+>   `competitive_headroom`, `segment_match`, `temporal_fitness`, `kde_penalty`.
+> - Rencana `/api/rank-area` + Supabase RPC diganti lima endpoint terpisah tanpa RPC
+>   (lihat `docs/api-*.md`); spatial join dibungkus SQL view, bukan RPC function.
+> - Sebagian pertanyaan terbuka di bagian 7 sudah terjawab: arsitektur backend final Next.js API
+>   Routes, scope pindah ke DKI Jakarta (bukan Cisauk), dan RLS + policy `SELECT` publik sudah
+>   diputuskan (`context/dokumentasi-erd-mvp.md` bagian "Keamanan").
+>
+> **Acuan sekarang:** `context/context-mvp.md`, `context/dokumentasi-erd-mvp.md`, dan
+> `docs/api-*.md`.
+
 # Context: Jalur 1 — Data, Basis Data & Backend (Anggota 1)
 
 Dokumen ini isinya keputusan, hasil riset, dan status kerja **Anggota 1 (Jalur 1)** untuk

@@ -1,7 +1,7 @@
 # app/api/prompt-request/route.ts
 
 Terima `prompt` bebas dari user (Business Brief), parse jadi objek terstruktur lewat
-`lib/ai/parseIntent.ts` — dipakai downstream oleh `POST /api/score` (`lib/scoring.ts`).
+`lib/ai/parseIntent.ts` — dipakai downstream oleh `POST /api/score` (`lib/scoring/index.ts`).
 
 ## Cara pakai
 
@@ -36,7 +36,7 @@ Respons gagal — kode galat mengikuti `context/context-mvp.md` §6.8b:
 - `lib/schemas/prompt-request.ts` — `PromptRequestSchema` (validasi request),
   `buildIntentSchema(tipe3Values)` (kontrak publik), `buildGeminiRawSchema(tipe3Values)`
   (skema internal parsing output Gemini, lihat `lib-ai-parseintent.md`).
-- [lib/tipe3.ts](lib-tipe3.md) — sumber `tipe_3` yang sah, dibaca dari Supabase.
+- [lib/tipe3/index.ts](lib-tipe3.md) — sumber `tipe_3` yang sah, dibaca dari Supabase.
 
 ## Batasan/gotcha
 
