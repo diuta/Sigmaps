@@ -4,7 +4,7 @@ Sidebar adalah seluruh antarmuka non-peta SIGMAPS: tempat user menulis rencana u
 (Business Brief), tempat hasil skor ditampilkan, dan tempat katalog properti kawasan dibaca.
 Peta hanya menggambar; semua teks, angka, dan peringatan ada di sini.
 
-Tiga belas komponen, satu file satu tanggung jawab:
+Lima belas komponen, satu file satu tanggung jawab:
 
 | File | Perannya |
 |---|---|
@@ -18,7 +18,8 @@ Tiga belas komponen, satu file satu tanggung jawab:
 | `RankStrip.tsx` | Deretan tombol angka 1..n untuk pindah peringkat |
 | `ScoreComponentBar.tsx` | Satu bar komponen (D/C/S) + kalimat penjelas |
 | `AreaInsightBlock.tsx` | Ringkasan AI Community Activity |
-| `PropertyList.tsx` | Kartu unit Properti Go — presentational, datanya dari pemanggil |
+| `PropertyList.tsx` | Kartu unit Properti Go yang bisa diklik — presentational, datanya dari pemanggil |
+| `PropertyDetail.tsx` | Halaman detail satu unit + tombol kembali |
 | `UnrankableNotice.tsx` | Daftar kawasan yang tidak dinilai |
 | `PriceAssumptionNotice.tsx` | Peringatan harga hasil perkiraan AI |
 | `StaleOutputNotice.tsx` | Hasil di bawah masih milik brief sebelumnya |
@@ -63,7 +64,7 @@ Data tidak dioper lewat props dari halaman — tiap komponen membaca context yan
 | `Sidebar`, `OutputSection` | `useBriefResult()` (intent, skor, loading, error) |
 | `OutputSection`, `StationNoBriefPanel`, `ScoredPanel` | `useSelectedStation()` |
 | `ScoredPanel` | `useStations()`, `useCommunitySentiment()` |
-| `PropertyList` | `useProperties(stationId)` |
+| `ScoredPanel`, `StationNoBriefPanel` | `useProperties(stationId)` — hasilnya dioper ke `PropertyList` |
 
 ### Alur state (semuanya di `Sidebar.tsx`)
 
@@ -84,13 +85,40 @@ hanya panel itu yang memakainya.
   membandingkan sambil mengetik ulang.
 - Label tombol ikut keadaan: `Nilai kawasan` → `Menilai...` → `Nilai ulang kawasan`.
 
-### Tiga keadaan `OutputSection`
+### Empat keadaan `OutputSection`
 
 | Keadaan | Yang tampil |
 |---|---|
 | Belum ada brief, belum ada stasiun dipilih | tidak ada apa-apa (hanya bagian brief) |
 | Stasiun diklik di peta, brief belum dinilai | `StationNoBriefPanel` (nama kawasan + ajakan menulis rencana + `PropertyList`) |
 | Brief sudah dinilai | `ScoredPanel` (didahului `PriceAssumptionNotice` bila perlu) |
+| Satu unit properti diklik | `PropertyDetail` — mengambil alih **seluruh** panel hasil |
+
+### Alur daftar → detail → kembali
+
+Klik kartu unit membuka `PropertyDetail`, yang menggantikan seluruh panel hasil: header
+kawasan, `RankStrip`, dan tab bar ikut hilang, sehingga tombol "Kembali" cuma punya satu arti.
+Bagian rencana usaha di atasnya tetap.
+
+`OutputSection` yang memegang unit terpilih (`detail`); `ScoredPanel` dan
+`StationNoBriefPanel` hanya meneruskan `onSelectProperty(unit, stationName)` ke
+`PropertyList` dan tidak tahu ada halaman detail sama sekali. Nama kawasan ikut dioper karena
+breadcrumb detail membutuhkannya, dan `selectedStation` belum tentu terisi (kawasan #1 tampil
+tanpa pengguna pernah mengkliknya).
+
+Isi halaman detail persis apa yang ada di Properti Go: kategori (judul), badge Siap
+Sewa/Siap Jual, alamat, dan dua foto (`foto_tampak_depan`, `foto_spanduk`) — plus satu kalimat
+yang menyatakan terbuka bahwa harga, luas, dan kontak memang tidak dicatat dataset. Kalimat
+itu bukan basa-basi: tanpa itu, halaman detail properti tanpa harga terbaca seperti data yang
+gagal dimuat.
+
+Aturan aksesibilitas yang mengikat di alur ini (hasil `ui-ux-pro-max`, severity High):
+
+- Kartu daftar adalah **`<button>` sungguhan**, bukan `<li>` ber-`onClick` — bisa difokus
+  keyboard dan punya cincin fokus (`focus-visible:outline-2`).
+- Fokus **berpindah ke judul unit** saat detail terbuka, dan **kembali ke kartu asalnya**
+  (`#unit-<id>`) saat ditutup.
+- Foto memesan ruangnya lewat `aspect-[4/3]`, jadi layout tidak melompat saat foto termuat.
 
 ### Isi `ScoredPanel` — dua tab
 
@@ -195,6 +223,14 @@ mesin dan mana kalimat yang ditulis model.
   yang sudah dipotong, kawasan peringkat 6 ke bawah salah dilabeli "data belum cukup" padahal
   justru dinilai — dan `demandObservedRange`, yang menggambarkan rentang seluruh kawasan
   dinilai, bukan lima teratas.
+- **Panel hasil tetap ter-mount saat halaman detail terbuka** (disembunyikan `hidden`, bukan
+  dilepas). Melepasnya mereset pilihan tab `ScoredPanel` — kembali dari detail harus mendarat
+  lagi di tab "Unit properti", bukan "Skor" — dan membuat `useCommunitySentiment` memanggil
+  Gemini sekali lagi. Ini juga yang membuat pengembalian fokus ke `#unit-<id>` bisa bekerja:
+  elemennya masih ada di DOM.
+- **Brief baru menutup halaman detail.** Kalau `scoreResult` berganti selagi detail terbuka,
+  `OutputSection` menutupnya — daftar di baliknya sudah berganti kawasan, jadi "Kembali" akan
+  mendarat di hasil yang lain.
 - **Isi panel tetap ter-mount saat sidebar ditutup** (digeser keluar layar dengan `transform`,
   bukan `hidden` maupun unmount). Melepas `OutputSection` membuat `useCommunitySentiment`
   memanggil Gemini lagi setiap sidebar dibuka; `/api/community-sentiment` belum punya cache dan

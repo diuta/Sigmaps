@@ -3,6 +3,11 @@
 import PropertyList from "@/components/sidebar/PropertyList";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
 import { useProperties } from "@/hooks/property/useProperties";
+import type { PropertyUnit } from "@/types/property";
+
+interface Props {
+  onSelectProperty: (unit: PropertyUnit, stationName: string) => void;
+}
 
 /**
  * Keadaan "kawasan dipilih di peta, rencana belum diisi" — belum ada skor apa pun.
@@ -12,7 +17,7 @@ import { useProperties } from "@/hooks/property/useProperties";
  * yang pernah menghasilkan data itu. docs/fe/ARCHITECTURE.md secara eksplisit menandai
  * "narasi AI area insight" di luar scope MVP, jadi bukan sesuatu yang perlu disambungkan.
  */
-export default function StationNoBriefPanel() {
+export default function StationNoBriefPanel({ onSelectProperty }: Props) {
   const { selectedStation } = useSelectedStation();
 
   // Sengaja TANPA tab bar: di sini cuma ada satu hal untuk ditampilkan, jadi tab tunggal
@@ -36,7 +41,11 @@ export default function StationNoBriefPanel() {
       </div>
 
       {selectedStation.is_rankable ? (
-        <PropertyList properties={properties} loading={loading} />
+        <PropertyList
+          properties={properties}
+          loading={loading}
+          onSelect={(unit) => onSelectProperty(unit, selectedStation.station_name)}
+        />
       ) : (
         <section className="flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-[var(--space-md)]">
           <h2 className="t-heading-2 text-[var(--color-warning-tx)]">Data belum cukup</h2>

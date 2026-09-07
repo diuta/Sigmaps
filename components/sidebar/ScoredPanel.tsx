@@ -18,6 +18,7 @@ import { useStations } from "@/hooks/station/useStations";
 import { useProperties } from "@/hooks/property/useProperties";
 import { useCommunitySentiment } from "@/hooks/sentiment/useCommunitySentiment";
 import type { ScoreComponentKey } from "@/types/scoring";
+import type { PropertyUnit } from "@/types/property";
 
 const COMPONENT_ORDER: readonly { key: ScoreComponentKey; weight: number }[] = [
   { key: "demand", weight: 0.25 },
@@ -30,7 +31,12 @@ const COMPONENT_ORDER: readonly { key: ScoreComponentKey; weight: number }[] = [
  *  peringkat apa adanya. */
 const TOP_N = 5;
 
-export default function ScoredPanel() {
+interface Props {
+  /** Buka halaman detail satu unit. Panel ini tidak tahu bentuk halamannya — cuma meneruskan. */
+  onSelectProperty: (unit: PropertyUnit, stationName: string) => void;
+}
+
+export default function ScoredPanel({ onSelectProperty }: Props) {
   const { setSelectedStation } = useSelectedStation();
   const { scoreResult } = useBriefResult();
   const { stations } = useStations();
@@ -199,7 +205,11 @@ export default function ScoredPanel() {
         </div>
       ) : (
         <div role="tabpanel" id="panel-unit" aria-labelledby="tab-unit">
-          <PropertyList properties={properties} loading={propertiesLoading} />
+          <PropertyList
+            properties={properties}
+            loading={propertiesLoading}
+            onSelect={(unit) => onSelectProperty(unit, area.station_name)}
+          />
         </div>
       )}
     </div>

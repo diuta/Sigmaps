@@ -5,6 +5,8 @@ import type { PropertyUnit } from "@/types/property";
 interface Props {
   properties: readonly PropertyUnit[];
   loading: boolean;
+  /** Buka halaman detail unit ini. */
+  onSelect: (unit: PropertyUnit) => void;
 }
 
 /**
@@ -14,7 +16,7 @@ interface Props {
  * pemanggil bisa memakai jumlahnya untuk label tab tanpa memicu fetch kedua untuk stasiun
  * yang sama.
  */
-export default function PropertyList({ properties, loading }: Props) {
+export default function PropertyList({ properties, loading, onSelect }: Props) {
   if (loading) {
     return <p className="t-body text-[var(--color-text-sub)]">Memuat properti...</p>;
   }
@@ -35,10 +37,19 @@ export default function PropertyList({ properties, loading }: Props) {
         */
         <ul className="grid grid-cols-2 gap-[var(--space-sm)]">
           {properties.map((unit) => (
-            <li
-              key={unit.id}
-              className="flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-[var(--space-sm)] shadow-[var(--shadow-card)] transition-all duration-[var(--motion-fast)] hover:-translate-y-[1px] hover:border-[var(--color-pin)] hover:shadow-[var(--shadow-float)]"
-            >
+            <li key={unit.id} className="flex">
+              {/*
+                Tombol sungguhan, bukan <li> ber-onClick: kontrol yang bisa diklik wajib bisa
+                difokus keyboard dan punya indikator fokus yang terlihat. `id`-nya dipakai
+                OutputSection untuk mengembalikan fokus ke sini setelah halaman detail ditutup.
+              */}
+              <button
+                type="button"
+                id={`unit-${unit.id}`}
+                onClick={() => onSelect(unit)}
+                aria-label={`Lihat detail ${unit.kategori_properti} di ${unit.alamat}`}
+                className="flex w-full flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-[var(--space-sm)] text-left shadow-[var(--shadow-card)] transition-all duration-[var(--motion-fast)] hover:-translate-y-[1px] hover:border-[var(--color-pin)] hover:shadow-[var(--shadow-float)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
+              >
               {unit.foto_tampak_depan ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -60,6 +71,7 @@ export default function PropertyList({ properties, loading }: Props) {
                 <span className="t-micro text-[var(--color-pin-hover)]">{unit.jenis_properti}</span>
                 <span className="t-body text-[var(--color-text-sub)]">{unit.alamat}</span>
               </div>
+              </button>
             </li>
           ))}
         </ul>

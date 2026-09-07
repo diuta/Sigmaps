@@ -338,6 +338,13 @@ Catatan bentuk yang mengikat:
 satu-satunya elemen ber-`Electric Ultramarine` di sidebar, karena hanya itu keluaran AI.
 * Dua garis (`‖`) pada bar Permintaan menandai rentang nilai di seluruh kawasan, digambar **di
 atas** isian bar — kalau di belakang, ia selalu tertutup rapat oleh isian.
+* **Halaman detail unit** menggantikan seluruh panel hasil (header kawasan, `RankStrip`, dan
+tab bar ikut hilang). Susunannya dari atas: tombol `‹ Kembali` (tinggi ±32px, cincin fokus
+terlihat) → breadcrumb `NAMA STASIUN › Kategori` → judul kategori + badge Siap Sewa/Siap Jual →
+alamat → dua foto `aspect-[4/3]` berlabel ("Foto tampak depan", "Foto spanduk"; placeholder
+bergaris putus-putus bila kosong) → catatan bahwa harga, luas, dan kontak tidak dicatat
+dataset. Badge memakai emerald untuk Sewa dan biru brand untuk Jual. **Larangan menampilkan
+harga/luas/kontak tetap berlaku penuh di halaman ini.**
 * **Dua tab: "Skor" dan "Unit properti (n)".** Identitas kawasan (breadcrumb, `RankStrip`,
 nama, angka skor) berada di **atas** tab bar dan selalu terlihat. Tab aktif ditandai garis
 bawah 2px `Cobalt Metro`; tab non-aktif memakai `--color-text-sub`.
