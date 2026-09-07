@@ -10,10 +10,12 @@ import { SelectedStationProvider } from "@/hooks/station/useSelectedStation";
 import { IsochroneConfigProvider } from "@/hooks/isochrone/useIsochroneConfig";
 import { PropertyPopupConfigProvider } from "@/hooks/property/usePropertyPopupConfig";
 import { BriefResultProvider } from "@/hooks/brief/useBriefResult";
+import { SelectedPropertyProvider } from "@/hooks/property/useSelectedProperty";
 
 export default function Home() {
   return (
     <SelectedStationProvider>
+      <SelectedPropertyProvider>
       {/* Hasil brief (intent + skor) dibutuhkan sidebar (ScoredPanel) MAUPUN peta
           (StationLayer, untuk gambar rank di pin) — makanya providernya di sini,
           di atas keduanya, bukan di dalam Sidebar saja. */}
@@ -42,6 +44,7 @@ export default function Home() {
           </PropertyPopupConfigProvider>
         </IsochroneConfigProvider>
       </BriefResultProvider>
+      </SelectedPropertyProvider>
     </SelectedStationProvider>
   );
 }

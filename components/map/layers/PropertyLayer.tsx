@@ -8,12 +8,17 @@
  * - 'sleek': Compact horizontal pill (sesuai referensi Figma 200x72)
  * - 'slender-detail': Horizontal sleek + baris alamat ringkas
  * - 'vertical-card': Format kartu vertikal awal
+ * - 'vertical-card-v2': Premium redesign — full-bleed photo, gradient, kategori + badge overlay
+ *
+ * Anti-overlap: resolveOverlaps() menyebarkan pin yang posisinya sangat berdekatan
+ * ke spiral kecil supaya tidak saling menumpuk.
  */
 
 import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import { useMapInstance } from "@/hooks/map/useMapInstance";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
 import { usePropertyPopupConfig } from "@/hooks/property/usePropertyPopupConfig";
 import type { PropertyPopupStyle } from "@/hooks/property/usePropertyPopupConfig.types";
 import type { PropertyUnit } from "@/types/property";
@@ -108,7 +113,8 @@ function renderPopupHTML(
   }
 
   // 3. VERTICAL CARD (Format Awal)
-  return `
+  if (style === "vertical-card") {
+    return `
     <div class="w-[260px] bg-slate-900/95 text-slate-100 rounded-xl overflow-hidden shadow-2xl border border-slate-700/80 font-sans backdrop-blur-md">
       <div class="relative w-full h-[120px] bg-slate-800 flex items-center justify-center overflow-hidden">
         <img src="${photoSrc}" alt="${prop.alamat}" class="w-full h-full object-cover" />
@@ -125,16 +131,87 @@ function renderPopupHTML(
       </div>
     </div>
   `;
+  }
+
+  // 4. VERTICAL CARD V2 — Light mode, clean design
+  const badgeColorV2 =
+    prop.jenis_properti === "Sewa"
+      ? "background:#F59E0B;color:#431407"
+      : "background:#10B981;color:#052e16";
+  const badgeLabelV2 = prop.jenis_properti === "Sewa" ? "DISEWA" : "DIJUAL";
+
+  return `
+    <div style="width:252px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.18),0 2px 8px rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.06);font-family:system-ui,-apple-system,sans-serif">
+      <div style="position:relative;width:100%;height:144px;overflow:hidden;background:#f1f5f9">
+        <img src="${photoSrc}" alt="${prop.kategori_properti}" style="width:100%;height:100%;object-fit:cover;display:block" />
+        <!-- Very light bottom scrim so category text stays readable -->
+        <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 40%,rgba(0,0,0,0.28) 100%)"></div>
+        <!-- Badge top-left -->
+        <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:0.07em;${badgeColorV2}">${badgeLabelV2}</span>
+        <!-- Category title over scrim at bottom -->
+        <div style="position:absolute;bottom:9px;left:11px;right:11px;font-size:15px;font-weight:700;color:#fff;line-height:1.25;letter-spacing:-0.01em;text-shadow:0 1px 6px rgba(0,0,0,0.5)">${prop.kategori_properti}</div>
+      </div>
+      <!-- Body: just the address -->
+      <div style="padding:9px 12px 11px">
+        <p style="margin:0;font-size:11px;color:#64748b;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${prop.alamat}</p>
+      </div>
+    </div>
+  `;
 }
+
+/**
+ * Anti-overlap: properti dengan koordinat identik / sangat berdekatan (≤ ~3m)
+ * dikelompokkan, lalu masing-masing digeser ke titik berbeda dalam lingkaran kecil
+ * (radius ≈ 13m) sehingga pin tidak menumpuk satu sama lain.
+ */
+function resolveOverlaps(
+  props: PropertyUnit[],
+  spreadDeg = 0.00015
+): Array<{ prop: PropertyUnit; lng: number; lat: number }> {
+  const BUCKET = 0.00003; // ~3m
+  const snap = (v: number) => Math.round(v / BUCKET) * BUCKET;
+
+  const groups = new Map<string, PropertyUnit[]>();
+  for (const prop of props) {
+    const key = `${snap(prop.lng).toFixed(6)},${snap(prop.lat).toFixed(6)}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(prop);
+  }
+
+  const result: Array<{ prop: PropertyUnit; lng: number; lat: number }> = [];
+
+  for (const [, group] of groups) {
+    if (group.length === 1) {
+      result.push({ prop: group[0], lng: group[0].lng, lat: group[0].lat });
+      continue;
+    }
+    // Sebarkan ke posisi-posisi sekeliling titik pusat (mulai dari atas, searah jam)
+    const angleStep = (2 * Math.PI) / group.length;
+    group.forEach((prop, i) => {
+      const angle = -Math.PI / 2 + i * angleStep;
+      result.push({
+        prop,
+        lng: prop.lng + Math.cos(angle) * spreadDeg,
+        lat: prop.lat + Math.sin(angle) * spreadDeg * 0.65,
+      });
+    });
+  }
+
+  return result;
+}
+
 
 export default function PropertyLayer() {
   const { map } = useMapInstance();
   const { selectedStation } = useSelectedStation();
+  const { selectedProperty } = useSelectedProperty();
   const { popupStyle, themeMode } = usePropertyPopupConfig();
   const { properties } = useProperties(selectedStation?.area_id ?? null);
 
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const activePopupRef = useRef<maplibregl.Popup | null>(null);
+  // Map property id → its Popup instance for programmatic open from sidebar
+  const popupMapRef = useRef<Map<string, { popup: maplibregl.Popup; prop: PropertyUnit }>>(new Map());
 
   useEffect(() => {
     if (!map) return;
@@ -149,7 +226,9 @@ export default function PropertyLayer() {
 
     if (!selectedStation) return;
 
-    properties.forEach((prop) => {
+    const placed = resolveOverlaps(properties);
+
+    placed.forEach(({ prop, lng, lat }) => {
       const el = document.createElement("div");
       el.className = "property-marker-container select-none";
 
@@ -175,18 +254,27 @@ export default function PropertyLayer() {
       );
 
       const popup = new maplibregl.Popup({
-        offset: [0, -22],
+        // anchor: 'bottom' → popup tip points down at the lnglat.
+        // offset [0, -30]: tip sits 30px above lnglat (5px clear gap above the
+        // 25px-tall pin svg whose anchor is 'bottom' = tip at lnglat).
+        // This is the ONLY place this offset is set — keeps positioning consistent
+        // regardless of popup content height.
+        anchor: "bottom",
+        offset: [0, -30] as [number, number],
         closeButton: true,
         closeOnClick: true,
         maxWidth: "300px",
       }).setHTML(popupHTML);
+
+      // Simpan dengan koordinat offset agar sidebar-click bisa buka di posisi yang benar
+      popupMapRef.current.set(prop.id, { popup, prop: { ...prop, lng, lat } });
 
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         if (activePopupRef.current) {
           activePopupRef.current.remove();
         }
-        popup.setLngLat([prop.lng, prop.lat]).addTo(map);
+        popup.setLngLat([lng, lat]).addTo(map);
         activePopupRef.current = popup;
       });
 
@@ -194,7 +282,7 @@ export default function PropertyLayer() {
         element: el,
         anchor: "bottom",
       })
-        .setLngLat([prop.lng, prop.lat])
+        .setLngLat([lng, lat])
         .addTo(map);
 
       markersRef.current.push(marker);
@@ -207,8 +295,23 @@ export default function PropertyLayer() {
       }
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
+      popupMapRef.current.clear();
     };
   }, [map, selectedStation, popupStyle, themeMode, properties]);
+
+  // 2. React to selectedProperty (klik dari sidebar) → buka popup pin yang sesuai
+  useEffect(() => {
+    if (!map || !selectedProperty) return;
+
+    const entry = popupMapRef.current.get(selectedProperty.id);
+    if (!entry) return; // properti mungkin belum di-render (stasiun berbeda)
+
+    if (activePopupRef.current) {
+      activePopupRef.current.remove();
+    }
+    entry.popup.setLngLat([entry.prop.lng, entry.prop.lat]).addTo(map);
+    activePopupRef.current = entry.popup;
+  }, [map, selectedProperty]);
 
   return null;
 }

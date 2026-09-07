@@ -18,6 +18,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapInstanceProvider } from "@/hooks/map/useMapInstance";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
 import { basemapStyleUrl, DEFAULT_BASEMAP_ID } from "@/lib/fixtures/layers";
 
 interface BaseMapProps {
@@ -32,6 +33,7 @@ export default function BaseMap({ children }: BaseMapProps) {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
 
   const { selectedStation } = useSelectedStation();
+  const { selectedProperty } = useSelectedProperty();
 
   // 1. Inisialisasi MapLibre GL + jaga canvas tetap sama besar dengan kontainernya.
   //
@@ -87,6 +89,20 @@ export default function BaseMap({ children }: BaseMapProps) {
       essential: true, // Hormati user preference tapi prioritaskan kelancaran animasi navigasi
     });
   }, [map, selectedStation]);
+
+  // 3. Unidirectional Reaction: Fly to selectedProperty (dari klik property card di sidebar)
+  // Zoom lebih dekat (16.5) supaya pin properti jelas terlihat.
+  useEffect(() => {
+    if (!map || !selectedProperty) return;
+
+    map.flyTo({
+      center: [selectedProperty.lng, selectedProperty.lat],
+      zoom: 16.5,
+      speed: 1.2,
+      curve: 1.4,
+      essential: true,
+    });
+  }, [map, selectedProperty]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">

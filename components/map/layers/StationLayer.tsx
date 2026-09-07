@@ -107,7 +107,10 @@ export default function StationLayer() {
             <img
               src="${svgSrc}"
               alt="${station.station_name}"
-              class="w-[54px] h-[60px] object-contain drop-shadow-md transition-transform duration-200"
+              class="${station.dataBelumCukup
+                ? 'w-[56px] h-[62px]'
+                : 'w-[80px] h-[88px]'
+              } object-contain transition-transform duration-200"
               draggable="false"
             />
           </div>

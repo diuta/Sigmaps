@@ -1,6 +1,8 @@
 "use client";
 
 import { useProperties } from "@/hooks/property/useProperties";
+import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
+import type { PropertyUnit } from "@/types/property";
 
 interface Props {
   stationId: string;
@@ -9,6 +11,11 @@ interface Props {
 /** Empat field per unit: kategori, jenis, alamat, foto. Tanpa luas, harga, kontak. */
 export default function PropertyList({ stationId }: Props) {
   const { properties, loading } = useProperties(stationId);
+  const { selectedProperty, setSelectedProperty } = useSelectedProperty();
+
+  function handleCardClick(unit: PropertyUnit) {
+    setSelectedProperty(unit);
+  }
 
   if (loading) {
     return <p className="t-body text-[var(--color-text-sub)]">Memuat properti...</p>;
@@ -30,7 +37,12 @@ export default function PropertyList({ stationId }: Props) {
           {properties.map((unit) => (
             <li
               key={unit.id}
-              className="flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-[var(--space-sm)] shadow-[var(--shadow-card)] transition-all duration-[var(--motion-fast)] hover:-translate-y-[1px] hover:border-[var(--color-pin)] hover:shadow-[var(--shadow-float)]"
+              onClick={() => handleCardClick(unit)}
+              className={`flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border bg-[var(--color-surface)] p-[var(--space-sm)] shadow-[var(--shadow-card)] transition-all duration-[var(--motion-fast)] cursor-pointer hover:-translate-y-[1px] hover:shadow-[var(--shadow-float)] ${
+                selectedProperty?.id === unit.id
+                  ? "border-[var(--color-pin)] ring-1 ring-[var(--color-pin)] -translate-y-[1px]"
+                  : "border-[var(--color-border)] hover:border-[var(--color-pin)]"
+              }`}
             >
               {unit.foto_tampak_depan ? (
                 // eslint-disable-next-line @next/next/no-img-element

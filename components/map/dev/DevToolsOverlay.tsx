@@ -133,6 +133,19 @@ export default function DevToolsOverlay() {
                     <span>📦 3. Vertical Card (Format Awal)</span>
                     <span className="text-[9px] opacity-75 font-mono">Tall</span>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPopupStyle("vertical-card-v2")}
+                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] text-left transition-all ${
+                      popupStyle === "vertical-card-v2"
+                        ? "bg-emerald-600/90 text-white font-semibold border border-emerald-400/40 shadow-sm"
+                        : "bg-slate-800/70 text-slate-300 hover:bg-slate-700/70"
+                    }`}
+                  >
+                    <span>✨ 4. Premium V2 (Gradient Hero)</span>
+                    <span className="text-[9px] opacity-75 font-mono">New</span>
+                  </button>
                 </div>
               </div>
 
