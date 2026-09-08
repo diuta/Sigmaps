@@ -1,4 +1,4 @@
-export type PropertyPopupStyle = "sleek" | "slender-detail" | "vertical-card";
+export type PropertyPopupStyle = "sleek" | "slender-detail" | "vertical-card" | "vertical-card-v2";
 
 export interface PropertyPopupConfigContextValue {
   popupStyle: PropertyPopupStyle;

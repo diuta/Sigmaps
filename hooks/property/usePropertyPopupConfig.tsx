@@ -22,7 +22,7 @@ export function PropertyPopupConfigProvider({
 }: {
   children: ReactNode;
 }) {
-  const [popupStyle, setPopupStyle] = useState<PropertyPopupStyle>("sleek");
+  const [popupStyle, setPopupStyle] = useState<PropertyPopupStyle>("vertical-card-v2");
   const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
 
   return (
