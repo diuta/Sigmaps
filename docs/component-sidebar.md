@@ -13,11 +13,13 @@ Lima belas komponen, satu file satu tanggung jawab:
 | `BusinessBriefInput.tsx` | Textarea + chip contoh + tombol kirim |
 | `SubmittedBrief.tsx` | Brief yang sudah dikirim, tampak nonaktif, tombol "Ubah" |
 | `OutputSection.tsx` | Bagian bawah: memilih panel mana yang tampil |
-| `StationNoBriefPanel.tsx` | Kawasan diklik di peta tapi brief belum diisi |
+| `StationNoBriefPanel.tsx` | Kawasan diklik di peta tapi brief belum diisi — gambaran kawasan + `PropertyList` |
 | `ScoredPanel.tsx` | Panel hasil: peringkat, komponen skor, sentimen, properti |
 | `RankStrip.tsx` | Deretan tombol angka 1..n untuk pindah peringkat |
 | `ScoreComponentBar.tsx` | Satu bar komponen (D/C/S) + kalimat penjelas |
 | `AreaInsightBlock.tsx` | Ringkasan AI Community Activity |
+| `AreaGapBlock.tsx` | Chip "Kategori yang belum banyak di sini" — **isinya masih dummy** |
+| `AiLoadingBlock.tsx` | Skeleton berdenyut selagi menunggu keluaran AI |
 | `PropertyList.tsx` | Kartu unit Properti Go yang bisa diklik — presentational, datanya dari pemanggil |
 | `PropertyDetail.tsx` | Halaman detail satu unit + tombol kembali |
 | `UnrankableNotice.tsx` | Daftar kawasan yang tidak dinilai |
@@ -90,7 +92,7 @@ hanya panel itu yang memakainya.
 | Keadaan | Yang tampil |
 |---|---|
 | Belum ada brief, belum ada stasiun dipilih | tidak ada apa-apa (hanya bagian brief) |
-| Stasiun diklik di peta, brief belum dinilai | `StationNoBriefPanel` (nama kawasan + ajakan menulis rencana + `PropertyList`) |
+| Stasiun diklik di peta, brief belum dinilai | `StationNoBriefPanel` (nama kawasan + ajakan menulis rencana + `AreaGapBlock` + `AreaInsightBlock` + `PropertyList`) |
 | Brief sudah dinilai | `ScoredPanel` (didahului `PriceAssumptionNotice` bila perlu) |
 | Satu unit properti diklik | `PropertyDetail` — mengambil alih **seluruh** panel hasil |
 
@@ -146,8 +148,31 @@ Blok sentimen AI berada di **tab skor**, bukan tab unit — ia konteks tentang k
 pertanyaan yang sama dengan skor. `UnrankableNotice` juga di tab skor, karena ia menjawab
 "kenapa kawasan lain tidak ada di peringkat".
 
-`StationNoBriefPanel` sengaja **tanpa** tab: di sana hanya ada satu hal untuk ditampilkan, jadi
-tab-bar berisi satu tab cuma derau.
+`StationNoBriefPanel` sengaja **tanpa** tab: semua isinya menjawab satu pertanyaan yang sama
+("kawasan ini seperti apa?"), jadi tab-bar cuma derau.
+
+### Gambaran kawasan sebelum brief
+
+Sejak 8 September 2026, `StationNoBriefPanel` tidak lagi hanya berisi daftar properti. Urutannya:
+breadcrumb → nama kawasan → `AreaGapBlock` → `AreaInsightBlock` → `PropertyList`. Alasannya, saat
+itulah user memutuskan kawasan mana yang layak ditulis rencananya — kalau tidak ada gambaran apa
+pun, keputusan itu diambil tanpa dasar.
+
+- `AreaInsightBlock` di sini memakai hook yang sama dengan `ScoredPanel`
+  (`useCommunitySentiment(area_id)`), jadi **tidak ada endpoint baru**. Konsekuensinya: tiap klik
+  pin stasiun memicu satu panggilan Gemini, karena endpoint itu belum punya cache. Lihat
+  [api-community-sentiment.md](api-community-sentiment.md).
+- Blok hanya dirender kalau `ringkasan` tidak kosong; saat `error`, panel **tidak menampilkan apa
+  pun** — kegagalan AI tidak boleh menghalangi daftar properti.
+- ⚠️ **`AreaGapBlock` masih dummy.** Isinya `DUMMY_KATEGORI_JARANG` yang diekspor dari file
+  komponennya sendiri, bukan data. Rencana sumber aslinya: field `kategori_jarang` yang menumpang
+  panggilan Gemini yang sudah ada di `/api/community-sentiment` (bukan titik sentuh AI ketiga),
+  divalidasi ke daftar `tipe3_values`. Perubahan itu ada di `app/api/`, `lib/ai/`, dan
+  `types/sentiment/` — di luar zona sidebar, jadi ditunda.
+- Blok **"Isi kawasan sekarang"** (jumlah pedagang per kategori) yang ada di mockup **tidak
+  dibuat**: tidak ada view/tabel yang menyimpan komposisi pedagang per kawasan.
+  `properti_go_by_station` hanya punya `kategori_properti` (jenis properti yang disewakan, bukan
+  jenis pedagang) dan `scored_areas` hanya menyimpan komponen 0–1 + `n_observations`.
 
 **Hanya `TOP_N` (5, konstanta di `ScoredPanel.tsx`) kawasan teratas yang ditampilkan**, walau `/api/score` mengembalikan
 semua kawasan yang dapat diperingkat (di data sekarang: 11).
@@ -167,11 +192,43 @@ rentang sengaja digambar **di atas** isian bar, karena kalau di belakang ia sela
 | Usaha non-kuliner | `Sidebar` (blok `error`) | `/api/prompt-request` balas 400, pesannya ditampilkan apa adanya |
 | `confidence` rendah | — | Sengaja tidak memblokir apa pun (§6.6) |
 
+## Menunggu AI
+
+Ada tiga masa tunggu AI di sidebar, dan ketiganya memakai komponen yang sama,
+`AiLoadingBlock` — skeleton berdenyut sebentuk dengan `AreaInsightBlock` (border kiri accent +
+tiga batang abu-abu + "AI sedang menulis..."). Bentuknya sengaja menyerupai hasil akhirnya
+supaya ruangnya sudah dipesan: begitu teks AI datang, isi di bawahnya tidak melompat.
+
+| Tempat | Menunggu |
+|---|---|
+| `StationNoBriefPanel` | `useCommunitySentiment` — gambaran kawasan sebelum brief |
+| `ScoredPanel` (tab skor) | `useCommunitySentiment` — gambaran kawasan peringkat yang aktif |
+| `OutputSection` | `useBriefResult` — `/api/prompt-request` lalu `/api/score` |
+
+Catatan implementasi:
+
+- **`OutputSection` menerima prop `loading`** dari `Sidebar`, dan penanda tunggunya dirender di
+  **atas** isi yang sudah ada, bukan menggantikannya — selama menunggu, user tetap bisa membaca
+  kawasan yang sedang dilihatnya, dan hasil lama yang sudah tidak cocok sudah diredupkan lewat
+  mekanisme `stale`.
+- **Early-return `OutputSection` ikut mengecek `loading`**
+  (`if (!scored && !selectedStation && !loading) return null`). Pada penilaian pertama belum ada
+  stasiun terpilih maupun skor, jadi tanpa pengecekan itu komponennya keluar duluan dan penanda
+  tunggu tidak pernah sempat tampil.
+- **Denyutnya `animate-pulse` bawaan Tailwind**, bukan keyframes baru — `app/globals.css` zona
+  rekan dan tidak disentuh. Aturan `prefers-reduced-motion` di sana sudah berlaku ke `*`, jadi
+  denyutnya otomatis mati untuk yang memintanya.
+- **Saat AI gagal (`error`), tidak ada yang dirender.** Kegagalan ringkasan tidak boleh
+  menghalangi daftar properti atau bar skor.
+
+---
+
 ## Aturan warna (jangan ditukar)
 
 - `--color-opportunity` (emerald): **hanya** untuk keluaran deterministik — angka skor dan bar
   D/C/S.
-- `--color-accent` (ultramarine): **hanya** untuk keluaran AI — `AreaInsightBlock`.
+- `--color-accent` (ultramarine): **hanya** untuk keluaran AI — `AreaInsightBlock`, `AreaGapBlock`,
+  `AiLoadingBlock`.
 - `--color-warning` (amber): peringatan/keterbatasan data.
 - `--color-pin` (tangerine): properti.
 

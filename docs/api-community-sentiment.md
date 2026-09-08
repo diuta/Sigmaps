@@ -59,3 +59,15 @@ Respons gagal:
   karena kuota Gemini per project dipakai bersama semua pengunjung — endpoint ini memanggil
   Gemini setiap request. Perlu ditambahkan sebelum publik (lihat juga `middleware.ts`
   rate-limit di `CLAUDE.md`).
+- ⚠️ **Sejak 8 September 2026 pemanggilnya bertambah**, dan ini memperbesar dampak butir cache
+  di atas. Dulu endpoint ini hanya dipanggil `ScoredPanel` (setelah user mengirim rencana
+  usaha); sekarang `StationNoBriefPanel` juga memanggilnya, jadi **tiap klik pin stasiun di peta
+  = satu panggilan Gemini**, termasuk oleh user yang cuma menjelajah peta. Diterima sadar demi
+  gambaran kawasan sebelum brief, tapi jadikan cache prioritas pertama kalau kuota mulai terasa.
+- **Rencana field `kategori_jarang` belum dikerjakan.** Sidebar sudah punya `AreaGapBlock`
+  ("Kategori yang belum banyak di sini") dengan isi dummy. Sumber aslinya direncanakan menumpang
+  panggilan Gemini di endpoint ini — tambah satu field ke `CommunitySentimentSchema` dan satu
+  baris di system prompt `lib/ai/summarizeSentiment.ts`, lalu filter hasilnya ke daftar
+  `tipe3_values` (`lib/tipe3/index.ts`) supaya kosakatanya sama dengan yang dimengerti
+  `/api/score`. Sengaja **bukan** endpoint baru: menambah endpoint AI berarti titik sentuh AI
+  ketiga, sesuatu yang dibatasi `docs/fe/ARCHITECTURE.md`.

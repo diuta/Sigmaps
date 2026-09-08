@@ -69,6 +69,23 @@ Dokumen acuan struktur direktori dan aturan kolaborasi frontend (**Caca & Clemen
 isokron 5 menit, H3/heatmap, `risk_level`, filter percakapan AI, export PDF, matriks
 perbandingan properti.
 
+**Pengecualian, diputuskan 8 September 2026 — blok "Kategori yang belum banyak di sini".**
+`StationNoBriefPanel` sekarang menampilkan chip kategori yang jarang di kawasan
+(`components/sidebar/AreaGapBlock.tsx`), di keadaan sebelum user mengisi rencana usaha. Ini
+mirip "narasi AI dari skor" yang dicoret di atas, tapi **tidak sama**: dia tidak menjelaskan
+skor dan tidak muncul di `ScoredPanel`, jadi tidak bersaing dengan penjelasan deterministik —
+dia gambaran kawasan untuk membantu memilih kawasan mana yang layak dinilai.
+
+Dua batasan yang tetap berlaku untuk blok ini:
+
+1. **Tetap dua titik sentuh AI.** Isi chip direncanakan menumpang panggilan Gemini yang sudah
+   ada di `/api/community-sentiment` (satu request, satu panggilan model, cuma bertambah satu
+   field di JSON balasannya) — **bukan** endpoint AI baru.
+2. **Sekarang isinya masih dummy.** Perubahan backend-nya (`app/api/`, `lib/ai/`,
+   `types/sentiment/`) berada di luar zona sidebar dan sengaja belum dikerjakan. Chip-nya
+   memakai `--color-accent` seperti keluaran AI lain, dan komponennya menyatakan sendiri bahwa
+   isinya contoh.
+
 ---
 
 ## 3. Struktur direktori (keadaan nyata)

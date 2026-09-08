@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AiLoadingBlock from "@/components/sidebar/AiLoadingBlock";
 import PriceAssumptionNotice from "@/components/sidebar/PriceAssumptionNotice";
 import PropertyDetail from "@/components/sidebar/PropertyDetail";
 import ScoredPanel from "@/components/sidebar/ScoredPanel";
@@ -11,6 +12,8 @@ import { useBriefResult } from "@/hooks/brief/useBriefResult";
 import type { PropertyUnit } from "@/types/property";
 
 interface Props {
+  /** Rencana sedang dinilai: /api/prompt-request lalu /api/score. */
+  loading: boolean;
   /** Ada brief yang sudah dinilai. */
   scored: boolean;
   /** Rencana sedang disunting, jadi hasil di bawah belum tentu cocok lagi. */
@@ -22,7 +25,7 @@ interface Props {
  * Bagian bawah sidebar. Berdiri sendiri dari bagian rencana di atasnya: membuka
  * penyunting rencana hanya meredupkan bagian ini, tidak melepasnya dari layar.
  */
-export default function OutputSection({ scored, stale, onEditBrief }: Props) {
+export default function OutputSection({ loading, scored, stale, onEditBrief }: Props) {
   const { selectedStation } = useSelectedStation();
   const { intent, scoreResult } = useBriefResult();
 
@@ -51,7 +54,9 @@ export default function OutputSection({ scored, stale, onEditBrief }: Props) {
   }
 
   // Tampilan awal: hanya bagian rencana. Belum ada kawasan yang dipilih di peta.
-  if (!scored && !selectedStation) return null;
+  // `loading` ikut dicek: pada penilaian pertama belum ada stasiun terpilih MAUPUN skor, jadi
+  // tanpa ini penanda tunggu di bawah tidak akan pernah sempat tampil.
+  if (!scored && !selectedStation && !loading) return null;
 
   const perkiraanHarga = scoreResult?.catatan.harga_sumber === "perkiraan";
 
@@ -60,6 +65,11 @@ export default function OutputSection({ scored, stale, onEditBrief }: Props) {
       <hr className="border-0 border-t border-[var(--color-border)]" />
 
       {!detail && stale && <StaleOutputNotice />}
+
+      {/* Di ATAS isi lama, bukan menggantikannya: selama menunggu, user tetap bisa membaca
+          kawasan yang sedang dilihatnya. Hasil lama yang sudah tidak cocok sudah diredupkan
+          lewat mekanisme `stale`. */}
+      {!detail && loading && <AiLoadingBlock judul="Menilai kawasan" />}
 
       {detail && (
         <PropertyDetail

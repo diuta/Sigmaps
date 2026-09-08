@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AiLoadingBlock from "@/components/sidebar/AiLoadingBlock";
 import AreaInsightBlock from "@/components/sidebar/AreaInsightBlock";
 import PropertyList from "@/components/sidebar/PropertyList";
 import RankStrip from "@/components/sidebar/RankStrip";
@@ -76,7 +77,7 @@ export default function ScoredPanel({ onSelectProperty }: Props) {
   const demandObservedRange = observedRange(allRanked.map((area) => area.komponen.demand));
 
   const area = rankedAreas.find((a) => a.area_id === activeAreaId) ?? rankedAreas[0] ?? null;
-  const { sentiment } = useCommunitySentiment(area?.station_id ?? null);
+  const { sentiment, loading: sentimentLoading } = useCommunitySentiment(area?.station_id ?? null);
 
   // Diambil DI SINI, bukan di dalam PropertyList: jumlahnya dipakai label tab, dan memanggil
   // hook yang sama dua kali berarti dua permintaan /api/properties untuk stasiun yang sama.
@@ -197,7 +198,12 @@ export default function ScoredPanel({ onSelectProperty }: Props) {
             />
           ))}
 
-          {sentiment?.ringkasan && <AreaInsightBlock paragraf={sentiment.ringkasan} />}
+          {/* Gagal ambil ringkasan tidak merender apa pun — jangan halangi isi tab lainnya. */}
+          {sentimentLoading ? (
+            <AiLoadingBlock judul="Gambaran kawasan" />
+          ) : (
+            sentiment?.ringkasan && <AreaInsightBlock paragraf={sentiment.ringkasan} />
+          )}
 
           {/* Paling bawah dan tertutup: menjawab "kenapa kawasan lain tidak ada di peringkat",
               pertanyaan yang sama dengan tab ini — bukan bagian dari katalog unit. */}
