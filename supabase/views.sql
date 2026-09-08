@@ -51,6 +51,41 @@ select
 from community_activity c
 join scored_areas a on ST_Within(c.geom, a.geom);
 
+-- Titik stasiun + kawasan isokronnya, satu baris per stasiun.
+--
+-- Catatan di kepala berkas ini benar: tabel `stasiun` SENDIRI tidak butuh view, karena
+-- koordinatnya dua kolom angka biasa dan tidak ada spatial join yang menyentuhnya. View ini
+-- ada karena alasan yang BERBEDA — dia menarik `scored_areas.geom`, yang memang kolom
+-- geometry PostGIS, sehingga jatuh tepat ke alasan nomor 2 di atas: PostgREST mengembalikan
+-- WKB hex untuk kolom geometry, bukan GeoJSON.
+--
+-- LEFT JOIN, bukan INNER: kalau pipeline batch belum jalan, `scored_areas` kosong dan
+-- stasiunnya tetap harus tampil di peta — `isokron`, `area_km2`, dan `is_rankable` bernilai
+-- NULL, dan itu kondisi normal, bukan galat.
+--
+-- Dipakai app/api/stations/route.ts untuk dua hal sekaligus:
+--   1. IsochroneLayer menggambar POLIGON MAPID ASLI, menggantikan lingkaran sintetis dari
+--      lib/map/isochrone-generator.ts (helper sementara dari masa B-1 masih memblokir).
+--   2. `is_rankable` memberi peta penanda "data belum cukup" (context-mvp.md §6.8). Tanpa
+--      ini, 32 kawasan yang belum bisa dinilai terlihat sama dengan kawasan yang sudah
+--      dinilai tapi skornya rendah — ketiadaan data tersaji seolah penilaian negatif.
+--      Penandanya tidak bisa datang dari /api/score, yang sengaja hanya mengirim Top 5.
+create or replace view stasiun_kawasan as
+select
+  s.station_id,
+  s.nama,
+  s.tipe_3,
+  s.kecamatan,
+  s.kabkot,
+  s.longitude,
+  s.latitude,
+  a.area_id,
+  a.area_km2,
+  a.is_rankable,
+  ST_AsGeoJSON(a.geom)::json as isokron
+from stasiun s
+left join scored_areas a on a.station_id = s.station_id;
+
 -- Sumber tunggal daftar TIPE_3 (context/context-mvp.md §6.8b: "TIPE_3_VALUES wajib
 -- dihasilkan dari query, bukan diketik manual" — mencegah enum kode dan isi tabel diam-diam
 -- berbeda). Ini juga butuh view walau tidak ada geometry/join sama sekali, karena PostgREST

@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
 import { CommunitySentimentQuerySchema } from '@/lib/schemas/community-sentiment'
-import { summarizeSentiment, type SentimentReport } from '@/lib/ai/summarizeSentiment'
+import {
+  summarizeSentiment,
+  SentimentUnavailableError,
+  SentimentValidationError,
+  type SentimentReport,
+} from '@/lib/ai/summarizeSentiment'
 
 export async function GET(request: Request) {
   const stationId = new URL(request.url).searchParams.get('station_id')
@@ -34,6 +39,26 @@ export async function GET(request: Request) {
     return NextResponse.json({ data: summary })
   } catch (err) {
     console.error(err)
+
+    // Dibedakan dengan `instanceof` supaya pesannya benar-benar memberi tahu
+    // pengguna apa yang terjadi (context-mvp.md §6.8b). "Gagal memproses
+    // ringkasan" menyembunyikan bahwa masalahnya sementara dan bisa dicoba lagi.
+    if (err instanceof SentimentUnavailableError) {
+      // Kuota Gemini berlaku per project, bukan per kunci — seluruh pengunjung
+      // berbagi satu kuota. Peta, /api/stations, dan /api/score tetap jalan
+      // tanpa endpoint ini (degradasi anggun).
+      return NextResponse.json(
+        { error: 'Layanan AI sedang penuh, gunakan filter manual' },
+        { status: 503 }
+      )
+    }
+    if (err instanceof SentimentValidationError) {
+      return NextResponse.json(
+        { error: 'Ringkasan tidak dapat ditafsirkan' },
+        { status: 422 }
+      )
+    }
+
     return NextResponse.json({ error: 'Gagal memproses ringkasan' }, { status: 503 })
   }
 }
