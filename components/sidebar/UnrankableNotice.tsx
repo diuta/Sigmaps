@@ -11,24 +11,37 @@ interface Props {
  * Kawasan tanpa data cukup: tidak diberi skor dan tidak diberi nomor peringkat.
  * /api/score tidak pernah mengirim kawasan is_rankable=false (lihat docs/api-score.md),
  * jadi tidak ada n_observations untuk ditampilkan di sini — hanya nama stasiunnya.
+ *
+ * Sengaja tenang dan tertutup secara bawaan, ditaruh paling bawah panel: ini keterbatasan
+ * data, bukan peringatan atas sesuatu yang pengguna lakukan, jadi tidak boleh bersaing
+ * perhatian dengan hasil skor. Memakai <details> bawaan peramban — buka/tutup, fokus
+ * keyboard, dan semantiknya sudah ada tanpa state React.
  */
 export default function UnrankableNotice({ stations }: Props) {
   if (stations.length === 0) return null;
 
   return (
-    <section className="flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-[var(--space-md)]">
-      <h2 className="t-heading-2 text-[var(--color-warning-tx)]">Data belum cukup</h2>
-      <p className="t-body text-[var(--color-warning-tx)]">
-        Kawasan berikut tidak dinilai dan tidak masuk peringkat karena jumlah pengamatannya
-        terlalu sedikit.
-      </p>
-      <ul className="flex flex-col gap-[var(--space-xs)]">
-        {stations.map((station) => (
-          <li key={station.station_id} className="t-body text-[var(--color-warning-tx)]">
-            {station.station_name}
-          </li>
-        ))}
-      </ul>
-    </section>
+    <details className="group border-t border-[var(--color-border)] pt-[var(--space-md)]">
+      <summary className="t-micro flex cursor-pointer list-none items-center gap-[var(--space-xs)] font-normal text-[var(--color-muted)] transition-colors duration-[var(--motion-fast)] hover:text-[var(--color-text-sub)]">
+        <span aria-hidden className="transition-transform duration-[var(--motion-fast)] group-open:rotate-90">
+          ›
+        </span>
+        {stations.length} kawasan tidak dinilai
+      </summary>
+
+      <div className="flex flex-col gap-[var(--space-xs)] pt-[var(--space-sm)] pl-[var(--space-md)]">
+        <p className="t-micro font-normal text-[var(--color-muted)]">
+          Pengamatannya terlalu sedikit untuk diberi skor, jadi kawasan ini tidak masuk
+          peringkat.
+        </p>
+        <ul className="flex flex-col gap-[var(--space-xs)]">
+          {stations.map((station) => (
+            <li key={station.station_id} className="t-body text-[var(--color-text-sub)]">
+              {station.station_name}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </details>
   );
 }

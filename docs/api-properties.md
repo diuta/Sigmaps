@@ -44,7 +44,7 @@ Respons gagal:
 ## Dependency/prasyarat
 
 - [lib/supabase/server.ts](lib-supabase-server.md).
-- [lib/properties.ts](../lib/properties.ts) — transform baris view ke FeatureCollection (pure).
+- [lib/property/index.ts](lib-properties.md) — transform baris view ke FeatureCollection (pure).
 - View `properti_go_by_station` di `supabase/views.sql` — wajib dijalankan lebih dulu di
   project Supabase (spatial join `ST_Within` + konversi GeoJSON tidak bisa lewat query
   builder PostgREST biasa, jadi dibungkus jadi view lalu difilter `.eq('station_id', ...)`

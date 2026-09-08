@@ -4,14 +4,42 @@ Dokumen acuan baku spesifikasi teknis desain dan antarmuka untuk tim perancang d
 
 ---
 
+> 🔄 **Disinkronkan dengan kode 7 September 2026.** Perubahan utama dari versi sebelumnya:
+> sidebar berada di **kiri** (bukan kanan), ditambah token motion, `--sidebar-width`, kelas
+> tipografi `.t-*`, spesifikasi `LayerPanel`, dan varian popup properti. Definisi token yang
+> benar-benar dipakai ada di `app/globals.css`.
+
+---
+
 ### 1. Canvas & Structural Layout
 
 * **Base Desktop Canvas:** `1440px × 900px`
 
-* **Sidebar Kanan Tunggal (Right-Aligned Singular Sidebar):** `380px` (Fixed Width, Full Height `100vh`)
+* **Sidebar Kiri Tunggal (Left-Aligned Singular Sidebar):** panel **melayang** di atas peta —
+`fixed inset-y-0 left-0`, lebar `min(--sidebar-width, 100vw)` (380px), tinggi penuh,
+`border-r`, latar `--color-surface-muted`, isi panel `overflow-y-auto`
+    * *Catatan:* versi dokumen sebelumnya menetapkan sidebar di kanan (`border-l`).
+      Implementasi menaruhnya di kiri dan **itu yang berlaku** — keputusan 7 September 2026.
+
+* **Buka/tutup:** `translate-x-0` ↔ `-translate-x-full`, transisi `--motion-base` +
+`--ease-out`. **Yang dianimasikan wajib `transform`, bukan `width`** — menganimasikan lebar
+membuat kontainer peta ikut menyusut bertahap, dan `ResizeObserver` di `BaseMap` memanggil
+`map.resize()` di tiap langkahnya sehingga peta berkedip. Lihat `docs/component-sidebar.md`.
+
+* **Tombol tab buka/tutup:** `24×48px`, menempel di **tepi kanan sidebar, rata tengah
+vertikal** (`absolute left-full top-1/2 -translate-y-1/2`), sudut kanan membulat
+(`rounded-r`), border kiri dilepas supaya menyatu dengan panel, `elevation-subtle`, ikon `‹`
+(tutup) / `›` (buka). Karena menempel pada sidebar, ia ikut bergeser saat panel keluar layar
+dan berhenti persis di tepi kiri layar — **selalu** terlihat di kedua keadaan.
+
+* **Breakpoint `768px`** hanya menentukan keadaan awal: di bawah 768px halaman dibuka dengan
+panel tertutup supaya peta terlihat lebih dulu. Setelah pengguna menekan tombol, pilihannya
+yang menang. Tidak ada perbedaan bentuk antara desktop dan mobile.
 
 
-* **Area Kanvas Peta (Map Viewport):** Sisa area layar responsif (`calc(100vw - 380px)`)
+* **Area Kanvas Peta (Map Viewport):** **selalu selebar layar penuh** (`flex-1` tanpa saingan,
+karena sidebar `fixed` keluar dari alur). Sidebar menumpanginya di `z-50`; bagian peta di balik
+panel tetap dirender, hanya tertutup.
 
 
 * **Z-Index Layering:**
@@ -22,8 +50,8 @@ Dokumen acuan baku spesifikasi teknis desain dan antarmuka untuk tim perancang d
 
 * Map Station Markers: `z-30`
 
-* Map Tooltip / Hover Cards: `z-40`
-* Right Sidebar Container: `z-50`
+* Map Tooltip / Hover Cards, Panel Tampilan Peta (`LayerPanel`), Dev Tools: `z-40`
+* Left Sidebar Container: `z-50`
 
 
 
@@ -90,7 +118,14 @@ Dokumen acuan baku spesifikasi teknis desain dan antarmuka untuk tim perancang d
 
 ### 3. Typography System (Plus Jakarta Sans)
 
-Font Family: `'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif`
+Font Family: `'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif` — dimuat lewat
+`next/font/google` di `app/layout.tsx` sebagai `--font-jakarta`.
+
+Ketujuh token di bawah **sudah tersedia sebagai kelas utilitas** di `app/globals.css`; pakai
+kelasnya, jangan menulis ulang `text-[13px] leading-[18px] font-normal` di komponen:
+`.t-display-score` · `.t-heading-1` · `.t-heading-2` · `.t-body` · `.t-button` · `.t-tabular` ·
+`.t-micro`. (`.t-micro` default-nya `font-semibold`; untuk keterangan sekunder yang tidak perlu
+tebal, tambahkan `font-normal`.)
 
 | Token Style | Font Size | Line Height | Weight | Tracking / Letter Spacing | Penggunaan Elemen |
 | --- | --- | --- | --- | --- | --- |
@@ -137,6 +172,20 @@ Font Family: `'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif
 * **Shadows & Elevation:**
 * `elevation-subtle` (Cards): `0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)`
 * `elevation-float` (Hover Tooltips & Drawer): `0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03)`
+
+
+* **Layout:**
+* `--sidebar-width`: `380px` (satu-satunya sumber lebar sidebar — jangan tulis `w-[380px]` lagi di komponen)
+
+
+* **Motion** (tidak ada di versi dokumen sebelumnya, ditambahkan mengikuti `app/globals.css`):
+* `--motion-fast`: `120ms` — hover, tekan tombol, toggle
+* `--motion-base`: `200ms` — transisi opasitas panel (mis. hasil yang diredupkan saat brief disunting)
+* `--motion-slow`: `320ms` — pengisian bar komponen skor
+* `--ease-out`: `cubic-bezier(0.16, 1, 0.3, 1)`
+* Animasi masuk: `motion-rise-in` (panel hasil), `motion-pop-in` (panel melayang)
+* Bar skor dianimasikan dengan `transform: scaleX()`, **bukan** `width` — animasi lebar memicu
+  layout tiap frame
 
 
 
@@ -191,58 +240,140 @@ Font Family: `'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif
 
 
 * **Polygon Fill:** `#1E40AF` dengan tingkat transparansi/opacity `12%` agar jaringan jalan basemap tetap terbaca jelas.
+* **Inner Core Fill:** `#1E40AF` opacity `8%` (hanya digambar bila datanya menyediakan feature `inner-core`).
+* ⚠️ Poligon yang tampil sekarang masih **sintetis** dari `lib/map/isochrone-generator.ts`, bukan
+isokron jaringan jalan MAPID — lihat `docs/component-map-layers.md`.
 
+#### D. Panel Tampilan Peta (`LayerPanel`)
 
+* **Posisi:** melayang di pojok **kanan bawah** area peta (`z-40`), dibuka lewat tombol
+"Tampilan peta"; panel `280px`, `elevation-float`, animasi `motion-pop-in`.
+* **Isi, hanya tiga hal:** daftar centang visibilitas layer, penggeser opasitas (20–100%, langkah 5),
+dan pemilih peta dasar (Jalan / Terang / Gelap / Satelit, grid 2 kolom).
+* **Batas tegas:** panel ini **hanya mengatur tampilan peta**. Tidak ada keterangan asal data,
+tidak ada penjelasan komponen skor, tidak ada filter analisis di sini.
+* ⚠️ Komponennya sudah ada tapi **belum dipasang** di `app/page.tsx`.
+
+#### E. Popup Unit Properti
+
+Tiga varian yang bisa dipilih saat pengembangan (`usePropertyPopupConfig`), tema terang/gelap:
+
+* `sleek` — pil horizontal ±215–250px: thumbnail kotak 52px + judul + badge "Siap Sewa"/"Siap Jual" (default).
+* `slender-detail` — `sleek` + satu baris alamat ringkas.
+* `vertical-card` — kartu vertikal, foto di atas.
+
+Badge memakai emerald untuk Sewa dan biru untuk Jual. **Tetap berlaku: tanpa harga, tanpa luas,
+tanpa kontak.**
 
 ---
 
-### 6. Component Blueprint: Singular Right Sidebar
+### 6. Component Blueprint: Singular Left Sidebar
 
-Sidebar kanan menampung transisi vertikal dari mode input ke mode hasil penelusuran.
+Sidebar kiri menampung transisi vertikal dari mode input ke mode hasil penelusuran. Bagian
+rencana (atas) dan bagian hasil (bawah) berdiri sendiri: membuka penyunting rencana hanya
+**meredupkan** bagian hasil (opacity 65%), tidak melepasnya dari layar.
+
+```text
+            TERTUTUP                        TERBUKA
+┌─────────────────────────────┐   ┌───────────┬─────────────────────┐
+│                             │   │ RENCANA   │                     │
+│                             │   │ USAHA     │   peta utuh di      │
+│[›]      PETA (utuh)         │   │ ...     [‹]   bawah panel       │
+│                             │   │           │                     │
+└─────────────────────────────┘   └───────────┴─────────────────────┘
+ tombol tab menempel di tepi       panel melayang di atas peta;
+ kiri layar, rata tengah           lebar peta tidak pernah berubah
+```
 
 ```text
 ┌────────────────────────────────────────┐
-│ [SIGMAPS]              Status: Jakarta │
-├────────────────────────────────────────┤
-│ ▼ BUSINESS BRIEF                       │
+│ ▼ RENCANA USAHA                        │
 │ ┌────────────────────────────────────┐ │
-│ │ Textarea (min-h: 80px, bg: white)  │ │
+│ │ Textarea (bg: surface)             │ │
 │ └────────────────────────────────────┘ │
-│ [Suggestion Pills: "Kedai Kopi", ...]  │
-│ [Button: "NILAI KAWASAN" (#0F172A)]    │
+│ [Chip contoh: "Kedai kopi kecil", ...] │
+│ [Button: "Nilai kawasan"]              │
 ├────────────────────────────────────────┤
-│ (State Setelah Submit: Brief Melipat)  │
-│ ┌────────────────────────────────────┐ │
-│ │ 🔍 BRIEF AKTIF              [Ubah] │ │
-│ │ [KAFE DAN RESTO] [Target: Rp18.000]│ │
-│ └────────────────────────────────────┘ │
+│ (Setelah dikirim: brief jadi ringkasan │
+│  yang sengaja tampak nonaktif + [Ubah])│
 ├────────────────────────────────────────┤
-│ HASIL REKOMENDASI KAWASAN              │
-│ ┌────────────────────────────────────┐ │
-│ │ #1 STASIUN TANAH ABANG   Skor 78.3 │ │
-│ │ Permintaan (D)       [===   ] 0.52 │ │
-│ │ Ruang Kompetisi (C)  [===== ] 0.92 │ │
-│ │ Kesesuaian Harga (S) [====  ] 0.75 │ │
-│ └────────────────────────────────────┘ │
+│ ⚠ Harga tidak Anda sebutkan, kami      │
+│   perkirakan Rp25.000  [Ubah rencana]  │
 ├────────────────────────────────────────┤
-│ (Saat Stasiun Dipilih: Panel Detail)   │
-│ [ Tab 1: Sentimen AI ] [ Tab 2: Unit ] │
+│ Peringkat › Tanah Abang                │
+│ [1][2][3][4][5]   ← RankStrip, maks 5  │
+│ TANAH ABANG                       78.3 │
+│ Peringkat 1 dari 5 · 28 pengamatan     │
+├────────────────────────────────────────┤
+│ ┌Skor┐ Unit properti (7)   ← tab bar   │
+│ ══════                                 │
 │                                        │
-│ • Konten Tab 1: Ringkasan narasi       │
-│   Community Activity sekitar stasiun   │
+│ TAB "SKOR":                            │
+│ Permintaan            Bobot 0,25  0,53 │
+│ [████▌ ‖   ‖              ]            │
+│ "Tingkat keramaian ... di tengah."     │
 │                                        │
-│ • Konten Tab 2: Kartu Unit Properti    │
-│   (Thumbnail 64px, Kategori, Alamat)   │
-│   *Strict: No Price, No Size, No Phone │
+│ Ruang kompetisi       Bobot 0,50  0,93 │
+│ [█████████▌               ]            │
+│ Kecocokan segmen harga Bobot 0,25 0,75 │
+│ [███████▌                 ]            │
+│                                        │
+│ ▎Gambaran kawasan            (AI)      │
+│  Ringkasan Community Activity...       │
+│                                        │
+│ › 32 kawasan tidak dinilai   ← tenang, │
+│                        tertutup bawaan │
+│                                        │
+│ TAB "UNIT PROPERTI (7)":               │
+│ 7 unit dari Properti Go, tidak ikut    │
+│ menentukan skor                        │
+│ [foto][foto]   grid 2 kolom            │
+│ [foto][foto]   *tanpa harga/luas/kontak│
 └────────────────────────────────────────┘
-
 ```
+
+Catatan bentuk yang mengikat:
+
+* **Bar komponen memakai warna `Neon Emerald`** (deterministik). Blok "Gambaran kawasan" adalah
+satu-satunya elemen ber-`Electric Ultramarine` di sidebar, karena hanya itu keluaran AI.
+* Dua garis (`‖`) pada bar Permintaan menandai rentang nilai di seluruh kawasan, digambar **di
+atas** isian bar — kalau di belakang, ia selalu tertutup rapat oleh isian.
+* **Halaman detail unit** menggantikan seluruh panel hasil (header kawasan, `RankStrip`, dan
+tab bar ikut hilang). Susunannya dari atas: tombol `‹ Kembali` (tinggi ±32px, cincin fokus
+terlihat) → breadcrumb `NAMA STASIUN › Kategori` → judul kategori + badge Siap Sewa/Siap Jual →
+alamat → dua foto `aspect-[4/3]` berlabel ("Foto tampak depan", "Foto spanduk"; placeholder
+bergaris putus-putus bila kosong) → catatan bahwa harga, luas, dan kontak tidak dicatat
+dataset. Badge memakai emerald untuk Sewa dan biru brand untuk Jual. **Larangan menampilkan
+harga/luas/kontak tetap berlaku penuh di halaman ini.**
+* **Dua tab: "Skor" dan "Unit properti (n)".** Identitas kawasan (breadcrumb, `RankStrip`,
+nama, angka skor) berada di **atas** tab bar dan selalu terlihat. Tab aktif ditandai garis
+bawah 2px `Cobalt Metro`; tab non-aktif memakai `--color-text-sub`.
+    * **Jumlah unit wajib ikut di label tab**, termasuk `(0)`. Tanpa angka itu, keadaan
+      "skor tinggi, nol properti" tersembunyi di balik satu klik padahal PRD menuntutnya
+      terlihat sebagai empty state eksplisit.
+    * Label ini **berbeda** dari rancangan awal dokumen ini ("Sentimen AI" dan "Unit"):
+      ringkasan sentimen ikut ke tab **Skor**, karena ia konteks tentang kawasan — pertanyaan
+      yang sama dengan skor, dan isinya pendek.
+    * Pilihan tab dipertahankan saat pengguna berpindah peringkat.
+* **Hanya satu kontainer scroll**, yaitu kolom sidebar. Jangan memberi `max-h` +
+`overflow-y-auto` pada daftar di dalamnya (daftar properti pernah punya itu dan menghasilkan
+scroll bersarang yang menelan event roda trackpad).
+* **Maksimal 5 kawasan** di `RankStrip` dan panel hasil, walau `/api/score` mengembalikan lebih.
+* **"Kawasan tidak dinilai" bukan peringatan.** Tanpa latar amber, tanpa kartu: teks kecil
+`--color-muted` di paling bawah, memakai `<details>` bawaan peramban dan tertutup secara
+bawaan. Amber tetap dipakai untuk hal yang menuntut perhatian (harga perkiraan, hasil basi,
+galat) dan untuk penjelasan di `StationNoBriefPanel` ketika pengguna mengklik langsung satu
+stasiun yang tidak dinilai — di situ jawabannya justru harus terbaca seketika.
 
 ---
 
 ### 7. Tailwind Utility Cheat-Sheet (Untuk Vibe Coding)
 
-* **Sidebar Container:** `w-[380px] h-screen bg-slate-50 border-l border-slate-200 flex flex-col p-4 overflow-y-auto z-50`
+> ⚠️ Cheat-sheet di bawah memakai kelas Tailwind bawaan (`bg-slate-50`, `text-xs`) sebagai
+> perkiraan cepat. Di kode, **token CSS yang dipakai** (`bg-[var(--color-surface-muted)]`,
+> `t-body`, `p-[var(--space-lg)]`) — kalau keduanya berbeda, token yang menang.
+
+* **Sidebar Container:** `w-[var(--sidebar-width)] h-screen bg-[var(--color-surface-muted)] border-r border-[var(--color-border)] flex flex-col gap-[var(--space-xl)] p-[var(--space-lg)] overflow-y-auto z-50`
 
 * **Textarea Input:** `w-full p-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-700`
 * **Execute Button:** `w-full py-2.5 bg-slate-900 hover:bg-blue-800 text-white font-semibold rounded-lg text-sm transition-colors`

@@ -1,4 +1,4 @@
-# lib/tipe3.ts
+# lib/tipe3/index.ts
 
 Sumber tunggal daftar `TIPE_3` (kategori restoran), dibaca langsung dari Supabase — bukan
 diketik manual di kode. Dipakai untuk membangun enum Zod dinamis di

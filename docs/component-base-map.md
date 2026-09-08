@@ -1,52 +1,72 @@
 # components/map/BaseMap.tsx
 
 Client Component yang membuat **satu** instance `maplibregl.Map` (basemap MAPID MAPS) saat
-komponen mount, sekali, dan membersihkannya (`map.remove()`) saat unmount. Ini fondasi
-arsitektur peta di `CLAUDE.md` bagian 11 ("Basemap ≠ Layer") — komponen ini **hanya**
-bertanggung jawab membuat map instance, tidak tahu-menahu soal layer produk (stasiun,
-properti, isokron, dll).
+komponen mount, membagikannya ke seluruh layer lewat `MapInstanceProvider`, dan
+membersihkannya (`map.remove()`) saat unmount. Ini fondasi arsitektur peta di `CLAUDE.md`
+bagian 11 ("Basemap ≠ Layer") — komponen ini **hanya** bertanggung jawab atas map instance dan
+kamera, tidak tahu-menahu isi layer produk (stasiun, properti, isokron).
+
+Dua tugasnya persis:
+
+1. Membuat instance MapLibre sekali, menaruhnya di context (`hooks/map/useMapInstance.tsx`).
+2. Menggeser kamera (`flyTo`) saat `selectedStation` berubah — reaksi satu arah, sidebar tidak
+   pernah memanggil `flyTo()` sendiri.
 
 ## Cara pakai
 
-```tsx
-// app/page.tsx
-import BaseMap from "@/components/map/BaseMap";
+Layer dirender sebagai **children**; mereka baru di-mount setelah map siap (`'load'`), jadi
+tiap layer boleh langsung memakai `useMapInstance()` tanpa mengecek `map === null` untuk
+keperluan mount:
 
-export default function Home() {
-  return <BaseMap />;
-}
+```tsx
+// app/page.tsx (potongan)
+<BaseMap>
+  <IsochroneLayer />
+  <PropertyLayer />
+  <StationLayer />
+</BaseMap>
 ```
 
-Tidak menerima props sama sekali (disengaja — lihat Batasan/gotcha).
+`children` adalah satu-satunya prop. Urutan children menentukan urutan pemasangan layer, bukan
+urutan gambar di peta — untuk marker HTML (`StationLayer`, `PropertyLayer`) urutan gambar
+ditentukan DOM/z-index, untuk layer MapLibre (`IsochroneLayer`) ditentukan urutan `addLayer`.
+
+Gaya peta dasar diambil dari `basemapStyleUrl(DEFAULT_BASEMAP_ID)`
+([lib/fixtures/layers.ts](lib-fixtures.md)) — bukan URL yang ditulis langsung di file ini.
 
 ## Dependency/prasyarat
 
 - Env var `NEXT_PUBLIC_MAPID_MAPS_KEY` (wajib, public — **beda** dari `MAPID_API_KEY`
-  server-only, lihat `CLAUDE.md` bagian 4).
-- Package `maplibre-gl`.
-- Elemen DOM dengan `id="map"` harus punya tinggi eksplisit (di sini lewat inline style
-  `height: '100%'`) — MapLibre GL tidak render apa pun kalau kontainernya tinggi 0.
+  server-only, lihat `CLAUDE.md` bagian 4). Dibaca di `lib/fixtures/layers.ts`, bukan di sini.
+- Package `maplibre-gl` (CSS-nya di-import di file ini: `maplibre-gl/dist/maplibre-gl.css`).
+- Provider `SelectedStationProvider` ([hooks](hooks.md)) wajib membungkus komponen ini —
+  `BaseMap` memanggil `useSelectedStation()` dan hook itu `throw` di luar provider-nya.
+- Kontainer induk wajib punya tinggi nyata; di `app/page.tsx` itu datang dari `h-screen` di
+  `<main>` dan `flex-1` di pembungkus peta.
 
 ## Batasan/gotcha
 
-- **Wajib `'use client'`** — MapLibre GL butuh `window`/DOM, tidak bisa jalan di Server
-  Component. Kalau nanti di-`dynamic()`-import, pastikan `{ ssr: false }` (lihat
-  `CLAUDE.md` bagian 3).
-- **Dilarang menerima prop berisi daftar layer** (`CLAUDE.md` bagian 11) — layer produk
-  (stasiun, properti, isokron) wajib jadi komponen terpisah di `components/map/layers/*.tsx`
-  yang mengambil map instance lewat `useMap()` dari `MapProvider`, **bukan** ditambahkan
-  langsung di sini.
-- **Status saat ini (belum ideal, tapi disengaja untuk tahap foundation):**
-  `components/map/MapProvider.tsx` dan `components/map/layers/*` **belum dibuat**, jadi
-  `BaseMap` masih berdiri sendiri, dipanggil langsung dari `app/page.tsx` tanpa Provider.
-  Map instance yang dibuat `useEffect` ini **tidak dibagikan** ke komponen lain — begitu
-  layer pertama (misal `StationLayer`) mulai dikerjakan, pola Provider/Context di
-  `CLAUDE.md` bagian 11 **wajib** diikuti dari awal, jangan tambahkan `map.addLayer()`
-  langsung di file ini "sementara".
-- `center`/`zoom`/`pitch`/`bearing` di kode saat ini adalah **nilai statis untuk
-  pengembangan** (bukan diturunkan dari data stasiun nyata) — belum ada mekanisme
-  menyesuaikan viewport ke data yang di-fetch dari `/api/stations`.
-- Style URL dibangun sebagai template string berisi `NEXT_PUBLIC_MAPID_MAPS_KEY` — kalau env
-  var ini belum diset saat build/dev, hasilnya `?key=undefined` dan basemap gagal total
-  (`AJAXError: Failed to fetch`, insiden nyata yang pernah terjadi — lihat riwayat `CLAUDE.md`
-  bagian 4 soal regresi `MAPID_API_KEY` vs `NEXT_PUBLIC_MAPID_MAPS_KEY`).
+- **Wajib `'use client'`** — MapLibre butuh `window`/DOM. Kalau nanti di-`dynamic()`-import,
+  pastikan `{ ssr: false }` (`CLAUDE.md` bagian 3).
+- **Dilarang menerima prop berisi daftar layer** (`CLAUDE.md` bagian 11). `children` bukan
+  pelanggaran aturan itu: BaseMap tidak tahu apa isinya, tidak membacanya, dan tidak pernah
+  memanggil `map.addLayer()` untuk mereka — tiap layer menambahkan dirinya sendiri.
+- **Kontainer 0×0 saat efek pertama — insiden nyata.** Pada render pertama, flex layout belum
+  memberi ukuran final ke kontainer, dan MapLibre yang dikonstruksi dari kontainer 0×0 **tidak
+  pernah** memicu event `'load'`. Akibatnya canvas terkunci di ukuran fallback 400×300
+  sementara marker dihitung dari ukuran kontainer sungguhan → marker "melayang" di luar peta.
+  Perbaikannya: `ResizeObserver` dipasang ke instance **mentah** begitu dibuat, bukan digantung
+  ke `map.on('load')` atau ke state `map`. Jangan pindahkan pemasangan observer itu ke dalam
+  handler `'load'` — itu persis bug yang sudah diperbaiki.
+- **Instance disimpan di `useState`, bukan hanya `useRef`.** Nilainya dipakai saat render
+  (dioper ke `MapInstanceProvider`), dan membaca `ref.current` saat render tidak dijamin React.
+- `setMap` baru dipanggil **setelah** `'load'`, jadi `children` tidak ter-mount sebelum peta
+  siap. Kalau map gagal `load` (mis. key basemap salah → `?key=undefined`), seluruh layer diam
+  tanpa galat yang kelihatan — cek tab Network untuk `style.json` yang gagal.
+- ⚠️ **Penyimpangan dari `CLAUDE.md` bagian 11:** aturan menyebut context map hidup di
+  `components/map/MapProvider.tsx`. Di kode sekarang context-nya ada di
+  `hooks/map/useMapInstance.tsx` (`MapInstanceProvider` + `useMapInstance`), mengikuti
+  `docs/fe/ARCHITECTURE.md` §4.2. Fungsinya sama persis; yang berbeda hanya lokasi filenya.
+- `center`/`zoom`/`pitch`/`bearing` awal adalah nilai statis Jakarta
+  (`[106.8271129, -6.1754398]`, zoom 13) — bukan diturunkan dari sebaran data `/api/stations`.
+  Kamera baru menyesuaikan data setelah user memilih satu stasiun.
