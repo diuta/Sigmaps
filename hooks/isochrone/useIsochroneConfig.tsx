@@ -2,10 +2,16 @@
 
 /**
  * hooks/isochrone/useIsochroneConfig.tsx
- * 🟡 DEV / EXPERIMENTAL ONLY — Pengaturan Parameter Isokron
+ * Menyimpan luas kawasan isokron yang sedang aktif, supaya DevToolsOverlay dapat
+ * menampilkannya tanpa menghitung ulang.
  *
- * Dipakai oleh IsochroneDevTool dan dibaca oleh IsochroneLayer.
- * Dapat dengan mudah dihapus setelah poligon MAPID final dari Jalur 2 siap.
+ * Diisi IsochroneLayer dari `properties.area_km2` (/api/stations), yang berasal
+ * dari `ST_Area(geom::geography)` di database — angka yang sama persis dipakai
+ * sebagai penyebut rumus C.
+ *
+ * Dulu hook ini juga memegang parameter bentuk isokron (mode, radiusMeter) untuk
+ * generator sintetis. Generatornya sudah dihapus; poligon sekarang datang asli
+ * dari MAPID Isochrone Tool dan tidak dapat diubah dari klien.
  */
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
@@ -16,21 +22,10 @@ const IsochroneConfigContext = createContext<IsochroneConfigContextValue | undef
 );
 
 export function IsochroneConfigProvider({ children }: { children: ReactNode }) {
-  const [options, setOptions] = useState<IsochroneConfigContextValue["options"]>({
-    mode: "organic",
-    radiusMeter: 800, // Default 10 Menit (~800m)
-  });
   const [calculatedAreaKm2, setCalculatedAreaKm2] = useState<number>(0);
 
   return (
-    <IsochroneConfigContext.Provider
-      value={{
-        options,
-        setOptions,
-        calculatedAreaKm2,
-        setCalculatedAreaKm2,
-      }}
-    >
+    <IsochroneConfigContext.Provider value={{ calculatedAreaKm2, setCalculatedAreaKm2 }}>
       {children}
     </IsochroneConfigContext.Provider>
   );

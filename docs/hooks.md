@@ -1,7 +1,7 @@
 # hooks/*
 
 Seluruh state bersama dan pengambilan data sisi klien. Tidak ada prop drilling antara sidebar
-dan peta: keduanya bertemu di hook, bukan di komponen induk (`docs/fe/ARCHITECTURE.md` §1).
+dan peta: keduanya bertemu di hook, bukan di komponen induk (`context/fe/ARCHITECTURE.md` §1).
 
 Konvensi: satu folder per topik, komponen/hook di `use*.tsx`, tipe-tipenya di `use*.types.ts`
 bersebelahan.
@@ -90,9 +90,9 @@ justru karena keduanya dibaca dua-duanya. `MapInstanceProvider` beda: ia dipasan
 
 - **`useMapInstance` hanya untuk `components/map/*`.** Sidebar tidak boleh meng-import-nya —
   itu jalan pintas menuju `map.flyTo()` langsung dari sidebar, yang dilarang
-  (`docs/fe/ARCHITECTURE.md` §4.1).
+  (`context/fe/ARCHITECTURE.md` §4.1).
 - **`useCommunitySentiment` memanggil Gemini di setiap request** — `/api/community-sentiment`
-  belum punya cache (lihat [docs/api-community-sentiment.md](api-community-sentiment.md)),
+  belum punya cache (lihat [docs/api-community-sentiment.md](../context/api-community-sentiment.md)),
   dan kuota Gemini dihitung per project, dipakai bersama semua pengunjung. Jangan memanggil
   hook ini dengan `station_id` yang berubah-ubah cepat (mis. mengikuti hover), dan jangan
   memasangnya di komponen yang sering di-mount ulang.

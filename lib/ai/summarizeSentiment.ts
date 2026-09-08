@@ -1,6 +1,10 @@
 import { generateText } from 'ai'
-import { geminiFlash } from '@/lib/ai/gemini'
+import { geminiFlashLite } from '@/lib/ai/gemini'
 import { CommunitySentimentSchema } from '@/lib/schemas/community-sentiment'
+
+// Dibedakan instanceof oleh route: "AI penuh" sementara, "tidak tertafsir" tidak.
+export class SentimentUnavailableError extends Error {}
+export class SentimentValidationError extends Error {}
 
 // Titik sentuh AI #5 (context/context-final.md §7.2, context/context-mvp.md §2 Langkah 3a).
 // Sama seperti parseIntent.ts: generateText + JSON.parse manual + validasi Zod, bukan
@@ -22,12 +26,22 @@ export async function summarizeSentiment(reports: SentimentReport[]) {
     .map((r) => `- ${r.title}: ${r.description} (komentar: ${r.total_comment}, suka: ${r.likes})`)
     .join('\n')
 
-  const { text } = await generateText({
-    model: geminiFlash,
-    system: SYSTEM_PROMPT,
-    prompt: payload,
-  })
+  // flash-lite, bukan flash: kuota flash habis (429 di semua stasiun, 7 Sep 2026).
+  let text: string
+  try {
+    ;({ text } = await generateText({
+      model: geminiFlashLite,
+      system: SYSTEM_PROMPT,
+      prompt: payload,
+    }))
+  } catch (error) {
+    throw new SentimentUnavailableError('Gagal memanggil Gemini', { cause: error })
+  }
 
-  const parsed = CommunitySentimentSchema.parse(JSON.parse(text))
-  return { ...parsed, jumlah_laporan: reports.length }
+  try {
+    const parsed = CommunitySentimentSchema.parse(JSON.parse(text))
+    return { ...parsed, jumlah_laporan: reports.length }
+  } catch (error) {
+    throw new SentimentValidationError('Keluaran Gemini tidak sesuai skema', { cause: error })
+  }
 }

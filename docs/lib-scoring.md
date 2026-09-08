@@ -2,7 +2,8 @@
 
 Mesin skoring SIGMAPS MVP — fungsi murni, tanpa HTTP/Supabase, 100% deterministik (tidak
 pernah memanggil AI). Menghitung `skor = 100 × (0,25·D + 0,50·C + 0,25·S)` per kawasan dari
-baris `scored_areas` yang sudah difilter `is_rankable = true`.
+seluruh baris `scored_areas` — termasuk yang `is_rankable = false`, yang tetap ikut dihitung
+karena normalisasi C membutuhkannya.
 
 ## Cara pakai
 
@@ -38,10 +39,10 @@ Tidak ada — murni fungsi TypeScript, bisa dites tanpa server/database.
 
 ## Batasan/gotcha
 
-- **Wajib dipanggil dengan SELURUH baris `is_rankable = true` sekaligus**, bukan satu per
-  satu — normalisasi min-max pada C butuh nilai kepadatan terkecil & terbesar di antara semua
-  kawasan (lihat `context/context-mvp.md` §6.8). Memanggilnya per-baris akan selalu
-  menghasilkan `C = 1` (karena `lo === hi`).
+- **Wajib dipanggil dengan SELURUH baris `scored_areas` sekaligus** — termasuk
+  `is_rankable = false` — bukan satu per satu. Normalisasi min-max pada C butuh nilai kepadatan
+  terkecil & terbesar di antara semua kawasan (lihat `context/context-mvp.md` §6.8).
+  Memanggilnya per-baris akan selalu menghasilkan `C = 1` (karena `lo === hi`).
 - Baris dengan `demand`/`price_median` bernilai `null` dibuang otomatis (dicatat lewat
   `console.error`) — ini seharusnya tidak pernah terjadi kalau batch sudah menjaga aturan
   `is_rankable = n_observations >= 10 AND n_price >= 5` (§6.9), jadi kalau muncul di log,
@@ -52,12 +53,14 @@ Tidak ada — murni fungsi TypeScript, bisa dites tanpa server/database.
 - `skor` **dibulatkan ke 1 desimal** (`Math.round(skor * 10) / 10`) sebelum dikembalikan, jadi
   jangan menjumlahkan ulang `komponen × bobot` di frontend dan berharap dapat angka yang sama
   persis sampai digit terakhir.
-- Hasilnya **sudah terurut** skor tertinggi → terendah, dan **hanya berisi kawasan rankable** —
-  `is_rankable` di tiap baris keluaran selalu `true`. Kawasan "data belum cukup" tidak pernah
-  lewat sini karena `app/api/score/route.ts` sudah menyaringnya di query
-  (`.eq('is_rankable', true)`). Frontend yang menyimpulkan kawasan mana yang belum cukup data,
-  dengan membandingkan hasil ini terhadap `/api/stations` (lihat
-  [docs/component-sidebar.md](component-sidebar.md) dan [docs/component-map-layers.md](component-map-layers.md)).
+- Hasilnya **sudah terurut**: kawasan rankable lebih dulu (skor tertinggi → terendah), yang
+  tidak rankable selalu di bawah — supaya Top N bisa dipotong dari atas. Keluarannya
+  **berisi semua kawasan**, termasuk `is_rankable: false`; penyaringan dan pemotongan Top 5
+  dilakukan pemanggilnya, `app/api/score/route.ts`, **setelah** fungsi ini selesai — bukan di
+  query Supabase (lihat [api-score.md](api-score.md)).
+- Kawasan mana yang "data belum cukup" **tidak** disimpulkan dari hasil fungsi ini. Frontend
+  membacanya dari flag `is_rankable` milik `/api/stations` (lihat
+  [component-sidebar.md](component-sidebar.md) dan [component-map-layers.md](component-map-layers.md)).
 - Kalimat penjelasan tiap komponen untuk UI **tidak** ada di file ini — ada di modul terpisah
   [lib/scoring/explanations.ts](lib-scoring-explanations.md), supaya modul ini tetap murni angka.
 - ⚠️ Penamaan `lib/scoring/index.ts` (folder + `index.ts`) menyimpang dari `CLAUDE.md` bagian 12

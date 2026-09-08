@@ -41,3 +41,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# virtualenv pipeline batch (etl/)
+/etl/.venv/
+
+# data sumber pipeline batch — arsip berkas mentah, tidak di-commit
+/etl/data/

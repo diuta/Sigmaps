@@ -1,7 +1,12 @@
+> ⚠️ **Duplikat kedaluwarsa.** Versi yang berlaku ada di `docs/api-prompt-request.md` — berkas ini masih
+> menyebut path sebelum refactor (`lib/scoring.ts`, `lib/tipe3.ts`, `lib/stations.ts`) dan
+> belum diperbarui untuk perubahan skoring di merge `bb4c280`. Belum dihapus karena
+> pembagian `docs/` vs `context/` masih menunggu keputusan tim — lihat `docs/README.md`.
+
 # app/api/prompt-request/route.ts
 
 Terima `prompt` bebas dari user (Business Brief), parse jadi objek terstruktur lewat
-`lib/ai/parseIntent.ts` — dipakai downstream oleh `POST /api/score` (`lib/scoring/index.ts`).
+`lib/ai/parseIntent.ts` — dipakai downstream oleh `POST /api/score` (`lib/scoring.ts`).
 
 ## Cara pakai
 
@@ -32,11 +37,11 @@ Respons gagal — kode galat mengikuti `context/context-mvp.md` §6.8b:
 ## Dependency/prasyarat
 
 - [lib/ai/gemini.ts](lib-ai-gemini.md) — client Gemini, butuh `GEMINI_API_KEY`.
-- [lib/ai/parseIntent.ts](../context/lib-ai-parseintent.md) — fungsi yang memanggil Gemini & memvalidasi hasilnya.
+- [lib/ai/parseIntent.ts](lib-ai-parseintent.md) — fungsi yang memanggil Gemini & memvalidasi hasilnya.
 - `lib/schemas/prompt-request.ts` — `PromptRequestSchema` (validasi request),
   `buildIntentSchema(tipe3Values)` (kontrak publik), `buildGeminiRawSchema(tipe3Values)`
   (skema internal parsing output Gemini, lihat `lib-ai-parseintent.md`).
-- [lib/tipe3/index.ts](../context/lib-tipe3.md) — sumber `tipe_3` yang sah, dibaca dari Supabase.
+- [lib/tipe3.ts](lib-tipe3.md) — sumber `tipe_3` yang sah, dibaca dari Supabase.
 
 ## Batasan/gotcha
 

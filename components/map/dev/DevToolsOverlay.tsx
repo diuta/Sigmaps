@@ -17,9 +17,10 @@ export default function DevToolsOverlay() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<"isochrone" | "popup">("popup");
 
-  // Isochrone Config
-  const { options: isoOptions, setOptions: setIsoOptions, calculatedAreaKm2 } =
-    useIsochroneConfig();
+  // Isochrone Config — tinggal pembacaan luas saja.
+  // Kontrol radius/mode sudah dihapus: bentuk poligon sekarang datang asli dari
+  // MAPID Isochrone Tool lewat /api/stations dan tidak bisa diubah dari klien.
+  const { calculatedAreaKm2 } = useIsochroneConfig();
 
   // Property Popup Config
   const { popupStyle, setPopupStyle, themeMode, setThemeMode } =
@@ -167,88 +168,32 @@ export default function DevToolsOverlay() {
             </div>
           )}
 
-          {/* TAB 2: ISOCHRONE SHAPE & RADIUS */}
+          {/* TAB 2: ISOCHRONE — HANYA BACA */}
           {activeTab === "isochrone" && (
             <div className="mt-2.5 space-y-2.5">
-              {/* Presets & Area Live */}
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] text-slate-400 font-medium">Preset:</span>
-                <div className="flex gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setIsoOptions((p) => ({ ...p, radiusMeter: 400 }))}
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-medium transition-all ${
-                      isoOptions.radiusMeter === 400
-                        ? "bg-[var(--color-brand)] text-white font-semibold"
-                        : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                    }`}
-                  >
-                    5 Menit (~400m)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsoOptions((p) => ({ ...p, radiusMeter: 800 }))}
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-medium transition-all ${
-                      isoOptions.radiusMeter === 800
-                        ? "bg-[var(--color-brand)] text-white font-semibold"
-                        : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                    }`}
-                  >
-                    10 Menit (~800m)
-                  </button>
+              <div className="rounded-lg bg-slate-800/70 px-2.5 py-2 space-y-1.5">
+                <div className="flex justify-between text-[10px]">
+                  <span className="text-slate-400">Sumber poligon</span>
+                  <span className="text-white font-mono">MAPID Isochrone Tool</span>
+                </div>
+                <div className="flex justify-between text-[10px]">
+                  <span className="text-slate-400">Profil</span>
+                  <span className="text-white font-mono">foot &middot; 600 detik</span>
+                </div>
+                <div className="flex justify-between text-[10px]">
+                  <span className="text-slate-400">Luas kawasan</span>
+                  <span className="text-indigo-300 font-mono">
+                    {calculatedAreaKm2 > 0 ? `${calculatedAreaKm2.toFixed(3)} km²` : "—"}
+                  </span>
                 </div>
               </div>
 
-              {/* Mode Shape */}
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] text-slate-400 font-medium">Shape:</span>
-                <div className="flex gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setIsoOptions((p) => ({ ...p, mode: "organic" }))}
-                    className={`px-2 py-0.5 rounded text-[10px] transition-all ${
-                      isoOptions.mode === "organic"
-                        ? "bg-indigo-600 text-white font-semibold"
-                        : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                    }`}
-                  >
-                    Kontur Organik
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsoOptions((p) => ({ ...p, mode: "radius" }))}
-                    className={`px-2 py-0.5 rounded text-[10px] transition-all ${
-                      isoOptions.mode === "radius"
-                        ? "bg-indigo-600 text-white font-semibold"
-                        : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                    }`}
-                  >
-                    Radius Buffer
-                  </button>
-                </div>
-              </div>
-
-              {/* Radius Slider & Area Readout */}
-              <div className="pt-2 border-t border-slate-800/80">
-                <div className="flex justify-between text-[10px] text-slate-400 mb-1">
-                  <span>Radius: <strong className="text-white font-mono">{isoOptions.radiusMeter}m</strong></span>
-                  <span className="text-indigo-300 font-mono">Area: {calculatedAreaKm2.toFixed(3)} km²</span>
-                </div>
-                <input
-                  type="range"
-                  min={200}
-                  max={1600}
-                  step={50}
-                  value={isoOptions.radiusMeter}
-                  onChange={(e) =>
-                    setIsoOptions((prev) => ({
-                      ...prev,
-                      radiusMeter: Number(e.target.value),
-                    }))
-                  }
-                  className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                />
-              </div>
+              <p className="text-[10px] leading-relaxed text-slate-500">
+                Kontrol radius dan bentuk sudah dihapus. Poligonnya keluaran MAPID apa
+                adanya dan tidak dapat diubah dari klien — luas di atas dihitung PostGIS
+                dengan <span className="font-mono">ST_Area(geom::geography)</span>, angka
+                yang sama persis dipakai sebagai penyebut rumus C.
+              </p>
             </div>
           )}
 
