@@ -3,25 +3,16 @@ import { geminiFlashLite } from '@/lib/ai/gemini'
 import { buildGeminiRawSchema, type Intent } from '@/lib/schemas/prompt-request'
 import { daftarUntukPrompt, HARGA_DEFAULT } from '@/lib/tipe3/padanan'
 
-// Tiga kelas error ini dipetakan ke kode HTTP spesifik oleh app/api/prompt-request/route.ts
-// sesuai kode galat wajib di context/context-mvp.md §6.8b (400/422/503) — jangan tangkap
-// sebagai Error generik di route.ts, harus `instanceof` supaya kode statusnya benar.
+// Dipetakan ke 400/422/503 oleh route lewat instanceof (§6.8b).
 export class NonCulinaryError extends Error {}
 export class IntentValidationError extends Error {}
 export class GeminiUnavailableError extends Error {}
 
 function buildSystemPrompt(tipe3Values: string[]): string {
-  // generateObject sengaja tidak dipakai — instruksi tim, lihat riwayat diskusi.
-  // Struktur dipaksa lewat prompt, lalu divalidasi manual pakai skema Zod (CLAUDE.md #6:
-  // output Gemini wajib divalidasi Zod sebelum dipakai).
-  //
-  // Daftar kategori dilengkapi SINONIM dan PERKIRAAN HARGA dari lib/tipe3/padanan.ts
-  // (context-mvp.md §6.6). Keduanya wajib ada di dalam prompt, bukan sekadar nama
-  // kategori telanjang:
-  //   - tanpa sinonim, Gemini menjawab "Warteg"/"Warung Makan" untuk hal yang cuma
-  //     dikenal sebagai "WARUNG TEGAL" di sensus, dan nilainya ditolak /api/score
-  //   - tanpa daftar harga, tebakan harga berubah tiap pemanggilan sehingga S ikut
-  //     berubah dan peringkatnya tidak lagi konsisten
+  // generateObject sengaja tidak dipakai (instruksi tim) — struktur dipaksa lewat
+  // prompt lalu divalidasi Zod. Sinonim + harga dari lib/tipe3/padanan.ts wajib
+  // ikut: tanpa sinonim AI mengarang nama kategori, tanpa harga tebakannya berubah
+  // tiap pemanggilan dan peringkat ikut berubah.
   return `Kamu mengubah kalimat bebas rencana usaha jadi JSON.
 Balas HANYA dengan JSON valid, tanpa markdown/backtick, persis mengikuti bentuk ini:
 {

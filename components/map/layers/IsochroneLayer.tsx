@@ -1,24 +1,12 @@
 "use client";
 
 /**
- * components/map/layers/IsochroneLayer.tsx
- * Poligon isokron pejalan kaki 10 menit di sekitar stasiun yang sedang aktif.
+ * Poligon isokron 10 menit di sekitar stasiun aktif. Gaya: dashed #1E40AF 2.4px,
+ * fill 0.12 (ARCHITECTURE.md §9).
  *
- * Gaya visual (ARCHITECTURE.md §9):
- * - Border: dashed #1E40AF, tebal 2.4px
- * - Fill: rgba(30, 64, 175, 0.12)
- *
- * SUMBER POLIGON: /api/stations -> properties.isokron (lihat docs/api-stations.md).
- * Itu keluaran MAPID Isochrone Tool apa adanya — `isochrone_profile: "foot"`,
- * `time_limit: 600` — disimpan di `scored_areas.geom` dan disajikan sebagai GeoJSON
- * lewat view `stasiun_kawasan`.
- *
- * Sebelumnya komponen ini menggambar lingkaran sintetis dari
- * `lib/map/isochrone-generator.ts`, helper sementara dari masa poligon MAPID belum
- * tersedia (B-1). Akibatnya peta menampilkan bentuk yang BUKAN kawasan yang dipakai
- * menghitung skor: lingkaran berjari-jari 800 m, sementara isokron aslinya tidak
- * beraturan dan luasnya 0,493–1,580 km². Angka di panel dan bentuk di peta merujuk
- * dua wilayah berbeda. Sudah diperbaiki — helper itu kini tidak dipakai siapa pun.
+ * Sumbernya /api/stations -> properties.isokron: keluaran MAPID Isochrone Tool apa
+ * adanya (foot, 600 detik). Generator lingkaran sintetis yang dulu dipakai sudah
+ * dihapus — bentuknya bukan kawasan yang dipakai menghitung skor.
  */
 
 import { useEffect } from "react";
@@ -122,8 +110,7 @@ export default function IsochroneLayer({ customGeoJSON }: IsochroneLayerProps) {
     const isokron = fitur?.properties.isokron;
 
     if (!isokron) {
-      // Tiga sebab, semuanya kondisi normal: belum ada stasiun dipilih, /api/stations
-      // belum selesai dimuat, atau pipeline batch belum jalan sehingga isokronnya NULL.
+      // Normal: belum ada stasiun dipilih, data belum dimuat, atau isokron NULL.
       source.setData(KOSONG);
       setCalculatedAreaKm2(0);
       return;
@@ -143,9 +130,7 @@ export default function IsochroneLayer({ customGeoJSON }: IsochroneLayerProps) {
       ],
     });
 
-    // Luas SEBENARNYA dari database — ST_Area(geom::geography), geodesik di atas
-    // elipsoid. Sebelumnya angka ini hasil hitungan kasar generator, jadi yang tampil
-    // di DevToolsOverlay tidak pernah sama dengan penyebut yang dipakai rumus C.
+    // Luas sebenarnya dari database, angka yang sama dipakai sebagai penyebut C.
     setCalculatedAreaKm2(fitur.properties.area_km2 ?? 0);
   }, [map, selectedStation, stations, customGeoJSON, setCalculatedAreaKm2]);
 

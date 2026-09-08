@@ -36,20 +36,9 @@ SUMBER = {
     "activities": "activities.geojson",
 }
 
-# WAJIB dikirim, jangan dihapus.
-#
-# Endpoint /activities diam-diam membatasi ke jendela waktu terbaru bila
-# start_date/end_date tidak diberikan — dan meta.total ikut memantulkan batas
-# itu, sehingga angkanya TERLIHAT seperti jumlah sebenarnya. Terukur 7 September
-# 2026 pada kotak DKI yang sama:
-#     tanpa filter tanggal ....    60
-#     Agustus 2026 saja ....... 1.298
-#     2015-2030 ............... 1.542
-# Tanpa rentang ini, 96% laporan hilang tanpa satu pun pesan galat.
-#
-# /menugo dan /propertigo TIDAK terpengaruh — keduanya memakai paginasi
-# sungguhan (hasMore/limit/offset) dan total-nya tetap 176 dan 191 dengan atau
-# tanpa filter. Rentang ini tetap dikirim ke semuanya karena tidak merugikan.
+# JANGAN DIHAPUS. Tanpa start_date/end_date, /activities diam-diam memotong ke
+# jendela terbaru DAN meta.total ikut terpotong, jadi tidak terlihat sebagai galat:
+# tanpa filter 60, dengan rentang penuh 1.542 — 96% data hilang.
 RENTANG_TANGGAL = {"start_date": "2015-01-01", "end_date": "2030-12-31"}
 
 BATAS_HALAMAN = 100

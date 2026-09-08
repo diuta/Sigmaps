@@ -2,13 +2,7 @@ import { generateText } from 'ai'
 import { geminiFlashLite } from '@/lib/ai/gemini'
 import { CommunitySentimentSchema } from '@/lib/schemas/community-sentiment'
 
-// Dua kelas galat ini dipetakan ke kode HTTP berbeda oleh
-// app/api/community-sentiment/route.ts — jangan tangkap sebagai Error generik,
-// harus `instanceof`. Polanya sama dengan lib/ai/parseIntent.ts.
-//
-// Bedanya penting bagi pengguna: "AI sedang penuh" itu sementara dan bisa
-// dicoba lagi, sedangkan keluaran yang tidak bisa ditafsirkan tidak akan
-// membaik dengan menunggu.
+// Dibedakan instanceof oleh route: "AI penuh" sementara, "tidak tertafsir" tidak.
 export class SentimentUnavailableError extends Error {}
 export class SentimentValidationError extends Error {}
 
@@ -32,11 +26,7 @@ export async function summarizeSentiment(reports: SentimentReport[]) {
     .map((r) => `- ${r.title}: ${r.description} (komentar: ${r.total_comment}, suka: ${r.likes})`)
     .join('\n')
 
-  // geminiFlashLite, BUKAN geminiFlash. Meringkas selusin laporan pendek tidak
-  // butuh model berat, dan kuota flash-lite jauh lebih longgar. Terukur
-  // 7 September 2026: gemini-3.5-flash mengembalikan HTTP 429 pada seluruh
-  // stasiun yang diuji — termasuk yang cuma punya 2 laporan — sementara
-  // flash-lite jalan normal. lib/ai/parseIntent.ts memakai model yang sama.
+  // flash-lite, bukan flash: kuota flash habis (429 di semua stasiun, 7 Sep 2026).
   let text: string
   try {
     ;({ text } = await generateText({

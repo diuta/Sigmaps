@@ -28,20 +28,14 @@ memindahkan ribuan baris bolak-balik tanpa alasan.
 
 from db import connect
 
-# Ambang kelayakan peringkat. Ditetapkan dari sebaran nyata, bukan tebakan:
-# 176 pengamatan Menu Go di DKI, 79 jatuh di dalam isokron, tersebar di 19 dari
-# 43 kawasan dengan pola [14, 11, 10, 9, 6, 4, 4, 3, 3, 3, 3, 2, 1, ...].
-# Ambang 5 hanya meloloskan 5 kawasan — dan "Top 5" dari 5 kandidat tidak
-# menyaring apa pun. Ambang 3 meloloskan 11, sehingga peringkatnya benar-benar
-# memilih. Lihat context-mvp 6.9 langkah 6.
+# Dari sebaran nyata, bukan tebakan: 79 dari 176 pengamatan jatuh di dalam isokron,
+# tersebar di 19 dari 43 kawasan. Ambang 10 meloloskan 3 kawasan, ambang 5
+# meloloskan tepat 5 (Top 5 jadi tidak menyaring apa pun), ambang 3 meloloskan 11.
 AMBANG_OBSERVASI = 3
 AMBANG_HARGA = 3
 
-# Kekuatan tarikan ke nilai netral pada rumus D (context-mvp 6.2).
-# Kawasan dengan tepat K pengamatan setengah ditentukan datanya sendiri,
-# setengah oleh 0,5. Tanpa ini, kawasan dengan 3 pengamatan yang kebetulan
-# semuanya "Ramai" mendapat D = 1,00 dan langsung juara.
-# Kawasan tanpa data (n = 0) otomatis mendarat di 0,5 tanpa aturan khusus.
+# Tarikan ke netral pada rumus D (§6.2). Tanpa ini, kawasan dengan 3 pengamatan
+# yang kebetulan semuanya "Ramai" dapat D = 1,00 dan langsung juara.
 K = 8
 NETRAL = 0.5
 

@@ -1,19 +1,10 @@
-"""Muat Community Activity ke tabel `community_activity`.
+"""Muat Community Activity dari etl/data/activities.geojson ke tabel community_activity.
 
-    cd etl && source .venv/bin/activate && python load_activity.py
+    python load_activity.py
 
-Berkas sumbernya etl/data/activities.geojson (dibuat tarik_mapid.py).
-
-CATATAN KEPEMILIKAN: tabel ini milik Jalur 1 (context-mvp Bagian 5), dipakai
-/api/community-sentiment. Skrip ini dibuat Jalur 2 karena cara menariknya sama
-persis dengan Menu Go — silakan diambil alih.
-
-PRIVASI — alasan skrip ini pendek:
-API mengembalikan user_name, user_full_name, user_profile_picture,
-community_picture, dan community_name. Tabelnya SENGAJA tidak punya kolom itu,
-jadi kelimanya jatuh di sini tanpa perlu disaring secara eksplisit. Menyaring
-sebelum kirim ke Gemini bisa lupa ditulis; tidak menyimpannya sama sekali
-membuat kebocoran mustahil. JANGAN menambahkan kolom-kolom itu.
+PRIVASI: API mengembalikan user_name, user_full_name, user_profile_picture,
+community_picture. Tabelnya sengaja tidak punya kolom itu, jadi semuanya jatuh
+di sini. JANGAN menambahkan kolom-kolom itu.
 """
 
 import json
@@ -24,13 +15,7 @@ KOLOM = ["id", "title", "description", "total_comment", "likes", "created_at", "
 
 
 def angka(v):
-    """Kolomnya integer, tapi API tidak konsisten.
-
-    `likes` dikembalikan sebagai ARRAY OBJEK — dan tiap objeknya memuat
-    `user_name`. Yang disimpan hanya JUMLAHNYA; isinya sengaja dibuang di sini
-    supaya identitas pemberi like tidak pernah masuk database.
-    `total_comment` berupa integer biasa. Keduanya bisa datang kosong.
-    """
+    """`likes` datang sebagai array objek berisi user_name — simpan jumlahnya saja."""
     if isinstance(v, list):
         return len(v)
     try:

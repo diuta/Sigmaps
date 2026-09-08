@@ -29,10 +29,8 @@ export default function ScoredPanel() {
   const { scoreResult } = useBriefResult();
   const { stations } = useStations();
 
-  // Sudah terurut skor tertinggi -> terendah oleh scoreAreas() di server. Kawasan
-  // is_rankable=false TIDAK PERNAH ada di sini (/api/score memang tidak mengirimnya,
-  // lihat docs/api-score.md) — makanya "kawasan mana yang belum cukup data" dihitung
-  // di bawah dengan membandingkan ke daftar semua stasiun, bukan dibaca dari sini.
+  // Terurut dan dipotong Top 5 di server. Jangan menyimpulkan apa pun dari
+  // ketiadaan sebuah kawasan di sini — penandanya dibaca dari /api/stations.
   const rankedAreas = scoreResult?.areas ?? [];
 
   const [activeAreaId, setActiveAreaId] = useState<string | null>(rankedAreas[0]?.area_id ?? null);
@@ -47,8 +45,10 @@ export default function ScoredPanel() {
     setActiveAreaId(rankedAreas[0]?.area_id ?? null);
   }
 
+  // Dari penanda asli /api/stations. `=== false` karena null berarti pipeline
+  // belum jalan, bukan datanya kurang.
   const unrankableStations = (stations?.features ?? [])
-    .filter((feature) => !rankedAreas.some((area) => area.station_id === feature.properties.station_id))
+    .filter((feature) => feature.properties.is_rankable === false)
     .map((feature) => ({
       station_id: feature.properties.station_id,
       station_name: feature.properties.nama,

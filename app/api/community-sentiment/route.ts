@@ -40,13 +40,9 @@ export async function GET(request: Request) {
   } catch (err) {
     console.error(err)
 
-    // Dibedakan dengan `instanceof` supaya pesannya benar-benar memberi tahu
-    // pengguna apa yang terjadi (context-mvp.md §6.8b). "Gagal memproses
-    // ringkasan" menyembunyikan bahwa masalahnya sementara dan bisa dicoba lagi.
+    // Dibedakan instanceof supaya pesannya benar (§6.8b) — kuota Gemini habis itu
+    // sementara, dan sisa aplikasi tetap jalan tanpa endpoint ini.
     if (err instanceof SentimentUnavailableError) {
-      // Kuota Gemini berlaku per project, bukan per kunci — seluruh pengunjung
-      // berbagi satu kuota. Peta, /api/stations, dan /api/score tetap jalan
-      // tanpa endpoint ini (degradasi anggun).
       return NextResponse.json(
         { error: 'Layanan AI sedang penuh, gunakan filter manual' },
         { status: 503 }
