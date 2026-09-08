@@ -1,6 +1,10 @@
 # Context: SIGMAPS MVP
 
-**Versi:** 4 — 6 September 2026. Memperbarui v3 dengan angka hasil pengukuran langsung
+**Versi:** 5 — 8 September 2026. MVP Jalur 2 selesai. Memperbarui v4 dengan tiga keputusan
+implementasi yang mencabut aturan lama: `/api/score` hanya mengirim Top 5 (6.8), penanda
+kawasan pindah ke `/api/stations` (6.8b), dan dua tabel padanan sudah ditulis (6.6).
+
+**Versi 4** — 6 September 2026. Memperbarui v3 dengan angka hasil pengukuran langsung
 setelah seluruh data benar-benar dimuat ke Supabase.
 
 v3 menutup item B-1 sampai B-6 dengan pernyataan "data sudah aman" tanpa angka. v4
@@ -432,11 +436,39 @@ rentang sempit, **jangan dipakai untuk memblokir apa pun**, dan kalibrasi ambang
 uji nyata 20–30 prompt. `harga_sumber` dan `tipe_3 = 'SEMUA'` adalah sinyal faktual yang
 lebih andal.
 
-❓ **Dua tabel manual (padanan teks bebas → `TIPE_3` + `SEMUA`, dan perkiraan harga per
-`TIPE_3`) BELUM DITULIS.** Masing-masing 24 baris, ditulis tangan. Yang sudah pasti adalah
-**24 nilai `TIPE_3`-nya**, terverifikasi dari sensus — jadi tidak ada lagi yang menghalangi.
-Pekerjaan Jalur 2, dipakai Jalur 1. Daftar harga wajib diikutkan di dalam prompt agar hasil
-AI konsisten antar pemanggilan.
+✅ **Dua tabel padanan SUDAH DITULIS** — `lib/tipe3/padanan.ts`, keduanya 24 baris,
+terverifikasi cocok persis dengan `select distinct tipe_3 from katalog_restoran` (24 = 24,
+nol selisih di kedua arah). Disisipkan ke prompt sistem Gemini lewat `daftarUntukPrompt()`,
+bukan tabel database.
+
+**`SINONIM_TIPE_3`** memaksa AI memilih nama yang benar-benar ada di sensus. Tanpa itu Gemini
+menjawab "Warteg"/"Warung Makan" untuk hal yang hanya dikenal sebagai `WARUNG TEGAL`, dan
+nilainya ditolak `/api/score`.
+
+**`HARGA_PERKIRAAN`** membuat tebakan harga selalu sama, sehingga peringkat tetap konsisten.
+✅ **Seluruh 24 angkanya TERUKUR, tidak ada satu pun yang ditebak.** Nilainya diambil apa
+adanya dari median harga nyata per format tempat, dari 175 pengamatan Menu Go DKI yang lolos
+pembersihan:
+
+```
+Kaki Lima/Gerobak  n=52   14.000        Kafe       n=26   22.000
+Fast Food          n=19   17.000        Restoran   n=39   30.000
+Warung/Tenda       n=39   20.000
+```
+
+`HARGA_DEFAULT` = 20.000, median seluruh 175 harga tanpa dipilah — padanan tepat untuk `SEMUA`.
+
+Yang tersisa sebagai penilaian tim hanyalah **menugaskan kategori ke salah satu dari lima
+format** itu, bukan menentukan rupiahnya. Kalimat untuk PRD: *perkiraan harga diturunkan dari
+median harga nyata per format tempat pada 175 pengamatan Menu Go DKI.*
+
+🔶 **Batasan yang wajib diakui di PRD:** Menu Go bukan populasi restoran (Kaki Lima 47,
+Restoran 22, Warung 21, Fast Food 6, Kafe 4 dari sampel 100), sehingga median tertingginya
+berhenti di 30.000. **Seluruh kategori premium — sushi, steak, masakan Eropa — ikut mendarat
+di 30.000**, jauh di bawah harga sebenarnya di Jakarta. Untuk usaha premium, `harga_target`
+jadi lebih rendah daripada niat pengguna, sehingga S menilai kawasan murah lebih cocok daripada
+semestinya. Ini pilihan sadar: lebih baik meleset ke arah yang dapat ditelusuri daripada
+memakai angka tanpa dasar. Pengguna tetap bisa mengoreksi lewat `harga_sumber = 'perkiraan'`.
 
 ⚠️ **`SEMUA` dan 14 nama kelompok (6.3b) TIDAK ADA di sensus** — keduanya hanya hidup di
 kontrak API dan di `lib/scoring.ts`. Jangan pernah menyimpannya ke `katalog_restoran.tipe_3`
@@ -504,8 +536,41 @@ POST /api/score
 }
 ```
 
-Kawasan dengan `is_rankable = false` tetap dikirim agar dapat digambar di peta dengan label
-"data belum cukup", tetapi tidak ikut diperingkat.
+🔄 **DICABUT 8 September 2026 — `/api/score` hanya mengirim Top 5.** Aturan lama menyuruh
+mengirim seluruh kawasan termasuk `is_rankable = false`. Sekarang tidak: kawasan berperingkat
+di luar lima besar pun tidak dikirim.
+
+Alasannya keamanan. Pembatasan di frontend **bukan** batas keamanan — apa pun yang dikirim
+backend terlihat di DevTools → Network, berapa pun yang dirender. Memotong di server berarti
+data yang tidak ditampilkan memang tidak pernah meninggalkan server.
+
+⚠️ Yang TIDAK berubah: `lib/scoring/index.ts` tetap menghitung **seluruh 43 kawasan**, dan
+query-nya tetap **tanpa** `.eq('is_rankable', true)`. Skala normalisasi C dibangun dari sebaran
+seluruh kawasan; menyaring di query menggeser persentil 5/95 dan mengubah peringkat. Yang
+dipotong hanya apa yang dikirim keluar, bukan apa yang dihitung.
+
+### 6.8b Penanda kawasan pindah ke `/api/stations`
+
+Karena `/api/score` tidak lagi mengirim kawasan `is_rankable = false`, label "data belum cukup"
+di peta tidak bisa lagi bersumber dari sana. Penandanya pindah ke `/api/stations`, lewat view
+`stasiun_kawasan` (`supabase/views.sql`) yang menggabungkan `stasiun` ⟕ `scored_areas`.
+
+`/api/stations` sekarang membawa tiga field tambahan per stasiun:
+
+```
+properties.is_rankable   boolean | null   null = pipeline batch belum jalan
+properties.area_km2      number  | null
+properties.isokron       Polygon | null   poligon MAPID asli, foot / 600 detik
+```
+
+✅ Ini sekaligus menyelesaikan hal lain: `IsochroneLayer` sebelumnya menggambar **lingkaran
+sintetis** dari `lib/map/isochrone-generator.ts`, helper sementara dari masa B-1 masih
+memblokir. Peta menampilkan bentuk yang bukan kawasan penilaian. Helper itu sudah dihapus dan
+peta kini menggambar poligon MAPID apa adanya.
+
+🔶 `is_rankable` memang lebih tepat di sini: dia **sifat kawasan, bukan hasil pencarian** —
+Stasiun Angke kekurangan data entah pengguna mencari sushi atau warteg. Peta dapat meredupkan
+kawasan miskin data sejak halaman dibuka, sebelum pengguna mengetik apa pun.
 
 ### 6.9 Tahap batch (Python, tanpa AI)
 
