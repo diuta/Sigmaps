@@ -161,7 +161,7 @@ pun, keputusan itu diambil tanpa dasar.
 - `AreaInsightBlock` di sini memakai hook yang sama dengan `ScoredPanel`
   (`useCommunitySentiment(area_id)`), jadi **tidak ada endpoint baru**. Konsekuensinya: tiap klik
   pin stasiun memicu satu panggilan Gemini, karena endpoint itu belum punya cache. Lihat
-  [api-community-sentiment.md](api-community-sentiment.md).
+  [api-community-sentiment.md](../context/api-community-sentiment.md).
 - Blok hanya dirender kalau `ringkasan` tidak kosong; saat `error`, panel **tidak menampilkan apa
   pun** — kegagalan AI tidak boleh menghalangi daftar properti.
 - ⚠️ **`AreaGapBlock` masih dummy.** Isinya `DUMMY_KATEGORI_JARANG` yang diekspor dari file
@@ -174,8 +174,9 @@ pun, keputusan itu diambil tanpa dasar.
   `properti_go_by_station` hanya punya `kategori_properti` (jenis properti yang disewakan, bukan
   jenis pedagang) dan `scored_areas` hanya menyimpan komponen 0–1 + `n_observations`.
 
-**Hanya `TOP_N` (5, konstanta di `ScoredPanel.tsx`) kawasan teratas yang ditampilkan**, walau `/api/score` mengembalikan
-semua kawasan yang dapat diperingkat (di data sekarang: 11).
+**Maksimal lima kawasan teratas yang tampil, dan pemotongannya dilakukan server**
+(`app/api/score/route.ts`) — `ScoredPanel` merender apa adanya isi `scoreResult.areas`.
+Konstanta `TOP_N` yang dulu ada di komponen ini sudah dihapus.
 
 Kalimat di tiap bar datang dari [lib/scoring/explanations.ts](lib-scoring-explanations.md),
 bukan dari AI. Bar `demand` juga menerima dua tambahan: klausa tarikan-ke-netral
@@ -239,21 +240,21 @@ mesin dan mana kalimat yang ditulis model.
 
 - Provider `SelectedStationProvider` dan `BriefResultProvider` wajib membungkus `Sidebar`.
 - Token CSS di `app/globals.css` (`--color-*`, `--space-*`, `--radius-*`, `--motion-*`, kelas
-  `.t-*`). **Jangan hardcode hex atau ukuran font** — lihat [docs/fe/DESIGN.md](fe/DESIGN.md).
+  `.t-*`). **Jangan hardcode hex atau ukuran font** — lihat [docs/fe/DESIGN.md](../context/fe/DESIGN.md).
 - Endpoint `/api/prompt-request`, `/api/score`, `/api/properties`, `/api/community-sentiment`.
 
 ## Batasan/gotcha
 
 - **Sidebar dilarang memanggil `map.flyTo()` atau meng-import apa pun dari `components/map/`.**
   Untuk memindahkan kamera, ia menulis `setSelectedStation(...)`; `BaseMap` yang bereaksi
-  (`docs/fe/ARCHITECTURE.md` §4.1). `ScoredPanel.selectArea()` adalah contoh polanya.
+  (`context/fe/ARCHITECTURE.md` §4.1). `ScoredPanel.selectArea()` adalah contoh polanya.
 - **Notice `tipe_3 = 'SEMUA'` belum diimplementasikan.** `context-mvp.md` §2 mewajibkan UI
   memberi tahu bahwa penilaian kompetisi memakai seluruh kategori kuliner; sekarang nilai
   `'SEMUA'` lewat tanpa keterangan apa pun ke user. `intent.tipe_3` sudah tersedia di
   `useBriefResult()`, jadi ini tinggal ditambahkan — bukan hal yang terhalang data.
 - **Ukuran tombol tab (24×48px) ditulis langsung di `Sidebar.tsx`, bukan jadi token di
   `app/globals.css`.** Pengecualian sadar dari aturan "semua ukuran lewat token": file token
-  itu zona rekan (`docs/fe/ARCHITECTURE.md` §5) yang sedang dikerjakan di branch lain, dan
+  itu zona rekan (`context/fe/ARCHITECTURE.md` §5) yang sedang dikerjakan di branch lain, dan
   menambah satu baris di sana berarti konflik merge yang harus dia selesaikan. Angkat jadi
   token setelah kedua branch bertemu.
 - **Stasiun terpilih bisa tertutup panel.** Karena sidebar kini menumpang di atas peta,
@@ -274,12 +275,10 @@ mesin dan mana kalimat yang ditulis model.
 - **Pilihan tab tidak pernah direset otomatis** — tidak saat pengguna berpindah peringkat, dan
   tidak saat brief baru dinilai. Kalau ia sedang membandingkan unit antar peringkat, dilempar
   balik ke tab skor tiap kali berpindah lebih buruk daripada tidak punya tab sama sekali.
-- **`TOP_N` memotong tampilan, bukan data.** Di `ScoredPanel`, `allRanked` (seluruh kawasan
-  berskor) dan `rankedAreas` (`allRanked.slice(0, TOP_N)`) adalah dua hal berbeda, dan dua
-  hitungan **wajib** memakai `allRanked`: daftar `unrankableStations` — kalau memakai daftar
-  yang sudah dipotong, kawasan peringkat 6 ke bawah salah dilabeli "data belum cukup" padahal
-  justru dinilai — dan `demandObservedRange`, yang menggambarkan rentang seluruh kawasan
-  dinilai, bukan lima teratas.
+- **Jangan menyimpulkan apa pun dari ketiadaan sebuah kawasan di `scoreResult.areas`.**
+  Isinya cuma Top 5; kawasan peringkat 6 ke bawah tetap dinilai, hanya tidak dikirim. Karena
+  itu `demandObservedRange` di sini menggambarkan rentang **lima kawasan teratas**, bukan
+  seluruh kawasan dinilai — batasan yang diterima sebagai konsekuensi pemotongan di server.
 - **Panel hasil tetap ter-mount saat halaman detail terbuka** (disembunyikan `hidden`, bukan
   dilepas). Melepasnya mereset pilihan tab `ScoredPanel` — kembali dari detail harus mendarat
   lagi di tab "Unit properti", bukan "Skor" — dan membuat `useCommunitySentiment` memanggil
@@ -293,12 +292,12 @@ mesin dan mana kalimat yang ditulis model.
   memanggil Gemini lagi setiap sidebar dibuka; `/api/community-sentiment` belum punya cache dan
   kuotanya dipakai bersama seluruh pengunjung. Jangan "merapikan" jadi `{open && <OutputSection />}`,
   dan jangan pakai `hidden` — `display:none` mematikan animasi transform-nya.
-- **`is_rankable` tidak pernah datang dari `/api/score` dalam keadaan `false`.** Endpoint hanya
-  mengirim kawasan rankable, jadi daftar "data belum cukup" di `UnrankableNotice` dihitung
-  dengan mengurangi `useStations()` dengan `scoreResult.areas`. Konsekuensinya notice itu
-  **tidak** bisa menampilkan `n_observations` — datanya memang tidak dikirim. Komentar di
-  `types/scoring/index.ts` yang menulis "semua kawasan termasuk `is_rankable=false` dikirim"
-  sudah tidak sesuai kode; jangan dijadikan acuan.
+- **Daftar "data belum cukup" dibaca dari `/api/stations`, bukan dari selisih terhadap
+  `/api/score`.** `UnrankableNotice` diisi dengan memfilter `feature.properties.is_rankable === false`
+  milik `useStations()`. Perbandingan `=== false` disengaja: `null` berarti pipeline skoring
+  belum jalan untuk kawasan itu, bukan datanya kurang — dua kondisi yang tidak boleh
+  disamakan. Konsekuensinya notice itu **tidak** bisa menampilkan `n_observations`; datanya
+  memang tidak ada di `/api/stations`.
 - **`ScoredPanel` menyetel ulang peringkat aktif ke #1 saat `scoreResult` berganti**, dilakukan
   langsung saat render (pola resmi React "adjusting state when a prop changes"), bukan lewat
   `useEffect`. Jangan "diperbaiki" jadi efek — tidak ada efek samping di luar React di situ.

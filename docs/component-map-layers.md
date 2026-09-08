@@ -2,7 +2,7 @@
 
 Semua yang digambar **di atas** basemap. Tiap layer adalah komponen sendiri yang mengambil map
 instance lewat `useMapInstance()` dan menambahkan dirinya sendiri — `BaseMap` tidak pernah tahu
-isi layer (`CLAUDE.md` bagian 11, lihat [component-base-map.md](component-base-map.md)).
+isi layer (`CLAUDE.md` bagian 11, lihat [component-base-map.md](../context/component-base-map.md)).
 
 | File | Isi | Teknik |
 |---|---|---|

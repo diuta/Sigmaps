@@ -41,7 +41,7 @@ Nama modelnya diambil dari env var dengan default `gemini-3.5-flash-lite` /
   `lib/schemas/` — bukan di sini, dan bukan juga di `route.ts` (route wajib tipis,
   `CLAUDE.md` bagian 2).
 - **Kedua pemakai memakai `generateText` + `JSON.parse` manual, bukan `generateObject`** —
-  keputusan tim, bukan library deprecation (lihat [lib-ai-parseintent.md](lib-ai-parseintent.md)).
+  keputusan tim, bukan library deprecation (lihat [lib-ai-parseintent.md](../context/lib-ai-parseintent.md)).
   Konsekuensinya tidak ada retry bawaan AI SDK saat keluaran model bukan JSON valid.
 - Modul ini **`throw` saat di-import** kalau `GEMINI_API_KEY` belum diset — sama seperti
   `lib/supabase/server.ts`, jadi `next dev`/`next build` gagal total, bukan cuma endpoint AI-nya.

@@ -27,10 +27,6 @@ const COMPONENT_ORDER: readonly { key: ScoreComponentKey; weight: number }[] = [
   { key: "segment_match", weight: 0.25 },
 ];
 
-/** Berapa kawasan teratas yang ditampilkan. Batas tampilan saja — /api/score tetap
- *  mengembalikan seluruh kawasan yang dapat diperingkat, dan peta tetap memberi badge
- *  peringkat apa adanya. */
-const TOP_N = 5;
 
 interface Props {
   /** Buka halaman detail satu unit. Panel ini tidak tahu bentuk halamannya — cuma meneruskan. */
@@ -42,14 +38,9 @@ export default function ScoredPanel({ onSelectProperty }: Props) {
   const { scoreResult } = useBriefResult();
   const { stations } = useStations();
 
-  // Sudah terurut skor tertinggi -> terendah oleh scoreAreas() di server. Kawasan
-  // is_rankable=false TIDAK PERNAH ada di sini (/api/score memang tidak mengirimnya,
-  // lihat docs/api-score.md) — makanya "kawasan mana yang belum cukup data" dihitung
-  // di bawah dengan membandingkan ke daftar semua stasiun, bukan dibaca dari sini.
-  const allRanked = scoreResult?.areas ?? [];
-
-  // Sidebar hanya menampilkan Top 5.
-  const rankedAreas = allRanked.slice(0, TOP_N);
+  // Terurut dan dipotong Top 5 di server. Jangan menyimpulkan apa pun dari
+  // ketiadaan sebuah kawasan di sini — penandanya dibaca dari /api/stations.
+  const rankedAreas = scoreResult?.areas ?? [];
 
   const [activeAreaId, setActiveAreaId] = useState<string | null>(rankedAreas[0]?.area_id ?? null);
 
@@ -63,18 +54,16 @@ export default function ScoredPanel({ onSelectProperty }: Props) {
     setActiveAreaId(rankedAreas[0]?.area_id ?? null);
   }
 
-  // ⚠️ Dua hitungan di bawah WAJIB memakai allRanked, bukan rankedAreas yang sudah dipotong:
-  // kawasan peringkat 6 ke bawah tetap dinilai, jadi memotongnya lebih dulu akan salah
-  // melabelinya "data belum cukup", dan rentang komponen yang ditampilkan di bar akan
-  // menyusut jadi rentang lima kawasan saja.
+  // Dari penanda asli /api/stations. `=== false` karena null berarti pipeline
+  // belum jalan, bukan datanya kurang.
   const unrankableStations = (stations?.features ?? [])
-    .filter((feature) => !allRanked.some((area) => area.station_id === feature.properties.station_id))
+    .filter((feature) => feature.properties.is_rankable === false)
     .map((feature) => ({
       station_id: feature.properties.station_id,
       station_name: feature.properties.nama,
     }));
 
-  const demandObservedRange = observedRange(allRanked.map((area) => area.komponen.demand));
+  const demandObservedRange = observedRange(rankedAreas.map((area) => area.komponen.demand));
 
   const area = rankedAreas.find((a) => a.area_id === activeAreaId) ?? rankedAreas[0] ?? null;
   const { sentiment, loading: sentimentLoading } = useCommunitySentiment(area?.station_id ?? null);
