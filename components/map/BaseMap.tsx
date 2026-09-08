@@ -65,6 +65,10 @@ export default function BaseMap({ children }: BaseMapProps) {
     const resizeObserver = new ResizeObserver(() => mapInstance.resize());
     resizeObserver.observe(mapContainerRef.current);
 
+    // Tambahkan scale control metrik (misal 500m / 1km) untuk verifikasi akurasi skala
+    const scaleControl = new maplibregl.ScaleControl({ maxWidth: 100, unit: "metric" });
+    mapInstance.addControl(scaleControl, "bottom-left");
+
     mapInstance.on("load", () => {
       setMap(mapInstance);
     });
