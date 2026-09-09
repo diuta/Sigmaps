@@ -14,6 +14,9 @@
  */
 
 import React, { useEffect, useRef, useState, ReactNode } from "react";
+import MapLegend from "@/components/map/MapLegend";
+import MapNavigationControl from "@/components/map/MapNavigationControl";
+import MapBrandBadge from "@/components/map/MapBrandBadge";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapInstanceProvider } from "@/hooks/map/useMapInstance";
@@ -60,6 +63,7 @@ export default function BaseMap({ children }: BaseMapProps) {
       zoom: 13,
       pitch: 0,
       bearing: 0,
+      attributionControl: false,
     });
 
     const resizeObserver = new ResizeObserver(() => mapInstance.resize());
@@ -101,7 +105,7 @@ export default function BaseMap({ children }: BaseMapProps) {
 
     map.flyTo({
       center: [selectedProperty.lng, selectedProperty.lat],
-      zoom: 16.5,
+      zoom: Math.max(map.getZoom(), 16.5),
       speed: 1.2,
       curve: 1.4,
       essential: true,
@@ -111,7 +115,17 @@ export default function BaseMap({ children }: BaseMapProps) {
   return (
     <div className="relative w-full h-full overflow-hidden">
       <div ref={mapContainerRef} className="w-full h-full" />
-      {map && <MapInstanceProvider map={map}>{children}</MapInstanceProvider>}
+      {map && (
+        <MapInstanceProvider map={map}>
+          {children}
+          {/* Kontrol navigasi peta: Zoom In, Zoom Out, Recenter */}
+          <MapNavigationControl />
+        </MapInstanceProvider>
+      )}
+      {/* Legenda peta: posisinya mengikuti sidebar via useSidebarOpen */}
+      <MapLegend />
+      {/* Co-branding badge: SIGMAPS & Powered by MAPID */}
+      <MapBrandBadge />
     </div>
   );
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import BriefSection from "@/components/sidebar/BriefSection";
 import OutputSection from "@/components/sidebar/OutputSection";
 import { useBriefResult } from "@/hooks/brief/useBriefResult";
+import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
+import { useSidebarOpen } from "@/hooks/sidebar/useSidebarOpen";
 
 /** Di bawah lebar ini halaman dibuka dengan panel tertutup supaya peta terlihat lebih dulu. */
 const DESKTOP_QUERY = "(min-width: 768px)";
@@ -32,12 +34,26 @@ export default function Sidebar() {
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const { scoreResult, loading, error, submitBrief } = useBriefResult();
+  const { selectedProperty } = useSelectedProperty();
 
   // Terbuka mengikuti ukuran layar sampai pengguna memutuskan sendiri; sejak tombolnya
   // ditekan, `override` yang menang.
   const isDesktop = useIsDesktop();
   const [override, setOverride] = useState<boolean | null>(null);
   const open = override ?? isDesktop;
+
+  // Sync open state into shared context so MapLegend can follow the sidebar
+  const { setSidebarOpen } = useSidebarOpen();
+  useEffect(() => {
+    setSidebarOpen(open);
+  }, [open, setSidebarOpen]);
+
+  // Jika user klik properti di peta saat sidebar tertutup, buka sidebar otomatis
+  useEffect(() => {
+    if (selectedProperty) {
+      setOverride(true);
+    }
+  }, [selectedProperty]);
 
   function openEditor() {
     setDraft(submitted ?? "");
@@ -65,7 +81,7 @@ export default function Sidebar() {
       Jangan kembalikan ke lebar yang dianimasikan.
     */
     <aside
-      className={`fixed inset-y-0 left-0 z-50 flex transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)] ${
+      className={`fixed inset-y-0 left-0 z-[100] flex transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)] ${
         open ? "translate-x-0" : "-translate-x-full"
       }`}
     >

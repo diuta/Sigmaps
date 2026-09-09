@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AiLoadingBlock from "@/components/sidebar/AiLoadingBlock";
 import PriceAssumptionNotice from "@/components/sidebar/PriceAssumptionNotice";
 import PropertyDetail from "@/components/sidebar/PropertyDetail";
@@ -9,6 +9,7 @@ import StaleOutputNotice from "@/components/sidebar/StaleOutputNotice";
 import StationNoBriefPanel from "@/components/sidebar/StationNoBriefPanel";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
 import { useBriefResult } from "@/hooks/brief/useBriefResult";
+import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
 import type { PropertyUnit } from "@/types/property";
 
 interface Props {
@@ -28,10 +29,31 @@ interface Props {
 export default function OutputSection({ loading, scored, stale, onEditBrief }: Props) {
   const { selectedStation } = useSelectedStation();
   const { intent, scoreResult } = useBriefResult();
+  const { selectedProperty, setSelectedProperty } = useSelectedProperty();
 
   // Unit yang sedang dibuka halaman detailnya. Dipegang di sini karena halaman detail
   // mengambil alih SELURUH panel hasil — panel di baliknya tidak perlu tahu apa-apa.
   const [detail, setDetail] = useState<{ unit: PropertyUnit; stationName: string } | null>(null);
+
+  // Sinkronisasi saat properti dipilih dari luar (misal dari kartu popup di peta)
+  useEffect(() => {
+    if (selectedProperty) {
+      setDetail({
+        unit: selectedProperty,
+        stationName: selectedStation?.station_name ?? "",
+      });
+    }
+  }, [selectedProperty, selectedStation?.station_name]);
+
+  // Reset detail & selectedProperty jika stasiun yang dipilih berganti
+  const [prevStationId, setPrevStationId] = useState(selectedStation?.area_id);
+  if (selectedStation?.area_id !== prevStationId) {
+    setPrevStationId(selectedStation?.area_id);
+    if (detail) {
+      setDetail(null);
+      setSelectedProperty(null);
+    }
+  }
 
   // Brief baru dinilai selagi halaman detail terbuka: tutup detailnya, karena daftar di
   // baliknya sudah berganti kawasan dan tombol "Kembali" akan mendarat di hasil yang lain.
@@ -39,12 +61,16 @@ export default function OutputSection({ loading, scored, stale, onEditBrief }: P
   const [prevScoreResult, setPrevScoreResult] = useState(scoreResult);
   if (scoreResult !== prevScoreResult) {
     setPrevScoreResult(scoreResult);
-    if (detail) setDetail(null);
+    if (detail) {
+      setDetail(null);
+      setSelectedProperty(null);
+    }
   }
 
   function closeDetail() {
     const triggerId = detail && `unit-${detail.unit.id}`;
     setDetail(null);
+    setSelectedProperty(null);
     // Kembalikan fokus ke kartu asalnya. Elemennya masih ada di DOM karena panel di balik
     // detail cuma disembunyikan, bukan dilepas — tanpa ini fokus jatuh ke <body> dan
     // pengguna keyboard harus menelusuri sidebar dari awal.
@@ -56,7 +82,7 @@ export default function OutputSection({ loading, scored, stale, onEditBrief }: P
   // Tampilan awal: hanya bagian rencana. Belum ada kawasan yang dipilih di peta.
   // `loading` ikut dicek: pada penilaian pertama belum ada stasiun terpilih MAUPUN skor, jadi
   // tanpa ini penanda tunggu di bawah tidak akan pernah sempat tampil.
-  if (!scored && !selectedStation && !loading) return null;
+  if (!scored && !selectedStation && !loading && !detail && !selectedProperty) return null;
 
   const perkiraanHarga = scoreResult?.catatan.harga_sumber === "perkiraan";
 
@@ -101,12 +127,18 @@ export default function OutputSection({ loading, scored, stale, onEditBrief }: P
               />
             )}
             <ScoredPanel
-              onSelectProperty={(unit, stationName) => setDetail({ unit, stationName })}
+              onSelectProperty={(unit, stationName) => {
+                setSelectedProperty({ ...unit });
+                setDetail({ unit, stationName });
+              }}
             />
           </>
         ) : (
           <StationNoBriefPanel
-            onSelectProperty={(unit, stationName) => setDetail({ unit, stationName })}
+            onSelectProperty={(unit, stationName) => {
+              setSelectedProperty({ ...unit });
+              setDetail({ unit, stationName });
+            }}
           />
         )}
       </div>

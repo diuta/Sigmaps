@@ -13,7 +13,7 @@ const DEFAULT_VISIBILITY = Object.fromEntries(
   MAP_LAYERS.map((layer) => [layer.id, layer.defaultOn]),
 );
 
-/** Panel tampilan peta: visibilitas layer, opasitas, dan peta dasar. */
+/** Panel tampilan peta: visibilitas layer, opasitas, legenda, dan peta dasar. */
 export default function LayerPanel({ styleId, onStyleChange }: Props) {
   const { map } = useMapInstance();
   const [open, setOpen] = useState(false);
@@ -73,6 +73,73 @@ export default function LayerPanel({ styleId, onStyleChange }: Props) {
               className="w-full accent-[var(--color-brand)]"
             />
           </section>
+
+          {/* ── Legenda ────────────────────────────────────────────────────── */}
+          <section className="flex flex-col gap-[var(--space-sm)] border-t border-[var(--color-border)] pt-[var(--space-md)]">
+            <h3 className="t-micro text-[var(--color-text-sub)]">Legenda</h3>
+            <ul className="flex flex-col gap-[6px] list-none m-0 p-0">
+
+              {/* Stasiun aktif */}
+              <li className="flex items-center gap-[var(--space-sm)]">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="shrink-0">
+                  <polygon points="8,1 15,8 8,15 1,8" fill="#1E40AF" stroke="white" strokeWidth="1.2" />
+                </svg>
+                <span className="flex flex-col">
+                  <span className="t-body font-medium text-[var(--color-text)]">Stasiun aktif</span>
+                  <span className="t-micro text-[var(--color-muted)]">Stasiun yang dipilih</span>
+                </span>
+              </li>
+
+              {/* Stasiun lainnya */}
+              <li className="flex items-center gap-[var(--space-sm)]">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="shrink-0">
+                  <polygon points="8,1 15,8 8,15 1,8" fill="rgba(30,64,175,0.12)" stroke="#1E40AF" strokeWidth="1.2" />
+                </svg>
+                <span className="flex flex-col">
+                  <span className="t-body font-medium text-[var(--color-text)]">Stasiun lainnya</span>
+                  <span className="t-micro text-[var(--color-muted)]">Jaringan KRL Jabodetabek</span>
+                </span>
+              </li>
+
+              {/* Properti tersedia */}
+              <li className="flex items-center gap-[var(--space-sm)]">
+                <svg width="12" height="16" viewBox="0 0 12 16" fill="none" aria-hidden="true" className="shrink-0 ml-[2px]">
+                  <path d="M6 0C2.686 0 0 2.686 0 6c0 1.427.506 2.734 1.346 3.756L6 16l4.654-6.244A5.974 5.974 0 0 0 12 6C12 2.686 9.314 0 6 0Z" fill="#EA580C" />
+                  <circle cx="6" cy="6" r="2.2" fill="white" />
+                </svg>
+                <span className="flex flex-col">
+                  <span className="t-body font-medium text-[var(--color-text)]">Properti tersedia</span>
+                  <span className="t-micro text-[var(--color-muted)]">Dalam zona jalan kaki</span>
+                </span>
+              </li>
+
+              {/* Zona jalan kaki 10 mnt */}
+              <li className="flex items-center gap-[var(--space-sm)]">
+                <svg width="20" height="12" viewBox="0 0 20 12" fill="none" aria-hidden="true" className="shrink-0">
+                  <rect x="1" y="1" width="18" height="10" rx="2.5" fill="rgba(30,64,175,0.12)" stroke="#1E40AF" strokeWidth="1.2" strokeDasharray="3 2" />
+                </svg>
+                <span className="flex flex-col">
+                  <span className="t-body font-medium text-[var(--color-text)]">Zona jalan kaki 10 mnt</span>
+                  <span className="t-micro text-[var(--color-muted)]">Dari stasiun aktif</span>
+                </span>
+              </li>
+
+              {/* Skor peluang */}
+              <li className="flex items-center gap-[var(--space-sm)]">
+                <svg width="20" height="12" viewBox="0 0 20 12" fill="none" aria-hidden="true" className="shrink-0">
+                  <rect x="0" y="7" width="5" height="5" rx="1" fill="#10B981" opacity="0.4" />
+                  <rect x="7" y="3.5" width="5" height="8.5" rx="1" fill="#10B981" opacity="0.7" />
+                  <rect x="14" y="0" width="6" height="12" rx="1" fill="#10B981" />
+                </svg>
+                <span className="flex flex-col">
+                  <span className="t-body font-medium text-[var(--color-text)]">Skor peluang</span>
+                  <span className="t-micro text-[var(--color-muted)]">Tinggi = lebih baik</span>
+                </span>
+              </li>
+
+            </ul>
+          </section>
+          {/* ── / Legenda ──────────────────────────────────────────────────── */}
 
           <section className="flex flex-col gap-[var(--space-sm)] border-t border-[var(--color-border)] pt-[var(--space-md)]">
             <h3 className="t-micro text-[var(--color-text-sub)]">Peta dasar</h3>
