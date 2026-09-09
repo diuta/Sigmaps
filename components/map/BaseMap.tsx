@@ -115,7 +115,7 @@ export default function BaseMap({ children }: BaseMapProps) {
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      <div ref={mapContainerRef} className="w-full h-full" />
+      <div ref={mapContainerRef} className="w-full h-full relative z-0" />
       {map && (
         <MapInstanceProvider map={map}>
           {children}
