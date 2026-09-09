@@ -276,6 +276,16 @@ body {
   border-radius: 12px !important;
 }
 
+.property-popup-interactive {
+  cursor: pointer;
+  transform-origin: bottom center;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.property-popup-interactive:hover {
+  transform: translateY(-2px);
+}
+
 .maplibregl-popup-close-button {
   top: 8px !important;
   right: 8px !important;

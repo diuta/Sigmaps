@@ -35,7 +35,7 @@ function renderPopupHTML(prop: PropertyUnit): string {
   const badgeLabel = prop.jenis_properti === "Sewa" ? "DISEWA" : "DIJUAL";
 
   return `
-    <div style="width:252px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.18),0 2px 8px rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.06);font-family:system-ui,-apple-system,sans-serif">
+    <div style="width:252px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.18),0 2px 8px rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.06);font-family:system-ui,-apple-system,sans-serif;cursor:pointer">
       <div style="position:relative;width:100%;height:144px;overflow:hidden;background:#f1f5f9">
         <img src="${photoSrc}" alt="${prop.kategori_properti}" style="width:100%;height:100%;object-fit:cover;display:block" />
         <!-- Very light bottom scrim so category text stays readable -->
@@ -45,9 +45,13 @@ function renderPopupHTML(prop: PropertyUnit): string {
         <!-- Category title over scrim at bottom -->
         <div style="position:absolute;bottom:9px;left:11px;right:11px;font-size:15px;font-weight:700;color:#fff;line-height:1.25;letter-spacing:-0.01em;text-shadow:0 1px 6px rgba(0,0,0,0.5)">${prop.kategori_properti}</div>
       </div>
-      <!-- Body: address only -->
+      <!-- Body: address & call-to-action hint -->
       <div style="padding:9px 12px 11px">
         <p style="margin:0;font-size:11px;color:#64748b;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${prop.alamat}</p>
+        <div style="margin-top:6px;padding-top:6px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600;color:#2563eb">
+          <span>Lihat detail properti</span>
+          <span style="font-size:13px;line-height:1">›</span>
+        </div>
       </div>
     </div>
   `;
@@ -98,7 +102,7 @@ function resolveOverlaps(
 export default function PropertyLayer() {
   const { map } = useMapInstance();
   const { selectedStation } = useSelectedStation();
-  const { selectedProperty } = useSelectedProperty();
+  const { selectedProperty, setSelectedProperty } = useSelectedProperty();
   const { properties } = useProperties(selectedStation?.area_id ?? null);
 
   const markersRef = useRef<maplibregl.Marker[]>([]);
@@ -123,7 +127,7 @@ export default function PropertyLayer() {
 
     placed.forEach(({ prop, lng, lat }) => {
       const el = document.createElement("div");
-      el.className = "property-marker-container select-none";
+      el.className = "property-marker-container select-none cursor-pointer";
 
       el.innerHTML = `
         <div class="relative flex flex-col items-center group">
@@ -139,26 +143,35 @@ export default function PropertyLayer() {
         </div>
       `;
 
-      const popupHTML = renderPopupHTML(prop);
+      // Buat container DOM untuk kartu popup agar interaktif dan bisa diklik
+      const popupEl = document.createElement("div");
+      popupEl.className = "property-popup-interactive select-none";
+      popupEl.innerHTML = renderPopupHTML(prop);
+
+      // Saat kartu properti di popup diklik, buka halaman detail properti di sidebar
+      popupEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setSelectedProperty({ ...prop });
+      });
 
       const popup = new maplibregl.Popup({
-        // anchor: 'bottom' → popup tip points down at the lnglat.
-        // offset [0, -30]: tip sits 30px above lnglat (5px clear gap above the
-        // 25px-tall pin svg whose anchor is 'bottom' = tip at lnglat).
-        // This is the ONLY place this offset is set — keeps positioning consistent
-        // regardless of popup content height.
         anchor: "bottom",
         offset: [0, -30] as [number, number],
         closeButton: true,
         closeOnClick: true,
         maxWidth: "300px",
-      }).setHTML(popupHTML);
+      }).setDOMContent(popupEl);
 
       // Simpan dengan koordinat offset agar sidebar-click bisa buka di posisi yang benar
       popupMapRef.current.set(prop.id, { popup, prop: { ...prop, lng, lat } });
 
       el.addEventListener("click", (e) => {
         e.stopPropagation();
+        if (activePopupRef.current === popup) {
+          // Klik pinpoint saat popup sudah terbuka juga membuka detail properti
+          setSelectedProperty({ ...prop });
+          return;
+        }
         if (activePopupRef.current) {
           activePopupRef.current.remove();
         }
@@ -185,20 +198,22 @@ export default function PropertyLayer() {
       markersRef.current = [];
       popupMapRef.current.clear();
     };
-  }, [map, selectedStation, properties]);
+  }, [map, selectedStation, properties, setSelectedProperty]);
 
-  // 2. React to selectedProperty (klik dari sidebar) → buka popup pin yang sesuai
+  // 2. React to selectedProperty (klik dari sidebar atau peta) → buka popup pin yang sesuai
   useEffect(() => {
     if (!map || !selectedProperty) return;
 
     const entry = popupMapRef.current.get(selectedProperty.id);
     if (!entry) return; // properti mungkin belum di-render (stasiun berbeda)
 
-    if (activePopupRef.current) {
-      activePopupRef.current.remove();
+    if (activePopupRef.current !== entry.popup) {
+      if (activePopupRef.current) {
+        activePopupRef.current.remove();
+      }
+      entry.popup.setLngLat([entry.prop.lng, entry.prop.lat]).addTo(map);
+      activePopupRef.current = entry.popup;
     }
-    entry.popup.setLngLat([entry.prop.lng, entry.prop.lat]).addTo(map);
-    activePopupRef.current = entry.popup;
   }, [map, selectedProperty]);
 
   return null;

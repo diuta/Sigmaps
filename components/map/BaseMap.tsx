@@ -101,7 +101,7 @@ export default function BaseMap({ children }: BaseMapProps) {
 
     map.flyTo({
       center: [selectedProperty.lng, selectedProperty.lat],
-      zoom: 16.5,
+      zoom: Math.max(map.getZoom(), 16.5),
       speed: 1.2,
       curve: 1.4,
       essential: true,
