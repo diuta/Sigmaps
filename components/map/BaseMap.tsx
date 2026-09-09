@@ -14,6 +14,7 @@
  */
 
 import React, { useEffect, useRef, useState, ReactNode } from "react";
+import MapLegend from "@/components/map/MapLegend";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapInstanceProvider } from "@/hooks/map/useMapInstance";
@@ -112,6 +113,8 @@ export default function BaseMap({ children }: BaseMapProps) {
     <div className="relative w-full h-full overflow-hidden">
       <div ref={mapContainerRef} className="w-full h-full" />
       {map && <MapInstanceProvider map={map}>{children}</MapInstanceProvider>}
+      {/* Legenda peta: posisinya mengikuti sidebar via useSidebarOpen */}
+      <MapLegend />
     </div>
   );
 }

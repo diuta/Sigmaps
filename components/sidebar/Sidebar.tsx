@@ -5,6 +5,7 @@ import BriefSection from "@/components/sidebar/BriefSection";
 import OutputSection from "@/components/sidebar/OutputSection";
 import { useBriefResult } from "@/hooks/brief/useBriefResult";
 import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
+import { useSidebarOpen } from "@/hooks/sidebar/useSidebarOpen";
 
 /** Di bawah lebar ini halaman dibuka dengan panel tertutup supaya peta terlihat lebih dulu. */
 const DESKTOP_QUERY = "(min-width: 768px)";
@@ -40,6 +41,12 @@ export default function Sidebar() {
   const isDesktop = useIsDesktop();
   const [override, setOverride] = useState<boolean | null>(null);
   const open = override ?? isDesktop;
+
+  // Sync open state into shared context so MapLegend can follow the sidebar
+  const { setSidebarOpen } = useSidebarOpen();
+  useEffect(() => {
+    setSidebarOpen(open);
+  }, [open, setSidebarOpen]);
 
   // Jika user klik properti di peta saat sidebar tertutup, buka sidebar otomatis
   useEffect(() => {

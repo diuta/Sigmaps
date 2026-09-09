@@ -9,9 +9,11 @@ import { SelectedStationProvider } from "@/hooks/station/useSelectedStation";
 import { IsochroneConfigProvider } from "@/hooks/isochrone/useIsochroneConfig";
 import { BriefResultProvider } from "@/hooks/brief/useBriefResult";
 import { SelectedPropertyProvider } from "@/hooks/property/useSelectedProperty";
+import { SidebarOpenProvider } from "@/hooks/sidebar/useSidebarOpen";
 
 export default function Home() {
   return (
+    <SidebarOpenProvider>
     <SelectedStationProvider>
       <SelectedPropertyProvider>
       {/* Hasil brief (intent + skor) dibutuhkan sidebar (ScoredPanel) MAUPUN peta
@@ -39,5 +41,6 @@ export default function Home() {
       </BriefResultProvider>
       </SelectedPropertyProvider>
     </SelectedStationProvider>
+    </SidebarOpenProvider>
   );
 }
