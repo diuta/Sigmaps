@@ -155,6 +155,7 @@ export default function PropertyLayer() {
       });
 
       const popup = new maplibregl.Popup({
+        className: "property-card-popup",
         anchor: "bottom",
         offset: [0, -30] as [number, number],
         closeButton: true,

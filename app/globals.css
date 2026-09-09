@@ -269,6 +269,11 @@ body {
 }
 
 /* MapLibre custom popup styling override */
+.maplibregl-popup,
+.property-card-popup {
+  z-index: 60 !important;
+}
+
 .maplibregl-popup-content {
   padding: 0 !important;
   background: transparent !important;
