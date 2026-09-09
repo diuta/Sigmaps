@@ -16,6 +16,7 @@
 import React, { useEffect, useRef, useState, ReactNode } from "react";
 import MapLegend from "@/components/map/MapLegend";
 import MapNavigationControl from "@/components/map/MapNavigationControl";
+import MapBrandBadge from "@/components/map/MapBrandBadge";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapInstanceProvider } from "@/hooks/map/useMapInstance";
@@ -62,6 +63,7 @@ export default function BaseMap({ children }: BaseMapProps) {
       zoom: 13,
       pitch: 0,
       bearing: 0,
+      attributionControl: false,
     });
 
     const resizeObserver = new ResizeObserver(() => mapInstance.resize());
@@ -122,6 +124,8 @@ export default function BaseMap({ children }: BaseMapProps) {
       )}
       {/* Legenda peta: posisinya mengikuti sidebar via useSidebarOpen */}
       <MapLegend />
+      {/* Co-branding badge: SIGMAPS & Powered by MAPID */}
+      <MapBrandBadge />
     </div>
   );
 }
