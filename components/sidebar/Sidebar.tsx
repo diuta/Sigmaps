@@ -74,7 +74,7 @@ export default function Sidebar() {
       Jangan kembalikan ke lebar yang dianimasikan.
     */
     <aside
-      className={`fixed inset-y-0 left-0 z-50 flex transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)] ${
+      className={`fixed inset-y-0 left-0 z-[100] flex transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)] ${
         open ? "translate-x-0" : "-translate-x-full"
       }`}
     >

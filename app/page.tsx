@@ -22,7 +22,7 @@ export default function Home() {
           <main className="flex h-screen w-screen overflow-hidden bg-slate-900">
             <Sidebar />
 
-            <div className="relative flex-1 overflow-hidden">
+            <div className="relative flex-1 overflow-hidden z-0 isolate">
               <BaseMap>
                 {/* 1. Poligon Isokron 10 Menit (muncul saat stasiun aktif) */}
                 <IsochroneLayer />
