@@ -1,23 +1,11 @@
 "use client";
 
 /**
- * components/map/layers/StationLayer.tsx
- * ZONA CACA — Stasiun Pins Layer
+ * Pin stasiun, tiga state: idle / hover / active.
  *
- * Mengimplementasikan 3 State Marker Interaktif:
- * - State A: Idle (sedikit transparan, scale 0.92)
- * - State B: Hover (scale 1.08, translateY -4px, glow halus, label stasiun)
- * - State C: Active (scale 1.22, translateY -8px, multi-layer shadow + pulsing radar ring)
- *
- * Data stasiun (lokasi) datang dari /api/stations (useStations) — SEMUA stasiun, termasuk
- * yang belum berskor. Data skor datang dari /api/score (useBriefResult), yang HANYA berisi
- * kawasan is_rankable=true (lihat docs/api-score.md) — jadi digabung di sini, bukan salah
- * satu dianggap superset dari yang lain:
- *
- *   - Belum ada brief disubmit  -> pin polos, tanpa badge rank, tanpa label "data belum cukup"
- *   - Brief disubmit & muncul di scoreResult.areas -> pin aktif, badge #rank + skor
- *   - Brief disubmit & TIDAK muncul di scoreResult.areas -> "data belum cukup" (bukan galat,
- *     lihat docs/api-stations.md: frontend yang menyimpulkan ini, bukan backend)
+ * Lokasi + penanda is_rankable dari /api/stations (semua 43). Nomor peringkat dari
+ * /api/score, yang hanya berisi Top 5 — jadi ketiadaan sebuah kawasan di sana
+ * tidak berarti datanya kurang.
  */
 
 import { useEffect, useRef } from "react";
@@ -33,7 +21,6 @@ interface StationMarkerData {
   lng: number;
   lat: number;
   rank: number | null;
-  /** true hanya kalau brief sudah disubmit DAN kawasan ini tidak dinilai. */
   dataBelumCukup: boolean;
 }
 
@@ -60,7 +47,8 @@ export default function StationLayer() {
         lng: feature.geometry!.coordinates[0],
         lat: feature.geometry!.coordinates[1],
         rank: found ? areaIndex! + 1 : null,
-        dataBelumCukup: scoreResult !== null && !found,
+        // `=== false` disengaja: null berarti pipeline belum jalan, bukan kurang data.
+        dataBelumCukup: feature.properties.is_rankable === false,
       };
     });
 

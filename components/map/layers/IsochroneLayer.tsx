@@ -1,45 +1,33 @@
 "use client";
 
 /**
- * components/map/layers/IsochroneLayer.tsx
- * ZONA CACA — 10-Minute Walking Isochrone Contour Layer
+ * Poligon isokron 10 menit di sekitar stasiun aktif. Gaya: dashed #1E40AF 2.4px,
+ * fill 0.12 (ARCHITECTURE.md §9).
  *
- * Sesuai spesifikasi visual & ARCHITECTURE.md §9:
- * - Border: Dashed line #1E40AF (Cobalt Metro) dengan tebal ~2.4px.
- * - Fill: rgba(30, 64, 175, 0.12).
- * - Inner Core: Konsentris halus di sekitar stasiun (hanya jika data generator parametrik).
- * - Muncul dan mengikuti stasiun yang sedang aktif (`selectedStation`).
- *
- * DATA SOURCE — dua jalur (otomatis dipilih):
- *   1. ✅ REAL: `public/geojson/isochrone/{area_id}.geojson` — file GeoJSON dari MAPID/GIS
- *   2. 🟡 FALLBACK: `lib/map/isochrone-generator.ts` — generator parametrik, aktif jika
- *      file belum tersedia untuk stasiun tersebut (404).
- *
- * Untuk menambahkan GeoJSON asli: taruh file di `public/geojson/isochrone/`
- * dengan nama `{area_id}.geojson`. Lihat README.md di folder tersebut.
+ * Sumbernya /api/stations -> properties.isokron: keluaran MAPID Isochrone Tool apa
+ * adanya (foot, 600 detik). Generator lingkaran sintetis yang dulu dipakai sudah
+ * dihapus — bentuknya bukan kawasan yang dipakai menghitung skor.
  */
 
 import { useEffect } from "react";
 import { useMapInstance } from "@/hooks/map/useMapInstance";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { useStations } from "@/hooks/station/useStations";
 import { useIsochroneConfig } from "@/hooks/isochrone/useIsochroneConfig";
-import { useIsochroneGeoJSON } from "@/hooks/isochrone/useIsochroneGeoJSON";
-import { calculateAreaKm2 } from "@/lib/map/isochrone-generator";
-import type { Polygon } from "geojson";
+import type { FeatureCollection, Polygon } from "geojson";
 
-export default function IsochroneLayer() {
+const KOSONG: FeatureCollection<Polygon> = { type: "FeatureCollection", features: [] };
+
+interface IsochroneLayerProps {
+  /** Override manual, mis. untuk pengujian. Kalau diisi, dipakai apa adanya. */
+  customGeoJSON?: FeatureCollection<Polygon>;
+}
+
+export default function IsochroneLayer({ customGeoJSON }: IsochroneLayerProps) {
   const { map } = useMapInstance();
   const { selectedStation } = useSelectedStation();
-  const { options, setCalculatedAreaKm2 } = useIsochroneConfig();
-
-  // ── Muat GeoJSON: file asli kalau ada, fallback ke generator parametrik ──
-  const { geoJSON } = useIsochroneGeoJSON(
-    selectedStation?.area_id ?? null,
-    options,
-    selectedStation
-      ? { lng: selectedStation.lng, lat: selectedStation.lat }
-      : undefined
-  );
+  const { stations } = useStations();
+  const { setCalculatedAreaKm2 } = useIsochroneConfig();
 
   const SOURCE_ID = "isochrone-source";
   const FILL_LAYER_ID = "isochrone-fill";
@@ -53,15 +41,10 @@ export default function IsochroneLayer() {
     if (!map.getSource(SOURCE_ID)) {
       map.addSource(SOURCE_ID, {
         type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: [],
-        },
+        data: { type: "FeatureCollection", features: [] },
       });
 
       // 1. Outer Isochrone Fill
-      //    Filter: feature dengan type=outer-isochrone (generator) ATAU tanpa field 'type'
-      //    (GeoJSON dari MAPID yang tidak menyertakan properti 'type' tetap dapat fill).
       map.addLayer({
         id: FILL_LAYER_ID,
         type: "fill",
@@ -69,15 +52,15 @@ export default function IsochroneLayer() {
         filter: [
           "any",
           ["==", ["get", "type"], "outer-isochrone"],
-          ["!", ["has", "type"]], // GeoJSON MAPID: tidak punya field 'type'
+          ["!", ["has", "type"]], // poligon MAPID tidak punya properti 'type'
         ],
         paint: {
           "fill-color": "#1E40AF",
-          "fill-opacity": 0.12, // Sesuai spek: rgba(30, 64, 175, 0.12)
+          "fill-opacity": 0.12,
         },
       });
 
-      // 2. Inner Core Fill (hanya aktif pada data generator yang punya feature inner-core)
+      // 2. Inner Core Fill (hanya aktif kalau data menyediakan feature inner-core)
       map.addLayer({
         id: INNER_FILL_ID,
         type: "fill",
@@ -89,7 +72,7 @@ export default function IsochroneLayer() {
         },
       });
 
-      // 3. Dashed Outline (Border 2.4px dashed #1E40AF)
+      // 3. Dashed Outline
       map.addLayer({
         id: OUTLINE_LAYER_ID,
         type: "line",
@@ -97,43 +80,59 @@ export default function IsochroneLayer() {
         filter: [
           "any",
           ["==", ["get", "type"], "outer-isochrone"],
-          ["!", ["has", "type"]], // GeoJSON MAPID: tetap mendapat dashed border
+          ["!", ["has", "type"]],
         ],
         paint: {
           "line-color": "#1E40AF",
-          "line-width": 2.4, // Sesuai spek
-          "line-dasharray": [3, 2], // Dashed pattern Figma
+          "line-width": 2.4,
+          "line-dasharray": [3, 2],
           "line-opacity": 0.9,
         },
       });
     }
 
-    // Update GeoJSON source
     const source = map.getSource(SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
-    if (source) {
-      if (geoJSON) {
-        source.setData(geoJSON);
+    if (!source) return;
 
-        // Hitung & update area (km²) dari outer polygon untuk DevTools readout
-        const outerFeature = geoJSON.features.find(
-          (f) =>
-            (f.properties as Record<string, unknown>)?.type === "outer-isochrone" ||
-            !(f.properties as Record<string, unknown>)?.type
-        );
-        if (outerFeature?.geometry.type === "Polygon") {
-          const coords = (outerFeature.geometry as Polygon).coordinates[0] as [
-            number,
-            number
-          ][];
-          setCalculatedAreaKm2(calculateAreaKm2(coords));
-        }
-      } else {
-        // Tidak ada stasiun aktif — kosongkan
-        source.setData({ type: "FeatureCollection", features: [] });
-        setCalculatedAreaKm2(0);
-      }
+    if (customGeoJSON) {
+      source.setData(customGeoJSON);
+      return;
     }
-  }, [map, geoJSON, setCalculatedAreaKm2]);
+
+    // Cari poligon stasiun yang sedang aktif. StationLocation.area_id sama dengan
+    // properties.station_id (keduanya 'R-1'…'R-43'), jadi cocokkan langsung.
+    const fitur = selectedStation
+      ? stations?.features.find(
+          (f) => f.properties.station_id === selectedStation.area_id
+        )
+      : undefined;
+
+    const isokron = fitur?.properties.isokron;
+
+    if (!isokron) {
+      // Normal: belum ada stasiun dipilih, data belum dimuat, atau isokron NULL.
+      source.setData(KOSONG);
+      setCalculatedAreaKm2(0);
+      return;
+    }
+
+    source.setData({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: isokron,
+          properties: {
+            station_id: fitur.properties.station_id,
+            is_rankable: fitur.properties.is_rankable,
+          },
+        },
+      ],
+    });
+
+    // Luas sebenarnya dari database, angka yang sama dipakai sebagai penyebut C.
+    setCalculatedAreaKm2(fitur.properties.area_km2 ?? 0);
+  }, [map, selectedStation, stations, customGeoJSON, setCalculatedAreaKm2]);
 
   // Cleanup layer & source saat unmount
   useEffect(() => {

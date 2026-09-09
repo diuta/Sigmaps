@@ -1,4 +1,4 @@
-# lib/stations.ts
+# lib/station/index.ts
 
 Fungsi murni: ubah baris **mentah tabel `stasiun`** (bukan hasil view) jadi GeoJSON
 FeatureCollection — cuma menyusun `longitude`/`latitude` jadi geometry `Point`. Nama kolom
@@ -6,9 +6,9 @@ FeatureCollection — cuma menyusun `longitude`/`latitude` jadi geometry `Point`
 2026 — lihat "Batasan/gotcha"). Tidak menyentuh Supabase/HTTP sama sekali — query dilakukan
 di [app/api/stations/route.ts](api-stations.md).
 
-## Kenapa ini TIDAK pakai SQL view, beda dari `lib/properties.ts`
+## Kenapa ini TIDAK pakai SQL view, beda dari `lib/property/index.ts`
 
-`properti_go_by_station` dan `community_activity_by_station` (dipakai `lib/properties.ts` dan
+`properti_go_by_station` dan `community_activity_by_station` (dipakai `lib/property/index.ts` dan
 `app/api/community-sentiment/route.ts`) wajib lewat view karena dua alasan yang genuinely
 tidak bisa dilakukan tanpa SQL:
 
@@ -26,7 +26,7 @@ coordinates: [lng, lat] }` dari dua angka itu tidak butuh PostGIS, jadi dilakuka
 ## Cara pakai
 
 ```ts
-import { toStationsFeatureCollection, type StationRow } from '@/lib/stations'
+import { toStationsFeatureCollection, type StationRow } from '@/lib/station'
 
 const rows: StationRow[] = [
   {

@@ -31,7 +31,9 @@ export function BriefResultProvider({ children }: { children: ReactNode }) {
       const intentRes = await fetch("/api/prompt-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        // Nama fieldnya `teks`, bukan `prompt` — mengikuti context-mvp.md §2
+        // (`POST /api/parse-intent { teks: "..." }`) dan PromptRequestSchema.
+        body: JSON.stringify({ teks: prompt }),
       });
       const intentJson = await intentRes.json();
 

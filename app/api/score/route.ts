@@ -16,33 +16,41 @@ export async function POST(request: Request) {
   }
 
   const parsed = buildScoreRequestSchema(tipe3Values).safeParse(body)
-
   if (!parsed.success) {
     return NextResponse.json({ error: 'Input tidak valid' }, { status: 400 })
   }
 
   const { tipe_3, harga_target, harga_sumber } = parsed.data
 
-  // Tanpa join, tanpa filter kategori, tanpa agregasi — normalisasi min-max C butuh nilai
-  // terkecil & terbesar di antara SEMUA kawasan (context-mvp.md §6.8).
+  // SENGAJA tanpa .eq('is_rankable', true) — normalisasi C butuh kepadatan seluruh
+  // kawasan. Menyaring di sini menggeser lo/hi dan mengubah peringkat (§6.8).
   const { data, error } = await supabaseServer
     .from('scored_areas')
     .select(
-      'area_id, station_id, station_name, area_km2, demand, price_median, competitor_counts, total_restaurants, n_observations, n_price'
+      'area_id, station_id, station_name, area_km2, demand, price_median, competitor_counts, total_restaurants, n_observations, n_price, is_rankable'
     )
-    .eq('is_rankable', true)
 
   if (error) {
     console.error(error)
     return NextResponse.json({ error: 'Gagal mengambil data skor' }, { status: 503 })
   }
 
-  const areas = scoreAreas((data ?? []) as ScoredAreaRow[], tipe_3, harga_target)
+  let hasil: ReturnType<typeof scoreAreas>
+  try {
+    hasil = scoreAreas((data ?? []) as ScoredAreaRow[], tipe_3, harga_target)
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json({ error: 'Kategori usaha tidak dikenali' }, { status: 400 })
+  }
+
+  // Hanya Top 5 yang keluar dari server. Pembatasan di frontend bukan batas keamanan.
+  // Penanda "data belum cukup" untuk peta diambil dari /api/stations.
+  const top5 = hasil.areas.filter((a) => a.is_rankable).slice(0, 5)
 
   return NextResponse.json({
     data: {
-      areas,
-      catatan: { harga_sumber: harga_sumber ?? 'pengguna' },
+      areas: top5,
+      catatan: { harga_sumber: harga_sumber ?? 'pengguna', ...hasil.catatan },
     },
   })
 }

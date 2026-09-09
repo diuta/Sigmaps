@@ -1,8 +1,16 @@
 # Context: SIGMAPS MVP
 
-**Versi:** 3 — turunan langsung dari `context-mvp-will.md` (v2), 3 September 2026.
-Versi ini menutup seluruh item B-1 sampai B-6 (sebelumnya memblokir) dan membuang seluruh
-item O-1 sampai O-8 (sebelumnya "perlu keputusan, tidak memblokir") dari dokumen v2.
+**Versi:** 5 — 8 September 2026. MVP Jalur 2 selesai. Memperbarui v4 dengan tiga keputusan
+implementasi yang mencabut aturan lama: `/api/score` hanya mengirim Top 5 (6.8), penanda
+kawasan pindah ke `/api/stations` (6.8b), dan dua tabel padanan sudah ditulis (6.6).
+
+**Versi 4** — 6 September 2026. Memperbarui v3 dengan angka hasil pengukuran langsung
+setelah seluruh data benar-benar dimuat ke Supabase.
+
+v3 menutup item B-1 sampai B-6 dengan pernyataan "data sudah aman" tanpa angka. v4
+menggantinya dengan angka yang sebenarnya, dan **mengoreksi tiga keputusan yang ternyata
+tidak cocok dengan data**: ambang `is_rankable` (6.9), sumber variabel D (6.2), dan cara C
+menangani kategori bersampel tipis (6.3b).
 
 **Status:** dokumen acuan utama untuk pengerjaan MVP, menggantikan v2. **Berdiri sendiri**
 — seluruh spesifikasi mesin skoring tetap dimuat penuh di Bagian 6, tidak perlu membuka
@@ -43,25 +51,28 @@ bertentangan dengan dokumen ini, **dokumen ini yang berlaku**.
 ### Langkah 1 — Basemap + titik stasiun
 
 ✅ `components/map/BaseMap.tsx` (map instance, style MAPID MAPS), titik stasiun sebagai
-layer terpisah (`components/map/layers/StationLayer.tsx`).
-
-🔄 **Diperbarui 4 September 2026, mengikuti `daftar-api-sigmaps.xlsx` (ground truth API):**
-data stasiun **tidak lagi** diambil langsung oleh Server Component dari Supabase. Sumbernya
-adalah `GET /api/stations` (tanpa parameter, baca tabel `stasiun`, kembalikan seluruh
-stasiun termasuk yang belum berskor). `StationLayer.tsx` mengambilnya lewat `fetch`. Ini
-menggantikan pola "Server Component query langsung lalu passing props" yang sebelumnya
-ditulis di sini — bukan pelanggaran aturan Server/Client Component `CLAUDE.md` Bagian 3,
-karena `/api/stations` tetap route tipis yang cuma baca dan balas.
+layer terpisah (`components/map/layers/StationLayer.tsx`), diambil lewat Server Component
+(`app/page.tsx`) dari Supabase, di-passing sebagai props, bukan di-fetch sendiri oleh
+Client Component.
 
 ✅ **Wilayah MVP: DKI Jakarta**, menggantikan rencana 5 stasiun Tangsel di versi sebelumnya
 (Cisauk, Serpong, Rawa Buntu, Sudimara, Jurangmangu). Alasannya di Bagian 7: Menu Go, sumber
 tunggal variabel D dan S, menumpuk di Jakarta dan nyaris nol di Tangsel. Cakupan PRD tetap
 Jabodetabek, yang menyempit hanya kawasan yang diskor di MVP.
 
-✅ **Daftar stasiun Jakarta sudah aman.** Datanya tersedia. Struktur dan daftar final
-mengikuti skema Zod yang akan dibuat di kode, jadi tidak perlu dituliskan manual di dokumen
-ini. Klaster Menu Go terbesar berada di sekitar Tanah Abang, Sudirman, dan koridor Sawah
-Besar–Juanda.
+✅ **Daftar stasiun final: 43 stasiun commuter DKI**, `station_id` = `R-1` … `R-43`, sudah
+dimuat ke tabel `stasiun`. Sebarannya: Jakarta Pusat 13 · Jakarta Barat 11 · Jakarta Selatan
+10 · Jakarta Timur 5 · Jakarta Utara 4.
+
+⚠️ **PRD menyebut "12 simpul"**, angka itu perlu dikoreksi jadi 43. Secara statistik 43
+justru menguntungkan: pemotongan persentil 5/95 pada rumus C baru bermakna di atas ~10
+kawasan (lihat catatan 🔶 di 6.3).
+
+🔶 **Lima pasang stasiun praktis berimpit.** Kampung Bandan Bawah–Atas berjarak 262 m; empat
+pasang lain (Jakarta Kota–Jayakarta, Sawah Besar–Juanda, Pasar Minggu Baru–Duren Kalibata,
+Jayakarta–Kampung Bandan Atas) di bawah 900 m. Isokronnya tumpang tindih berat dan sepasang
+bisa menempati dua slot Top 5 sekaligus dengan skor nyaris identik. **Keputusan tim:
+dibiarkan**, tidak digabung.
 
 ### Langkah 2 — Business Brief → Top 5 (ONE-SHOT)
 
@@ -74,11 +85,11 @@ bobotnya tunggal dan tidak ada lagi yang bisa disunting (Bagian 6.5).
 **Alur teknis:**
 ```
 Sidebar (Client Component)
-  → POST /api/prompt-request { prompt: "..." }
-      → Gemini + Zod (IntentSchema: kategori_usaha, target_jam, segmen, skala, weights, confidence)
-  → POST /api/score { weights }
-      → baca scored_areas/scored_cells dari Supabase
-      → hitung WLC live (lib/scoring.ts) — DETERMINISTIK, bukan AI
+  → POST /api/parse-intent { teks: "..." }
+      → Gemini + Zod (IntentSchema, lihat Bagian 6.6)
+  → POST /api/score { tipe_3, harga_target }
+      → baca scored_areas dari Supabase
+      → hitung C dan S, gabung dengan D (lib/scoring.ts), DETERMINISTIK
       → urutkan, ambil Top 5
   → tampilkan Top 5 + skor + dekomposisi komponen mentah (angka/chart)
 ```
@@ -122,14 +133,25 @@ Jalur 1 dan Jalur 3 dapat langsung membangun di atas nama kolom final.
 ✅ Community Activity **tidak masuk formula skor** (alasannya di Bagian 7), tetapi tetap
 hidup di sini dan sebagai layer peta. Kewajiban memakainya terpenuhi lewat jalur ini.
 
-✅ **Tabel Community Activity di Supabase sudah aman**, datanya tersedia. Skema Zod untuk
-output ringkasan mengikuti skema yang akan dibuat di kode bersamaan dengan endpoint ini.
+❓ **Tabel `community_activity` sudah dibuat tetapi MASIH KOSONG (0 baris).** Datanya ada di
+API MAPID Competition dan cara menariknya sama persis dengan Menu Go — `etl/tarik_mapid.py`
+dapat dijadikan contoh. **Pekerjaan Jalur 1**, bukan Jalur 2. Skema Zod untuk output ringkasan
+dibuat bersamaan dengan endpoint ini.
 
 #### 3b. Katalog properti dalam isokron
 
-✅ **Poligon isokron dari MAPID Isochrone Tool sudah aman.** Datanya tersedia untuk dipakai,
-termasuk untuk `area_km2` yang jadi penyebut kepadatan pada rumus C. Struktur datanya
-mengikuti skema Zod yang akan dibuat di kode, jadi skoring dapat berjalan penuh.
+✅ **43 poligon isokron sudah dimuat ke `scored_areas`**, seluruhnya keluaran MAPID
+Isochrone Tool apa adanya: `isochrone_profile = "foot"`, `time_limit = 600` detik. Luasnya
+**0,493 – 1,580 km², median 1,059** — setara radius efektif ~580 m, wajar untuk jalan kaki
+10 menit yang dibatasi jaringan jalan.
+
+✅ **`area_km2` dihitung `ST_Area(geom::geography) / 1e6`**, luas geodesik di atas elipsoid.
+Tanpa proyeksi apa pun, jadi tidak ada zona UTM yang bisa salah dipilih. Ini menutup
+pertanyaan proyeksi yang tertinggal setelah EPSG:32748 dicabut di Bagian 8.
+
+🔶 **Batasan yang wajib di PRD:** poligonnya kasar, 13–39 titik dengan median 24. Isokron
+pejalan kaki sungguhan berlekuk mengikuti jalan; pada resolusi ini penghalang nyata (sungai,
+rel, jalan tol) kemungkinan terlewati.
 
 ✅ Poligon dibuat untuk semua titik stasiun yang masuk daftar, bukan hanya kawasan survei.
 
@@ -145,13 +167,6 @@ GET /api/properties?station_id=... → FeatureCollection Properti Go
 
 ✅ Kolom yang ditampilkan: `kategori_properti`, `jenis_properti` (Sewa/Jual), alamat, foto
 (`foto_tampak_depan`, `foto_spanduk`).
-
-❓ **Masih terbuka** (`daftar-api-sigmaps.xlsx`, sheet Masih Terbuka): apakah jarak jalan
-kaki ke pintu stasiun ditampilkan di property card. MAPID Routing Tool tidak dipakai untuk
-MVP, jadi tidak ada sumber angka jarak jalan kaki asli. **Bila** kelak dipakai garis lurus
-sebagai pengganti, field-nya **wajib** dinamai `jarak_garis_lurus_m`, **bukan**
-`jarak_jalan_kaki_m` — supaya tidak mengklaim akurasi yang tidak ada. Sampai keputusan ini
-diambil, field jarak **tidak ditampilkan sama sekali** (lihat juga Bagian 8 item 10).
 
 ✅ **Dilarang** menampilkan filter/field luas, harga, kontak pemilik, Properti Go tidak
 punya kolom itu.
@@ -205,17 +220,28 @@ terlihat seperti janji yang tidak ditepati saat demo.
 
 ## 5. Pemetaan kerja per jalur
 
-- **Jalur 1 (Data/Backend):** `app/api/prompt-request`, `app/api/score`, `app/api/properties`,
-  `app/api/community-sentiment` (baru, untuk Langkah 3a), skema tabel sementara (dummy/seed)
-  sambil nunggu Jalur 2, tabel Community Activity di Supabase (belum ada, cuma di ETL).
-- **Jalur 2 (Analisis Spasial/Skoring):** **blocking item** — skema & isi `scored_areas`/
-  `scored_cells` final, status poligon isokron semua stasiun. MVP Langkah 2 & 3b menunggu ini.
-- **Jalur 3 (Frontend/AI):** `components/map/*`, sidebar Business Brief (UI one-shot), panel
-  hasil Top 5 + dekomposisi komponen (angka/chart, **tanpa** narasi AI — titik #4 di luar
-  scope), panel klik stasiun (2 tab: sentimen + katalog), property card. Zod schema yang
-  dipakai MVP cuma dua: `IntentSchema` (titik #3, wajib pakai nama final Jalur 2 — lihat
-  `context-final.md` §7.2) dan schema output titik #5 (nama masih ❓, lihat §7.2).
-  `InsightSchema` (titik #4) **tidak perlu dikerjakan** untuk MVP ini.
+**Jalur 1 (Data/Backend):** `app/api/parse-intent`, `app/api/score`, `app/api/properties`,
+`app/api/community-sentiment`, tabel Community Activity di Supabase + loader.
+✅ Skema `scored_areas` (Bagian 6.7) sudah final dan dapat dipakai sekarang.
+
+**Jalur 2 (Analisis Spasial/Skoring):** ✅ **selesai 6 September 2026**, kecuali dua tabel
+padanan manual (6.6). Yang sudah jalan: `etl/load_isokron.py` (43 poligon),
+`etl/tarik_mapid.py` + `etl/load_mapid.py` (Menu Go 176, Properti Go 191),
+`etl/pipeline_scoring.py` (seluruh kolom komponen), dan `lib/scoring.ts` (C, S, skor akhir).
+
+⚠️ **`lib/scoring.ts` dipegang Jalur 2, bukan Jalur 1**, meski `/api/score` milik Jalur 1.
+Alasannya seluruh konstanta rumus harus hidup di satu kepala; kalau Python dan TypeScript
+ditulis dua orang berbeda, keduanya menyimpang tanpa pernah menimbulkan galat.
+
+⚠️ **`etl/` sekarang berisi loader Python yang terhubung langsung ke Supabase lewat psycopg2**
+(`DATABASE_URL`, variabel baru di `.env.example`), menggantikan `script.py` lama yang hilang.
+`stasiun` dan `katalog_restoran` diimpor **manual lewat Table Editor Supabase**, bukan lewat
+Python.
+
+**Jalur 3 (Frontend/AI):** `components/map/*`, sidebar Business Brief, panel Top 5 +
+dekomposisi (angka/chart, tanpa narasi AI), panel klik stasiun (2 tab), property card.
+Zod schema yang dipakai: `IntentSchema` (Bagian 6.6) dan schema output titik #5.
+`InsightSchema` tidak perlu dikerjakan.
 
 ---
 
@@ -236,7 +262,12 @@ rata =  (Σ nilai) ÷ n
 D    =  (n × rata + 8 × 0,5) ÷ (n + 8)
 ```
 
-**Sumber:** `kondisi_tempat` di Menu Go + survei tim.
+**Sumber:** `kondisi_tempat` di Menu Go.
+
+⚠️ **Survei tim dicabut.** Tidak ada tabelnya di skema dan tidak jadi dikerjakan, sehingga D
+bertumpu sepenuhnya pada **176 pengamatan Menu Go di DKI**. Sebaran nilainya: Sedang 95 ·
+Sepi 54 · Ramai 27. Nilai aslinya berupa kalimat panjang (`'Sedang (Ada 1-3 pembeli yang
+sedang menunggu/makan)'`), dipotong ke kata pertamanya saat dimuat.
 
 ⚠️ **D dipakai apa adanya, TANPA normalisasi.** Rumus di atas sudah menghasilkan 0–1 karena
 merupakan rata-rata tertimbang dari angka yang seluruhnya di 0–1. Normalisasi min-max justru
@@ -280,13 +311,59 @@ sekarang di level kawasan, dengan 5 kawasan, persentil hanya bisa menghasilkan l
 Pemotongan pencilan menutup satu-satunya kelemahan min-max. 🔶 Dengan kurang dari ~10
 kawasan, pemotongan ini praktis tidak berpengaruh.
 
+### 6.3b Pengelompokan kategori dan penurunan ke `SEMUA`
+
+⚠️ **Bagian baru di v4.** Diperlukan setelah pengukuran menunjukkan C mati untuk sebagian
+besar kategori.
+
+Sensus punya **24 kategori `TIPE_3`**, tetapi hanya 751 restoran yang jatuh di dalam isokron.
+Dipecah 24 arah, sebagian besar kategori hanya ada di segelintir kawasan, dan kawasan sisanya
+mendarat di `C = 0,333` — yang **bukan nilai netral melainkan hukuman** "pasar belum
+terbukti". Komponen berbobot 0,50 lalu berhenti membedakan apa pun, sementara skornya tetap
+keluar dan terlihat wajar.
+
+**Dua penanganan, dipakai bersama:**
+
+**1. 24 kategori dikelompokkan jadi 14** di `lib/scoring.ts`. Ini **lapisan pemetaan, bukan
+perubahan data** — `competitor_counts` tetap menyimpan 24 kunci mentah, penjumlahan terjadi
+saat request. Mengubah pemetaan tidak butuh migrasi maupun tarik ulang data.
+
+```
+CEPAT SAJI        = CEPAT SAJI + RESTORAN AYAM
+KAFE DAN RESTO    = KAFE DAN RESTO + JAJANAN
+ASIA TIMUR        = RESTORAN JEPANG + SUSHI + RAMEN + RESTORAN CINA
+MASAKAN NUSANTARA = WARUNG TEGAL + RESTORAN NUSANTARA
+ASIA TENGGARA     = RESTORAN THAILAND + RESTORAN VIETNAM
+MASAKAN BARAT     = RESTORAN EROPA + PIZZA + STEAK DAN BBQ + RESTORAN MEKSIKO
+(delapan lainnya berdiri sendiri)
+```
+
+🔶 Empat penggabungan berikut **penilaian tim, bukan fakta**, dan pantas dibantah:
+RESTORAN AYAM→CEPAT SAJI (kuat), RESTORAN CINA→ASIA TIMUR (lemah), RESTORAN
+MEKSIKO→MASAKAN BARAT (lemah), JAJANAN→KAFE DAN RESTO (paling lemah).
+
+**2. Penurunan otomatis ke `SEMUA`** bila kelompoknya tetap terlalu tipis: kalau kurang dari
+**separuh kawasan yang diperingkat** punya pesaing kelompok itu, C dihitung dari
+`total_restaurants`. Responsnya membawa `catatan.fallback_ke_semua` supaya UI dapat berkata
+jujur, bukan diam-diam mengganti penilaian.
+
+⚠️ **Cakupan diukur pada kawasan `is_rankable`, bukan seluruh 43** — dan bedanya nyata.
+`RESTORAN MELAYU` ada di 26 dari 43 kawasan, terdengar cukup, tetapi hanya di 4 dari 11
+kawasan yang benar-benar diperingkat. Mengukur pada populasi yang salah membuat fallback
+tidak menyala saat seharusnya menyala.
+
+Hasil pengukuran 6 September 2026: **7 dari 14 kelompok** punya cakupan cukup (CEPAT SAJI 10,
+SEAFOOD 9, RESTORAN PADANG 8, RESTORAN KOREA 8, MIE DAN BAKSO 6, NASI GORENG 6, ASIA TENGGARA
+6 — dari 11 kawasan). Tujuh sisanya, termasuk `KAFE DAN RESTO` dan `ASIA TIMUR`, selalu turun
+ke `SEMUA`. **Jalur 3 wajib menyiapkan kalimatnya**, karena ini akan sering muncul.
+
 ### 6.4 S — kecocokan segmen
 
 ```
 S = maks(0, 1 − |price_median − harga_target| ÷ harga_target)
 ```
 
-**Sumber:** `harga_rata_rata` di Menu Go + survei tim, diambil median per kawasan.
+**Sumber:** `harga_rata_rata` di Menu Go (survei tim dicabut, lihat 6.2), median per kawasan.
 
 Pembagi memakai `harga_target` agar selisihnya relatif: meleset Rp5.000 fatal untuk target
 Rp10.000, sepele untuk target Rp100.000.
@@ -306,6 +383,12 @@ S:  0,700 – 1,000   rentang 0,300
 
 C punya rentang **14 kali lebih lebar** daripada D. Bobot hanya berpengaruh bila rentang
 variabelnya sebanding.
+
+🔄 **Diukur ulang 6 September 2026 dengan 176 pengamatan penuh: rentang D ternyata 0,212**
+(0,333 – 0,545), tiga kali lebih lebar daripada angka di atas. Kekhawatiran "permintaan
+praktis tidak berfungsi" jauh lebih ringan dari dugaan. Kesimpulan bobot tunggal tidak
+berubah, C tetap mendominasi — tetapi **angka 0,068 di atas berasal dari sampel awal dan
+jangan dikutip lagi di PRD**.
 
 ✅ Kalimat untuk PRD: *kami menguji empat set bobot dan menemukan peringkat tidak berubah,
 sehingga dipilih satu set berbasis literatur ketimbang variasi yang tidak berdasar.*
@@ -353,100 +436,51 @@ rentang sempit, **jangan dipakai untuk memblokir apa pun**, dan kalibrasi ambang
 uji nyata 20–30 prompt. `harga_sumber` dan `tipe_3 = 'SEMUA'` adalah sinyal faktual yang
 lebih andal.
 
-✅ **Dua tabel manual (padanan teks bebas → `TIPE_3` + `SEMUA`, dan perkiraan harga per
-`TIPE_3`) sudah aman datanya.** Struktur dan isinya mengikuti skema Zod yang akan dibuat di
-kode. Daftar harga wajib diberikan di dalam prompt agar hasil AI konsisten antar pemanggilan.
+✅ **Dua tabel padanan SUDAH DITULIS** — `lib/tipe3/padanan.ts`, keduanya 24 baris,
+terverifikasi cocok persis dengan `select distinct tipe_3 from katalog_restoran` (24 = 24,
+nol selisih di kedua arah). Disisipkan ke prompt sistem Gemini lewat `daftarUntukPrompt()`,
+bukan tabel database.
 
-### 6.7 Skema data — enam tabel, satu foreign key
+**`SINONIM_TIPE_3`** memaksa AI memilih nama yang benar-benar ada di sensus. Tanpa itu Gemini
+menjawab "Warteg"/"Warung Makan" untuk hal yang hanya dikenal sebagai `WARUNG TEGAL`, dan
+nilainya ditolak `/api/score`.
 
-🔄 **Ditulis ulang 4 September 2026.** Skema di bawah dan seluruh keputusan ERD MVP kini
-mengikuti tiga dokumen ground truth: `context/dokumentasi-erd-mvp.md` (penjelasan lengkap
-per kolom, alasan desain), `context/daftar-api-sigmaps.xlsx` (kontrak tiap endpoint), dan
-diagram ERD dbdiagram.io (skema visual). Ketiganya **menggantikan** versi `scored_areas`
-lama di dokumen ini — versi lama tidak punya kolom `station_id`, sebuah kekurangan nyata
-yang sudah diperbaiki di bawah.
+**`HARGA_PERKIRAAN`** membuat tebakan harga selalu sama, sehingga peringkat tetap konsisten.
+✅ **Seluruh 24 angkanya TERUKUR, tidak ada satu pun yang ditebak.** Nilainya diambil apa
+adanya dari median harga nyata per format tempat, dari 175 pengamatan Menu Go DKI yang lolos
+pembersihan:
 
-**Peta enam tabel** (detail penuh tiap kolom & alasannya ada di `dokumentasi-erd-mvp.md`):
-
-| Tabel | Golongan | Dibaca oleh |
-|---|---|---|
-| `stasiun` | sumber mentah, diisi ETL katalog MAPID | `/api/stations`, batch |
-| `menu_go` | sumber mentah, diisi ETL API lomba | batch |
-| `katalog_restoran` | sumber mentah, diisi ETL GeoJSON | batch |
-| `scored_areas` | **hasil batch**, satu-satunya yang dibaca mesin skoring | `/api/score`, `/api/properties` |
-| `properti_go` | pendukung, tidak masuk skor | `/api/properties` |
-| `community_activity` | pendukung, tidak masuk skor | `/api/community-sentiment` |
-
-✅ **Nama tabel restoran — dikonfirmasi langsung koordinator 4 September 2026:
-`katalog_restoran`.** Sempat ada selisih penamaan antar dokumen sumber: prosa
-`dokumentasi-erd-mvp.md` dan query SQL di `daftar-api-sigmaps.xlsx` sebelumnya memakai
-`sensus_restoran`, sementara diagram ERD dbdiagram.io memakai `katalog_restoran`.
-`dokumentasi-erd-mvp.md` sudah diperbaiki mengikuti nama yang dikonfirmasi ini. Bila ada
-salinan `daftar-api-sigmaps.xlsx` yang belum diperbarui, query di dalamnya
-(`select distinct tipe_3 from sensus_restoran ...`) harus dibaca sebagai
-`katalog_restoran`.
-
-**Hampir tidak ada foreign key** — keanggotaan kawasan (properti, restoran, laporan warga
-masuk kawasan mana) ditentukan lewat `ST_Within(titik.geom, area.geom)` saat batch berjalan,
-bukan kolom kunci tersimpan (satu titik bisa masuk 2 isokron berdempetan, FK cuma bisa
-menunjuk satu induk). Satu-satunya foreign key sungguhan: `scored_areas.station_id →
-stasiun.station_id`, satu-ke-satu, karena satu isokron memang diturunkan dari tepat satu
-stasiun. Detail lengkap alasannya ada di `dokumentasi-erd-mvp.md` bagian "Kenapa hampir
-tidak ada foreign key".
-
-```sql
-create table stasiun (
-  station_id  text primary key,
-  nama        text not null,
-  tipe        text,                       -- 'COMMUTER' atau 'KERETA API', info saja
-  alamat      text,
-  kecamatan   text,
-  kabkot      text,
-  geom        geometry(Point, 4326) not null
-);
+```
+Kaki Lima/Gerobak  n=52   14.000        Kafe       n=26   22.000
+Fast Food          n=19   17.000        Restoran   n=39   30.000
+Warung/Tenda       n=39   20.000
 ```
 
-🔄 **Skema `stasiun` yang benar-benar dijalankan di Supabase, ditemukan 6 September 2026,
-berbeda dari SQL di atas.** Kolom aslinya:
+`HARGA_DEFAULT` = 20.000, median seluruh 175 harga tanpa dipilah — padanan tepat untuk `SEMUA`.
 
-```sql
-create table stasiun (
-  station_id  text primary key,
-  nama        text not null,
-  tipe_3      text,               -- BUKAN 'tipe' — nama ini keliru, kemungkinan besar
-                                   -- copy-paste dari katalog_restoran (di sana `tipe_3`
-                                   -- memang berarti kategori restoran, di sini cuma
-                                   -- kebetulan sama nama untuk arti yang beda: tipe layanan
-                                   -- transportasi)
-  alamat      text,
-  kecamatan   text,
-  kabkot      text,
-  longitude   double precision,   -- BUKAN kolom `geom`
-  latitude    double precision
-);
-```
+Yang tersisa sebagai penilaian tim hanyalah **menugaskan kategori ke salah satu dari lima
+format** itu, bukan menentukan rupiahnya. Kalimat untuk PRD: *perkiraan harga diturunkan dari
+median harga nyata per format tempat pada 175 pengamatan Menu Go DKI.*
 
-**Keputusan 6 September 2026: tabel TIDAK diubah** (tidak di-`ALTER`/rename), supaya tidak
-menyentuh data yang sudah ada tanpa perlu.
+🔶 **Batasan yang wajib diakui di PRD:** Menu Go bukan populasi restoran (Kaki Lima 47,
+Restoran 22, Warung 21, Fast Food 6, Kafe 4 dari sampel 100), sehingga median tertingginya
+berhenti di 30.000. **Seluruh kategori premium — sushi, steak, masakan Eropa — ikut mendarat
+di 30.000**, jauh di bawah harga sebenarnya di Jakarta. Untuk usaha premium, `harga_target`
+jadi lebih rendah daripada niat pengguna, sehingga S menilai kawasan murah lebih cocok daripada
+semestinya. Ini pilihan sadar: lebih baik meleset ke arah yang dapat ditelusuri daripada
+memakai angka tanpa dasar. Pengguna tetap bisa mengoreksi lewat `harga_sumber = 'perkiraan'`.
 
-🔄 **Diperbarui lagi 6 September 2026 (revisi kedua, hari yang sama):** selisih ini sempat
-ditutup lewat SQL view `stasiun_geojson`, tapi itu **kelebihan rekayasa** — dicabut. Beda dari
-`properti_go`/`community_activity` yang butuh view karena ada spatial join (`ST_Within`) DAN
-kolom geometry PostGIS asli (butuh `ST_AsGeoJSON` di database, tidak bisa di-parse di JS),
-tabel `stasiun` **tidak punya keduanya**: tidak ada join, dan koordinatnya sudah berupa dua
-kolom angka biasa (`longitude`, `latitude`). Menyusun `{ type: 'Point', coordinates: [lng,
-lat] }` dari dua angka itu tidak butuh SQL sama sekali. `app/api/stations/route.ts` sekarang
-query tabel `stasiun` langsung, dan `lib/stations.ts` yang menyusun GeoJSON-nya — semuanya di
-TypeScript. 🔄 **Revisi ketiga, hari yang sama:** nama kolom `tipe_3` juga dipertahankan apa
-adanya di response (sempat dialiaskan jadi `tipe`, tapi dicabut — itu perubahan yang tidak
-perlu, cuma menambah satu terjemahan nama lagi tanpa manfaat nyata). Lihat
-`docs/lib-stations.md` untuk kriteria lengkap kapan sesuatu butuh view vs cukup di kode
-aplikasi.
+⚠️ **`SEMUA` dan 14 nama kelompok (6.3b) TIDAK ADA di sensus** — keduanya hanya hidup di
+kontrak API dan di `lib/scoring.ts`. Jangan pernah menyimpannya ke `katalog_restoran.tipe_3`
+atau sebagai kunci `competitor_counts`. Sebaliknya, validasi `tipe_3` di `/api/score` **wajib
+mengecualikan `SEMUA`**, kalau tidak jalur fallback ditolak oleh validasinya sendiri.
+
+### 6.7 Skema `scored_areas`
 
 ```sql
 create table scored_areas (
-  area_id            text primary key,
-  station_id         text not null references stasiun(station_id),
+  area_id            text primary key,          -- = station_id, mis. 'R-14'
+  station_id         text not null unique references stasiun (station_id),
   station_name       text not null,
   geom               geometry(Polygon, 4326) not null,
   area_km2           double precision not null,
@@ -467,32 +501,9 @@ create table scored_areas (
 );
 
 create index scored_areas_geom_idx on scored_areas using gist (geom);
-create index stasiun_geom_idx on stasiun using gist (geom);
 ```
 
 `competitor_counts` berbentuk `{ "CEPAT SAJI": 8, "KAFE DAN RESTO": 3, ... }`.
-
-🔶 `area_id` sebenarnya mubazir selama relasinya satu-ke-satu dengan `stasiun` (isokron 5
-menit dicabut) — `station_id` bisa langsung jadi primary key. Dipertahankan sebagai `area_id`
-terpisah supaya penamaan tidak berubah di tengah pengerjaan.
-
-⚠️ **`stasiun` dan `scored_areas` sengaja dua tabel terpisah walau relasinya satu-ke-satu**:
-jumlah barisnya beda (`stasiun` memuat seluruh ~50–60 stasiun DKI, `scored_areas` hanya yang
-isokronnya sudah selesai — peta tetap bisa menggambar semua titik stasiun sementara skoring
-baru jalan di sebagian), diisi pihak & waktu berbeda (`stasiun` dari ETL, hampir tidak
-berubah; `scored_areas` ditulis ulang tiap batch jalan), dan tipe geometrinya beda (titik vs
-poligon).
-
-⚠️ **Katalog `stasiun` mentah punya baris ganda** — stasiun yang melayani lebih dari satu
-moda (mis. Grogol: COMMUTER + KERETA API) muncul sebagai 2 baris dengan koordinat identik.
-**Deduplikasi berdasarkan koordinat, bukan nama**, dan wajib dilakukan **sebelum** dikirim ke
-MAPID Isochrone Tool (bukan sesudah) supaya kuota panggilan tidak terbuang separuh untuk
-titik yang sama. Bila dimuat apa adanya, satu stasiun muncul dua kali di Top 5 dengan skor
-identik.
-
-Definisi tabel `menu_go`, `katalog_restoran`, `properti_go`, `community_activity` (kolom,
-index, RLS) ada lengkap di `dokumentasi-erd-mvp.md` — tidak diulang di sini supaya tidak ada
-dua sumber kebenaran untuk hal yang sama.
 
 ✅ **Skor akhir tidak disimpan**, dihitung live di `lib/scoring.ts` saat request.
 
@@ -506,139 +517,64 @@ POST /api/score
 ```json
 {
   "areas": [{
-    "area_id": "st_tanah_abang",
-    "station_id": "st_tanah_abang",
-    "station_name": "Tanah Abang",
+    "area_id": "R-14",
+    "station_id": "R-14",
+    "station_name": "STASIUN TANAH ABANG",
     "skor": 78.3,
     "komponen": { "demand": 0.528, "competitive_headroom": 0.927, "segment_match": 0.750 },
     "bobot": { "wD": 0.25, "wC": 0.50, "wS": 0.25 },
     "n_observations": 28, "n_price": 28, "is_rankable": true
   }],
-  "catatan": { "harga_sumber": "pengguna" }
+  "catatan": {
+    "harga_sumber": "pengguna",
+    "kelompok_dinilai": "CEPAT SAJI",
+    "fallback_ke_semua": false,
+    "kawasan_berisi": 10,
+    "kawasan_diperingkat": 11,
+    "total_kawasan": 43
+  }
 }
 ```
 
-🔄 **`station_id` ditambahkan 4 September 2026** mengikuti `daftar-api-sigmaps.xlsx` (sheet
-Field Response) — field ini sempat hilang dari contoh di atas, padahal wajib ada (dipakai
-frontend untuk memanggil `/api/properties` dan `/api/community-sentiment` saat kawasan
-diklik).
+🔄 **DICABUT 8 September 2026 — `/api/score` hanya mengirim Top 5.** Aturan lama menyuruh
+mengirim seluruh kawasan termasuk `is_rankable = false`. Sekarang tidak: kawasan berperingkat
+di luar lima besar pun tidak dikirim.
 
-Kawasan dengan `is_rankable = false` tetap dikirim agar dapat digambar di peta dengan label
-"data belum cukup", tetapi tidak ikut diperingkat.
+Alasannya keamanan. Pembatasan di frontend **bukan** batas keamanan — apa pun yang dikirim
+backend terlihat di DevTools → Network, berapa pun yang dirender. Memotong di server berarti
+data yang tidak ditampilkan memang tidak pernah meninggalkan server.
 
-⚠️ **Query `/api/score` tanpa join, tanpa filter kategori, tanpa agregasi** — seluruh baris
-`scored_areas` dengan `is_rankable = true` ditarik dalam satu `SELECT`, karena normalisasi
-min-max pada C butuh nilai terkecil dan terbesar di antara semua kawasan (skor satu kawasan
-bergantung pada kawasan lain, tidak bisa dihitung baris per baris). Lihat
-`dokumentasi-erd-mvp.md` bagian "Kenapa `station_name` diduplikasi".
+⚠️ Yang TIDAK berubah: `lib/scoring/index.ts` tetap menghitung **seluruh 43 kawasan**, dan
+query-nya tetap **tanpa** `.eq('is_rankable', true)`. Skala normalisasi C dibangun dari sebaran
+seluruh kawasan; menyaring di query menggeser persentil 5/95 dan mengubah peringkat. Yang
+dipotong hanya apa yang dikirim keluar, bukan apa yang dihitung.
 
-⚠️ **Pengaman wajib saat menghitung C** (`daftar-api-sigmaps.xlsx`, sheet Aturan & Pengaman):
-bila `hi === lo` (tidak ada kawasan lain yang punya kategori itu), pembagi normalisasi
-bernilai nol dan hasilnya `NaN` — **gagal diam-diam tanpa pesan galat**. Set `x = 0.5` agar
-semua kawasan mendapat C yang sama pada kasus ini. Kunci `tipe_3` yang dipakai mencari di
-`competitor_counts` **harus cocok persis** (huruf besar semua, sama seperti di
-`katalog_restoran`) — kalau enumnya beda ejaan, pencarian selalu bernilai 0, C seragam 0,33,
-dan skor tetap keluar terlihat wajar padahal salah (gagal diam-diam juga).
+### 6.8b Penanda kawasan pindah ke `/api/stations`
 
-### 6.8b Endpoint lain, kode galat, dan pengaman — ringkasan (ground truth: `daftar-api-sigmaps.xlsx`)
+Karena `/api/score` tidak lagi mengirim kawasan `is_rankable = false`, label "data belum cukup"
+di peta tidak bisa lagi bersumber dari sana. Penandanya pindah ke `/api/stations`, lewat view
+`stasiun_kawasan` (`supabase/views.sql`) yang menggabungkan `stasiun` ⟕ `scored_areas`.
 
-🔄 **Ditambahkan 4 September 2026.** Lima endpoint masuk MVP: `GET /api/stations`,
-`POST /api/prompt-request`, `POST /api/score`, `GET /api/properties`,
-`GET /api/community-sentiment`. `POST /api/insight` di luar MVP (titik AI #4). Tiga dari
-lima endpoint MVP memanggil AI: `prompt-request`, `community-sentiment`, dan (di luar MVP)
-`insight` — `score`, `properties`, `stations` murni deterministik/baca data.
+`/api/stations` sekarang membawa tiga field tambahan per stasiun:
 
-Urutan pemanggilan satu sesi: `/api/stations` → `/api/prompt-request` → `/api/score` → klik
-stasiun → `/api/properties` + `/api/community-sentiment`.
-
-**Kode galat wajib** (daftar lengkap ada di xlsx, sheet Kode Galat — ringkasan yang paling
-gampang salah dilewatkan):
-
-| Endpoint | Kondisi | Kode | Catatan |
-|---|---|---|---|
-| `/api/prompt-request` | Usaha non-kuliner | 400 | `'SEMUA'` bukan tempat pembuangan, tetap tolak |
-| `/api/prompt-request` | Zod gagal setelah retry AI SDK | 422 | — |
-| `/api/prompt-request` / `/api/community-sentiment` | Kuota Gemini habis | 503 | Kuota per project, bukan per key |
-| `/api/score` | `tipe_3` tak dikenali | 400 | Harus persis sama dengan isi `competitor_counts` |
-| `/api/score` | Tidak ada kawasan `is_rankable` | 200 + array kosong | **Bukan galat** — state kosong di frontend |
-| `/api/properties` | Kawasan tanpa properti | 200 + FeatureCollection kosong | Kondisi normal |
-| `/api/community-sentiment` | Kawasan tanpa laporan | 200 + ringkasan kosong | Jangan panggil Gemini kalau tidak ada isi |
-| Semua | Supabase tidak merespons | 503 | Cek dulu apakah project di-pause idle 7 hari |
-
-**Query baku tiap endpoint** (persis, dari xlsx sheet Query Database):
-
-```sql
--- /api/stations
-select station_id, nama, tipe, kecamatan, kabkot, geom from stasiun;
-
--- /api/score (tanpa join, tanpa filter kategori — lihat alasan di 6.8)
-select area_id, station_id, station_name, area_km2, demand, price_median,
-       competitor_counts, total_restaurants, n_observations, n_price
-from scored_areas where is_rankable = true;
-
--- /api/properties
-select p.* from properti_go p
-join scored_areas a on ST_Within(p.geom, a.geom)
-where a.station_id = $1;
-
--- /api/community-sentiment
-select c.title, c.description, c.total_comment, c.likes
-from community_activity c
-join scored_areas a on ST_Within(c.geom, a.geom)
-where a.station_id = $1;
+```
+properties.is_rankable   boolean | null   null = pipeline batch belum jalan
+properties.area_km2      number  | null
+properties.isokron       Polygon | null   poligon MAPID asli, foot / 600 detik
 ```
 
-🔄 **Konflik dengan implementasi nyata, dicatat 5 September 2026** — keempat query "baku" di
-atas ditulis seolah bisa dieksekusi persis begitu (SQL mentah, parameter `$1`), tapi backend
-sebenarnya jalan lewat `supabase-js` yang bicara ke PostgREST, bukan koneksi Postgres
-langsung. Dua akibat konkret:
+✅ Ini sekaligus menyelesaikan hal lain: `IsochroneLayer` sebelumnya menggambar **lingkaran
+sintetis** dari `lib/map/isochrone-generator.ts`, helper sementara dari masa B-1 masih
+memblokir. Peta menampilkan bentuk yang bukan kawasan penilaian. Helper itu sudah dihapus dan
+peta kini menggambar poligon MAPID apa adanya.
 
-1. **`/api/properties` dan `/api/community-sentiment` tidak bisa menjalankan `JOIN ...
-   WHERE a.station_id = $1` sebagai satu query parameterized** — PostgREST tidak expose
-   spatial join (`ST_Within` antar tabel) maupun parameter positional lewat query builder
-   biasa (`.from().select().eq()`). Diselesaikan dengan membungkus join itu sebagai **SQL
-   view** (`properti_go_by_station`, `community_activity_by_station` di
-   `supabase/views.sql`), lalu route.ts memfilter `station_id` di luar lewat
-   `.from(view).select().eq('station_id', id)` — hasil akhir sama, tapi secara teknis join
-   dihitung untuk semua baris dulu baru difilter, bukan `WHERE` di dalam satu query seperti
-   ditulis di atas.
-2. **Query `/api/stations` di atas mengasumsikan kolom `geom` bertipe PostGIS `geometry`**,
-   padahal (temuan terpisah 6 September 2026, lihat baris "Skema `stasiun`" di §6.7 atas)
-   tabel `stasiun` yang sebenarnya berjalan di Supabase tidak punya kolom `geom` sama sekali
-   — cuma `longitude`/`latitude` sebagai angka biasa. Karena tidak ada geometry PostGIS yang
-   perlu dikonversi dan tidak ada join, ini **tidak** butuh view — `app/api/stations/route.ts`
-   query tabel `stasiun` langsung, dan `lib/stations.ts` menyusun `{ type: 'Point',
-   coordinates: [longitude, latitude] }` di TypeScript.
-
-Dua view untuk poin 1 (`properti_go_by_station`, `community_activity_by_station`) plus satu
-view lagi untuk `TIPE_3_VALUES` (`tipe3_values`, lihat §6.8b di bawah) ada di
-`supabase/views.sql` — jalankan sekali di Supabase SQL Editor setelah keenam tabel MVP
-dibuat. Kode galat, urutan pemanggilan, dan kolom yang dikembalikan tetap sama persis seperti
-tabel di atas; yang berubah cuma jalur
-teknis mengeksekusi join & konversi geometry-nya.
-
-**Pengaman wajib lain** (selain hi===lo dan pencocokan `tipe_3` persis di 6.8):
-- `TIPE_3_VALUES` (enum Zod `IntentSchema`) **wajib dihasilkan dari query**
-  (`select distinct tipe_3 from katalog_restoran order by tipe_3;`), bukan diketik manual —
-  mencegah enum kode dan isi tabel diam-diam berbeda. ✅ **Diimplementasikan 5 September
-  2026** lewat view `tipe3_values` (`supabase/views.sql`) + `lib/tipe3.ts` (`getTipe3Values()`,
-  cache in-memory 10 menit) — dipakai `buildIntentSchema`/`buildScoreRequestSchema`
-  (`lib/schemas/prompt-request.ts`, `lib/schemas/score.ts`) untuk membangun enum Zod dinamis
-  per request, bukan lagi daftar hardcode di kode.
-- Tidak ada endpoint yang menulis ke database — seluruh tulis hanya dari pipeline batch
-  dengan service role key.
-- Jangan kirim `segment_match` bernilai `0` untuk kawasan yang belum dinilai — nol dibaca
-  sebagai "buruk secara segmen", padahal artinya "tidak dinilai" (tidak relevan untuk MVP
-  karena S dijamin selalu terhitung, lihat 6.4, tapi tetap jadi pengingat kalau logic
-  berubah).
-- Cache hasil `/api/community-sentiment` per kawasan — kuota Gemini per project dipakai
-  bersama semua pengunjung.
-- Degradasi anggun bila Gemini mati: peta, `/api/stations`, dan `/api/score` tetap harus
-  jalan; sediakan filter manual sebagai cadangan.
+🔶 `is_rankable` memang lebih tepat di sini: dia **sifat kawasan, bukan hasil pencarian** —
+Stasiun Angke kekurangan data entah pengguna mencari sushi atau warteg. Peta dapat meredupkan
+kawasan miskin data sejak halaman dibuka, sebelum pengguna mengetik apa pun.
 
 ### 6.9 Tahap batch (Python, tanpa AI)
 
-1. **Kumpulkan pengamatan**, gabungkan Menu Go dan survei tim; kolomnya sama.
+1. **Kumpulkan pengamatan** dari Menu Go. (Survei tim dicabut, lihat 6.2.)
 2. **Spatial join** ke poligon isokron. Titik pada dua isokron bertumpuk dihitung di
    keduanya, karena kawasan berdekatan memang berbagi pasar.
 3. **Hitung D** (6.2).
@@ -651,15 +587,36 @@ if not (2000 <= harga <= 150000):
 ```
 5. **Hitung jumlah pesaing per `TIPE_3`**, simpan apa adanya sebagai JSONB. Jangan
    dinormalisasi di sini, normalisasi butuh kategori yang baru diketahui saat runtime.
-6. **Tandai** `is_rankable = n_observations >= 10 AND n_price >= 5`.
+6. **Tandai** `is_rankable = n_observations >= 3 AND n_price >= 3`.
 
-🔄 **Diperbarui 4 September 2026** — ambang lama di dokumen ini cuma menyebut
-`n_observations >= 10` (satu syarat). `daftar-api-sigmaps.xlsx` (sheet Aturan & Pengaman)
-memastikan ada **dua** syarat: `n_observations` menjamin D dapat dipercaya, `n_price`
-menjamin S dapat dipercaya (`price_median` tidak pernah `NULL` pada baris yang lolos).
-Kawasan bisa saja punya 15 pengamatan tapi cuma 2 yang harganya lolos pembersihan — tanpa
-syarat kedua, S tetap dihitung dari median 2 titik yang goyah dengan bobot penuh 0,25. Lihat
-detail lengkap di `dokumentasi-erd-mvp.md` bagian `is_rankable, n_observations, n_price`.
+🔄 **Ambang diturunkan dari 10 menjadi 3, dan syarat harga ditambahkan.** Bukan pelonggaran
+sembarangan — ini dipaksa oleh sebaran nyata. Dari 176 pengamatan Menu Go di DKI, hanya **79
+jatuh di dalam isokron**, tersebar di **19 dari 43 kawasan**:
+
+```
+14  11  10  9  6  4  4  3  3  3  3  2  1  1  1  1  1  1  1
+```
+
+| Ambang | Kawasan lolos |
+|---:|---:|
+| ≥ 10 | 3 |
+| ≥ 5 | 5 |
+| **≥ 3** | **11** |
+
+Dengan ambang 10 hanya 3 kawasan lolos dan Top 5 mustahil dipenuhi. Dengan 5, tepat 5 lolos —
+dan "Top 5" dari 5 kandidat berhenti bermakna, karena tidak ada penyaringan yang terjadi.
+Ambang 3 memberi 11 kandidat sehingga peringkatnya benar-benar memilih.
+
+Kawasan bertumpu 3 pengamatan memang tipis, tetapi tarikan K = 8 pada rumus D sudah
+menahannya di dekat 0,5 — ia tidak dapat menang karena kebetulan. `n_observations` tetap
+dikirim ke frontend sehingga pengguna melihat sendiri setebal apa datanya.
+
+Syarat kedua `n_price >= 3` menjamin `price_median` tidak pernah NULL, sehingga S selalu
+terhitung. Syarat ini praktis tidak mengikat: dari 176 harga, hanya 1 gugur setelah
+pembersihan.
+
+⚠️ **Konsekuensi yang wajib diketahui tim produk: hanya 11 dari 43 kawasan dapat
+diperingkat.** 74% peta akan menampilkan label "data belum cukup".
 
 ⚠️ **Deduplikasi berubah.** Aturan lama ("objek sama bila < 20 m dan nama mirip") dicabut.
 Bila anggota tim mensurvei tempat yang sudah ada di Menu Go, hasilnya dihitung sebagai **dua
@@ -677,7 +634,8 @@ baris.
 | Penyebut punuk | 0,6 | ✅ | Turunan: `maks(puncak, 1 − puncak)` |
 | Pemotongan pencilan | persentil 5 & 95 | 🔶 | Menutup kelemahan min-max |
 | Bobot 0,25 / 0,50 / 0,25 | — | ✅ | Rasio 2 : 1 dari literatur (6.5) |
-| Ambang `is_rankable` | 10 | 🔶 | Tanpa dasar statistik formal |
+| Ambang `is_rankable` | 3 obs & 3 harga | ✅ | Diturunkan dari sebaran nyata (6.9) |
+| Ambang cakupan kategori | 0,5 × kawasan diperingkat | 🔶 | Keputusan tim (6.3b) |
 | Pengali skala | 100 | ✅ | Kosmetik |
 | Pembersihan harga | 1.000 / 2.000 / 150.000 | 🔶 | Menangani salah input nyata |
 
@@ -717,24 +675,43 @@ satuan ribuan) dan Rp180.000 untuk sebuah warung pecel.
 | Dataset | Peran |
 |---|---|
 | Menu Go (API lomba) | D dan S |
-| Survei tim | D dan S, format sama dengan Menu Go |
 | Sensus restoran (GeoJSON per kota) | C |
 | MAPID Isochrone Tool | batas kawasan + `area_km2` |
 | Properti Go | katalog properti, tidak masuk skoring |
 | Community Activity | layer peta + titik AI #5, tidak masuk skoring |
 
-Sensus yang sudah ada: Jakarta Pusat 1.160 · Kota Tangerang Selatan 1.391 · Kabupaten
-Tangerang 1.435. Tidak ada duplikat antar berkas.
+**Sensus DKI lengkap: 6.392 baris, 5 kota, 24 kategori `TIPE_3`.** Jakarta Pusat 1.160 ·
+Jakarta Utara 1.080 · Jakarta Barat 1.246 · Jakarta Selatan 1.519 · Jakarta Timur 1.387.
+
+Diverifikasi langsung: `TIPE_1`/`TIPE_2` seragam MAKANAN DAN MINUMAN/RESTORAN, tidak ada
+koordinat di luar DKI, 10 pasang baris kembar (0,16%, sengaja dibiarkan — bisa jadi dua gerai
+nyata di satu gedung).
+
+**751 dari 6.392 restoran (11,7%) jatuh di dalam 43 isokron**, 4–57 per kawasan dengan median
+12. **Tidak ada satu pun kawasan tanpa pesaing.**
+
+🔶 **Label `TIPE_3` tidak selalu akurat.** Uji silang nama restoran dengan kategorinya:
+'PADANG' 333/333 tepat, 'SUSHI' 131/133, 'SEAFOOD' 413/438, tetapi 'BAKSO' hanya 9/27 (8
+masuk CEPAT SAJI) dan sebuah '48 DIMSUM PLACE' berlabel RESTORAN PADANG. Kategori besar
+labelnya rapi, kategori kecil justru paling berisik — memperkuat alasan pengelompokan di
+6.3b. **Tidak diperbaiki**: normalisasi kategori pakai AI sudah dicabut permanen (titik #1).
 
 🔶 **Batasan sensus restoran, wajib di PRD Bab 5:** hanya kuliner (`TIPE_2` seragam
 RESTORAN, arketipe non-kuliner tidak dapat dilayani); dikumpulkan **Q4 2023** meski nama
 berkasnya "TAHUN 2025"; `STATUS` seragam BUKA sehingga tidak ada catatan usaha yang tutup;
 dipotong batas administratif kota sehingga setiap kota butuh berkasnya sendiri.
 
-✅ Seluruh data pendukung (sensus restoran, poligon isokron, dua tabel padanan manual,
-tabel Community Activity, daftar stasiun Jakarta) sudah aman dan tersedia. Struktur field
-persisnya mengikuti skema Zod yang akan dibuat langsung di kode saat implementasi, bukan
-dituliskan manual di dokumen ini.
+**Menu Go dan Properti Go ditarik dari API, bukan berkas.** Kotak pembatas DKI dipakai
+sebagai wilayah permintaan (lon 106,65–107,00 · lat -6,40 – -6,05), bukan gabungan isokron,
+supaya data tetap utuh kalau daftar stasiun berubah dan pemeriksaan "berapa yang jatuh di
+luar semua kawasan" tetap bisa dijawab. Hasilnya **Menu Go 176** dan **Properti Go 191**
+di DKI.
+
+🔶 **Properti Go sangat tipis di dalam kawasan: 26 dari 191, hanya di 9 dari 43 kawasan.**
+Saat pengguna mengklik stasiun, sebagian besar akan melihat panel properti kosong. Jalur 3
+perlu merancang state kosongnya, bukan menganggapnya bug. Kategorinya juga bercampur: Ruko
+113 · Rumah 42 · Tanah 15 · Kos 12 · Kantor 3 · Gudang 1 · Laundry 1 — tidak semuanya masuk
+akal untuk usaha kuliner.
 
 ---
 
@@ -745,7 +722,7 @@ dituliskan manual di dokumen ini.
 | 1 | `IntentSchema`: `kategori_usaha`, `target_jam`, `segmen`, `skala`, `weights`, `confidence` | **Diganti** oleh 6.6. Nama lama dilarang |
 | 2 | `/api/score` menerima `{ weights }` dari klien | **Dicabut.** Bobot tunggal, ditetapkan server (6.8) |
 | 3 | Langkah 2 membaca `scored_areas`/`scored_cells` | **`scored_cells` dicabut** dari MVP. Hanya `scored_areas` |
-| 4 | Daftar stasiun: 5 stasiun Tangsel | **Diganti** stasiun Jakarta. Data sudah aman, lihat skema Zod |
+| 4 | Daftar stasiun: 5 stasiun Tangsel | **Diganti** 43 stasiun commuter DKI, `R-1`…`R-43` |
 | 5 | Titik AI #1 & #2 "di luar scope MVP, milik Jalur 2" | **Dicabut permanen**, bukan ditunda (Bagian 3) |
 | 6 | ❓ "sumber data skor komponen masih di-research Jalur 2" | **Ditutup.** Skema final di 6.7 |
 | 7 | `/api/score` boleh dibangun dengan data dummy/seed | **Tidak perlu lagi.** Nama kolom final sudah tersedia |
@@ -764,19 +741,36 @@ dituliskan manual di dokumen ini.
 
 ## 9. Status penyelesaian item dari v2
 
-✅ **B-1 sampai B-6 (sebelumnya memblokir) sudah ditutup.** Poligon isokron, daftar stasiun
-Jakarta, sensus restoran, data Menu Go, dua tabel padanan manual, dan tabel Community
-Activity, seluruhnya sudah aman dan tersedia. Detail struktur field masing-masing mengikuti
-skema Zod yang akan dibuat langsung di kode saat implementasi, sehingga tidak perlu
-dispesifikasikan lebih jauh di dokumen ini.
+### Kondisi database per 6 September 2026
 
-❌ **O-1 sampai O-8 (perlu keputusan, tidak memblokir) dibuang dari dokumen ini.** Item-item
-itu dinilai tidak penting untuk scope MVP 5 hari dan tidak lagi menjadi bagian dari context
-ini. Tim tidak perlu menunggu keputusan apa pun terkait metode validasi, rentang nilai D,
-posisi puncak kurva C, jarak jalan kaki di property card, ambang `is_rankable`, skema output
-titik AI #5, maupun asal-usul dan umur sensus restoran, semuanya dianggap selesai secara
-default mengikuti keputusan yang sudah ada di Bagian 6 dan 7, tanpa perlu pembahasan lebih
-lanjut.
+| Tabel | Baris | Cara masuk |
+|---|---:|---|
+| `stasiun` | 43 | import CSV manual, Table Editor |
+| `scored_areas` | 43 | `etl/load_isokron.py` + `etl/pipeline_scoring.py` |
+| `katalog_restoran` | 6.392 | import CSV manual, 5 berkas per kota |
+| `menu_go` | 176 | `etl/tarik_mapid.py` + `etl/load_mapid.py` |
+| `properti_go` | 191 | sama |
+| `community_activity` | 0 | **belum dikerjakan, milik Jalur 1** |
+
+✅ **B-1 sampai B-6 benar-benar ditutup**, kini dengan angka, bukan pernyataan.
+
+### Yang masih terbuka
+
+❓ **Dua tabel padanan manual (6.6) belum ditulis.** Masing-masing 24 baris: teks bebas →
+`TIPE_3`, dan perkiraan harga per `TIPE_3`. 24 nilai `TIPE_3` sudah pasti dari sensus, jadi
+tidak ada lagi yang menghalangi. Pekerjaan Jalur 2, dipakai Jalur 1 di prompt Gemini.
+
+❓ **Tabel `community_activity` masih kosong.** Milik Jalur 1. Cara menariknya sama persis
+dengan Menu Go — `etl/tarik_mapid.py` bisa dijadikan contoh.
+
+❓ **Puncak kurva punuk 0,4 masih asumsi kerja** (6.10) dan sendirian menentukan siapa yang
+menang. Dengan 43 kawasan terisi, kalibrasi empiris sekarang mungkin dilakukan: hitung x tiap
+kawasan, lihat pada nilai x berapa kawasan paling banyak memuat tempat berlabel "Ramai" di
+Menu Go. Bukan blocker MVP.
+
+🔶 **Validasi model belum dikerjakan.** Community Activity kini layak jadi pembanding
+independen — ia sudah keluar dari formula, dan 43 kawasan melewati ambang ~10 yang dibutuhkan
+agar Spearman bermakna. Bukan blocker MVP.
 
 ---
 
@@ -802,15 +796,3 @@ lanjut.
   yang dicabut di Bagian 8.
 - Studi AHP-TOPSIS pemilihan lokasi usaha, JUTIN, Universitas Pahlawan, 2026, sumber rasio
   bobot 2 : 1.
-
-🔄 **Ground truth data/ERD/API, ditetapkan 4 September 2026** — untuk segala hal soal
-struktur tabel, kolom, dan kontrak endpoint, tiga dokumen berikut **menang atas isi Bagian 6
-di dokumen ini** bila ada selisih detail kecil yang terlewat saat sinkronisasi:
-- `context/dokumentasi-erd-mvp.md` — penjelasan lengkap tiap kolom enam tabel, alasan
-  desain, dan kenapa hampir tidak ada foreign key.
-- `context/daftar-api-sigmaps.xlsx` — kontrak persis tiap endpoint (field request/response,
-  kode galat, query SQL baku, pengaman wajib, keputusan yang masih terbuka). ⚠️ Query
-  contoh di sheet Aturan & Pengaman masih menulis `sensus_restoran` — dibaca sebagai
-  `katalog_restoran` (lihat catatan penamaan di 6.7).
-- Diagram ERD dbdiagram.io (PDF) — skema visual enam tabel, sumber nama tabel
-  `katalog_restoran` yang dikonfirmasi benar (lihat 6.7).

@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
 import { CommunitySentimentQuerySchema } from '@/lib/schemas/community-sentiment'
-import { summarizeSentiment, type SentimentReport } from '@/lib/ai/summarizeSentiment'
+import {
+  summarizeSentiment,
+  SentimentUnavailableError,
+  SentimentValidationError,
+  type SentimentReport,
+} from '@/lib/ai/summarizeSentiment'
 
 export async function GET(request: Request) {
   const stationId = new URL(request.url).searchParams.get('station_id')
@@ -34,6 +39,22 @@ export async function GET(request: Request) {
     return NextResponse.json({ data: summary })
   } catch (err) {
     console.error(err)
+
+    // Dibedakan instanceof supaya pesannya benar (§6.8b) — kuota Gemini habis itu
+    // sementara, dan sisa aplikasi tetap jalan tanpa endpoint ini.
+    if (err instanceof SentimentUnavailableError) {
+      return NextResponse.json(
+        { error: 'Layanan AI sedang penuh, gunakan filter manual' },
+        { status: 503 }
+      )
+    }
+    if (err instanceof SentimentValidationError) {
+      return NextResponse.json(
+        { error: 'Ringkasan tidak dapat ditafsirkan' },
+        { status: 422 }
+      )
+    }
+
     return NextResponse.json({ error: 'Gagal memproses ringkasan' }, { status: 503 })
   }
 }
