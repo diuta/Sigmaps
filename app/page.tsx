@@ -4,7 +4,6 @@ import BaseMap from "@/components/map/BaseMap";
 import StationLayer from "@/components/map/layers/StationLayer";
 import IsochroneLayer from "@/components/map/layers/IsochroneLayer";
 import PropertyLayer from "@/components/map/layers/PropertyLayer";
-import DevToolsOverlay from "@/components/map/dev/DevToolsOverlay";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { SelectedStationProvider } from "@/hooks/station/useSelectedStation";
 import { IsochroneConfigProvider } from "@/hooks/isochrone/useIsochroneConfig";
@@ -34,9 +33,6 @@ export default function Home() {
                 {/* 3. Layer stasiun KRL dengan 3 state interaktif (Idle, Hover, Active) */}
                 <StationLayer />
               </BaseMap>
-
-              {/* 🟡 DEV TOOLS OVERLAY (Simulasi & visualisasi Isochrone) */}
-              <DevToolsOverlay />
             </div>
           </main>
         </IsochroneConfigProvider>
