@@ -14,11 +14,12 @@
  * ke spiral kecil supaya tidak saling menumpuk.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import maplibregl from "maplibre-gl";
 import { useMapInstance } from "@/hooks/map/useMapInstance";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
 import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
+import { usePropertyFilter } from "@/hooks/property/usePropertyFilter";
 import type { PropertyUnit } from "@/types/property";
 import { useProperties } from "@/hooks/property/useProperties";
 
@@ -104,6 +105,41 @@ export default function PropertyLayer() {
   const { selectedStation } = useSelectedStation();
   const { selectedProperty, setSelectedProperty } = useSelectedProperty();
   const { properties } = useProperties(selectedStation?.area_id ?? null);
+  const { propertyTypes, transactionTypes, hasPhotoOnly } = usePropertyFilter();
+
+  const filteredProperties = useMemo(() => {
+    return properties.filter((prop) => {
+      // 1. Tipe properti (multi-select)
+      if (propertyTypes.length > 0) {
+        const cat = (prop.kategori_properti || "").toLowerCase();
+        const matchesAny = propertyTypes.some((t) => {
+          if (t === "rumah") return cat.includes("rumah");
+          if (t === "kos") return cat.includes("kos") || cat.includes("kost");
+          if (t === "ruko") return cat.includes("ruko");
+          if (t === "kantor") return cat.includes("kantor") || cat.includes("office");
+          if (t === "tanah") return cat.includes("tanah") || cat.includes("lahan");
+          if (t === "retail") return cat.includes("retail") || cat.includes("ritel") || cat.includes("toko");
+          return cat.includes(t.toLowerCase());
+        });
+        if (!matchesAny) return false;
+      }
+      // 2. Jenis transaksi (multi-select)
+      if (transactionTypes.length > 0) {
+        const jenis = (prop.jenis_properti || "").toLowerCase();
+        const matchesType = transactionTypes.some((t) => {
+          if (t === "sewa") return jenis.includes("sewa");
+          if (t === "jual") return jenis.includes("jual");
+          return jenis.includes(t.toLowerCase());
+        });
+        if (!matchesType) return false;
+      }
+      // 3. Foto fisik terverifikasi
+      if (hasPhotoOnly && !prop.foto_tampak_depan && !prop.foto_spanduk) {
+        return false;
+      }
+      return true;
+    });
+  }, [properties, propertyTypes, transactionTypes, hasPhotoOnly]);
 
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const activePopupRef = useRef<maplibregl.Popup | null>(null);
@@ -123,7 +159,7 @@ export default function PropertyLayer() {
 
     if (!selectedStation) return;
 
-    const placed = resolveOverlaps(properties);
+    const placed = resolveOverlaps(filteredProperties);
 
     placed.forEach(({ prop, lng, lat }) => {
       const el = document.createElement("div");
@@ -199,7 +235,7 @@ export default function PropertyLayer() {
       markersRef.current = [];
       popupMapRef.current.clear();
     };
-  }, [map, selectedStation, properties, setSelectedProperty]);
+  }, [map, selectedStation, filteredProperties, setSelectedProperty]);
 
   // 2. React to selectedProperty (klik dari sidebar atau peta) → buka popup pin yang sesuai
   useEffect(() => {

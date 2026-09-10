@@ -17,6 +17,7 @@ import React, { useEffect, useRef, useState, ReactNode } from "react";
 import MapLegend from "@/components/map/MapLegend";
 import MapNavigationControl from "@/components/map/MapNavigationControl";
 import MapBrandBadge from "@/components/map/MapBrandBadge";
+import StationSearchBar from "@/components/map/StationSearchBar";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapInstanceProvider } from "@/hooks/map/useMapInstance";
@@ -114,7 +115,7 @@ export default function BaseMap({ children }: BaseMapProps) {
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      <div ref={mapContainerRef} className="w-full h-full" />
+      <div ref={mapContainerRef} className="w-full h-full relative z-0" />
       {map && (
         <MapInstanceProvider map={map}>
           {children}
@@ -122,6 +123,8 @@ export default function BaseMap({ children }: BaseMapProps) {
           <MapNavigationControl />
         </MapInstanceProvider>
       )}
+      {/* Floating Station Search Bar: bergeser sinkron dengan sidebar */}
+      <StationSearchBar />
       {/* Legenda peta: posisinya mengikuti sidebar via useSidebarOpen */}
       <MapLegend />
       {/* Co-branding badge: SIGMAPS & Powered by MAPID */}
