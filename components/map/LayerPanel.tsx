@@ -124,19 +124,6 @@ export default function LayerPanel({ styleId, onStyleChange }: Props) {
                 </span>
               </li>
 
-              {/* Skor peluang */}
-              <li className="flex items-center gap-[var(--space-sm)]">
-                <svg width="20" height="12" viewBox="0 0 20 12" fill="none" aria-hidden="true" className="shrink-0">
-                  <rect x="0" y="7" width="5" height="5" rx="1" fill="#10B981" opacity="0.4" />
-                  <rect x="7" y="3.5" width="5" height="8.5" rx="1" fill="#10B981" opacity="0.7" />
-                  <rect x="14" y="0" width="6" height="12" rx="1" fill="#10B981" />
-                </svg>
-                <span className="flex flex-col">
-                  <span className="t-body font-medium text-[var(--color-text)]">Skor peluang</span>
-                  <span className="t-micro text-[var(--color-muted)]">Tinggi = lebih baik</span>
-                </span>
-              </li>
-
             </ul>
           </section>
           {/* ── / Legenda ──────────────────────────────────────────────────── */}
