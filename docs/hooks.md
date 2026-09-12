@@ -11,7 +11,7 @@ bersebelahan.
 | `station/useSelectedStation` | Context | Kawasan aktif (`StationLocation \| null`) | sidebar ⇄ peta |
 | `brief/useBriefResult` | Context | Hasil brief: `intent`, `scoreResult`, `loading`, `error`, `submitBrief()` | `Sidebar`, `ScoredPanel`, `StationLayer` |
 | `map/useMapInstance` | Context | Instance `maplibregl.Map` | **hanya** `components/map/*` |
-| `api/useApiJson` | Fetch (dasar) | Mesin state bersama semua hook fetch di bawah; cache + dedup per URL lewat `helper/fetch-json-cached.ts` | hook fetch lain, bukan komponen |
+| `api/useApiJson` | Fetch (dasar) | Mesin state bersama semua hook fetch di bawah; request di-memo per URL lewat `helper/memo-ttl.ts` | hook fetch lain, bukan komponen |
 | `station/useStations` | Fetch | `GET /api/stations` | `StationLayer`, `IsochroneLayer`, `StationSearchBar`, `ScoredPanel` |
 | `property/useProperties` | Fetch | `GET /api/properties?station_id=` | `PropertyLayer`, `ScoredPanel`, `StationNoBriefPanel` |
 | `property/useAllPropertiesSummary` | Fetch | `GET /api/properties?summary=true` → `Map` meta per stasiun | `StationSearchBar` |
@@ -25,7 +25,7 @@ Keempat hook fetch adalah pembungkus tipis di atas `useApiJson<T>(url | null, pe
 (`hooks/api/useApiJson.ts`). Argumen `null` berarti "belum perlu ambil": tidak ada request,
 hasilnya kosong. Penjaga `cancelled` ada di satu tempat, bukan disalin ke tiap hook.
 
-Di bawahnya, `helper/fetch-json-cached.ts` memoisasi **promise** per URL: beberapa komponen
+Di bawahnya, `helper/memo-ttl.ts` memoisasi **promise** per URL: beberapa komponen
 yang memanggil hook yang sama untuk URL yang sama (tiga pemanggil `useStations()` saat halaman
 dimuat, dua pemanggil `useProperties(id)` tiap klik stasiun) berbagi satu request dan satu objek
 hasil. Terukur: `/api/stations` 3× → 1× per muat halaman, `/api/properties` 2× → 1× per klik
@@ -104,9 +104,9 @@ justru karena keduanya dibaca dua-duanya. `MapInstanceProvider` beda: ia dipasan
   1–3 detik, berikutnya ~5 ms. Kuota Gemini tetap per project, jadi tetap jangan memanggil hook
   ini dengan `station_id` yang berubah-ubah cepat (mis. mengikuti hover).
 - **Hook fetch tidak pernah menyegarkan sendiri** — hasil sukses bertahan di cache klien 10
-  menit (`helper/fetch-json-cached.ts`). Cukup untuk data yang praktis statis (katalog stasiun,
-  properti per kawasan hasil batch). Kalau nanti butuh refresh manual, panggil
-  `clearFetchJsonCache()` lalu ganti `url`-nya; jangan menambah dependency palsu ke efeknya.
+  menit (`helper/memo-ttl.ts`, dipakai `hooks/api/useApiJson.ts`). Cukup untuk data yang praktis
+  statis (katalog stasiun, properti per kawasan hasil batch). Refresh manual belum ada — tambah
+  begitu ada yang membutuhkannya, jangan menambah dependency palsu ke efeknya.
 - **Saat `url` berganti, `data` langsung `null` dan `loading` `true`** sampai jawaban URL baru
   datang — komponen tidak sempat melihat data URL lama (dulu `useProperties` menahan daftar
   stasiun sebelumnya selama memuat). Untuk URL yang sudah di-cache jedanya satu frame.

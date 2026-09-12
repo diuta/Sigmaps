@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server'
 import { summarizeSentiment, type SentimentReport } from '@/lib/ai/summarizeSentiment'
 import type { CommunitySentiment } from '@/lib/schemas/community-sentiment'
+import { memoTtl } from '@/helper/memo-ttl'
 
 // Titik sentuh AI #5, dibungkus cache per station_id. Dipanggil app/api/community-sentiment.
 //
@@ -10,38 +11,18 @@ import type { CommunitySentiment } from '@/lib/schemas/community-sentiment'
 // tetap ter-mount hanya supaya hook-nya tidak memanggil ulang — bentuk komponen ditentukan
 // oleh cache yang tidak ada. Pola cachenya sama dengan lib/tipe3 (TTL di memori proses).
 //
-// Yang di-cache adalah PROMISE-nya, bukan hasilnya: dua permintaan yang datang bersamaan untuk
-// stasiun yang sama (dua tab, React StrictMode di dev yang memanggil efek dua kali) berbagi
-// satu panggilan Gemini, bukan dua. Promise yang gagal dibuang dari cache supaya permintaan
-// berikutnya mencoba lagi — galat Gemini (429/503) bersifat sementara.
+// Cache-nya helper/memo-ttl (promise per station_id): permintaan bersamaan berbagi satu
+// panggilan Gemini; yang gagal dibuang supaya percobaan berikutnya mengulang (429/503 sementara).
 //
 // Batasan: cache hidup per proses. Di Vercel tiap instance hangat punya cachenya sendiri dan
 // hilang saat cold start — cukup untuk menghapus seluruh pengulangan dalam satu sesi, bukan
 // cache lintas instance. Kalau community_activity dimuat ulang (etl/load_activity.py),
-// ringkasan lama bisa bertahan paling lama CACHE_TTL_MS.
+// ringkasan lama bisa bertahan paling lama 6 jam.
 
 /** Gagal membaca view community_activity_by_station — dipetakan route ke 503. */
 export class SentimentSourceError extends Error {}
 
-type Entry = { promise: Promise<CommunitySentiment>; expiresAt: number }
-const cache = new Map<string, Entry>()
-
-const CACHE_TTL_MS = 6 * 60 * 60 * 1000
-
-export function getCommunitySentiment(stationId: string): Promise<CommunitySentiment> {
-  const hit = cache.get(stationId)
-  if (hit && hit.expiresAt > Date.now()) return hit.promise
-
-  const promise = loadAndSummarize(stationId).catch((error) => {
-    // Hanya hapus kalau entri di cache masih milik promise ini — jangan menimpa percobaan
-    // ulang yang sudah dimulai pemanggil lain.
-    if (cache.get(stationId)?.promise === promise) cache.delete(stationId)
-    throw error
-  })
-
-  cache.set(stationId, { promise, expiresAt: Date.now() + CACHE_TTL_MS })
-  return promise
-}
+export const getCommunitySentiment = memoTtl(loadAndSummarize, 6 * 60 * 60 * 1000)
 
 async function loadAndSummarize(stationId: string): Promise<CommunitySentiment> {
   const { data, error } = await supabaseServer

@@ -60,7 +60,7 @@ Respons gagal:
 - **Cache per stasiun ada di `lib/sentiment` (sejak 12 September 2026)**, memenuhi
   `context-mvp.md` §6.8b. Terukur: panggilan pertama sebuah stasiun 1,3–2,5 detik (Gemini),
   panggilan berikutnya ~5 ms; dua permintaan bersamaan untuk stasiun yang sama berbagi satu
-  panggilan Gemini (yang di-cache promise-nya). TTL 6 jam, di memori proses — per instance di
+  panggilan Gemini (`helper/memo-ttl.ts`, yang di-cache promise-nya). TTL 6 jam, di memori proses — per instance di
   Vercel, hilang saat cold start. Kalau `community_activity` dimuat ulang lewat
   `etl/load_activity.py`, ringkasan lama bisa bertahan sampai TTL habis atau redeploy.
 - Pemanggilnya dua: `ScoredPanel` (setelah brief) dan `StationNoBriefPanel` (klik pin di peta).

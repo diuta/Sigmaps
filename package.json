@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node lib/scoring/explanations.test.ts"
+    "test": "node lib/scoring/explanations.test.ts && node helper/memo-ttl.test.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.63",

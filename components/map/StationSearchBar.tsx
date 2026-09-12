@@ -27,8 +27,8 @@ import type { StationLocation } from "@/types/station";
 import {
   PROPERTY_TYPES,
   TRANSACTION_TYPES,
-  anyMatchesPropertyType,
-  anyMatchesTransactionType,
+  matchesPropertyType,
+  matchesTransactionType,
 } from "@/lib/property/filter";
 
 const SIDEBAR_CLOSED_PX = 24;
@@ -130,10 +130,10 @@ export default function StationSearchBar() {
       // A–C. Ketersediaan unit sesuai filter — predikatnya di lib/property/filter.ts, sama
       // persis dengan yang dipakai PropertyLayer & PropertyList untuk unit satu per satu.
       // Stasiun tanpa properti (propMeta undefined) gugur begitu ada filter unit yang aktif.
-      if (propertyTypes.length > 0 && !(propMeta && anyMatchesPropertyType(propMeta.categories, propertyTypes))) {
+      if (propertyTypes.length > 0 && !propMeta?.categories.some((c) => matchesPropertyType(c, propertyTypes))) {
         return false;
       }
-      if (transactionTypes.length > 0 && !(propMeta && anyMatchesTransactionType(propMeta.types, transactionTypes))) {
+      if (transactionTypes.length > 0 && !propMeta?.types.some((t) => matchesTransactionType(t, transactionTypes))) {
         return false;
       }
       if (hasPhotoOnly && !(propMeta && propMeta.hasPhoto)) {

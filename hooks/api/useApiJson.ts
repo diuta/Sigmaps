@@ -3,50 +3,44 @@
 /**
  * hooks/api/useApiJson.ts
  * Satu mesin state untuk semua hook fetch di hooks/* (useStations, useProperties,
- * useCommunitySentiment, useAllPropertiesSummary). Dulu keempatnya menyalin pola yang sama
- * (`cancelled` + data/loading/error) dan masing-masing menembak request sendiri.
+ * useCommunitySentiment, useAllPropertiesSummary). Tahu bentuk envelope API SIGMAPS
+ * (CLAUDE.md §6): sukses `{ data: T }`, gagal `{ error }`.
  *
- * Tahu bentuk envelope API SIGMAPS (CLAUDE.md §6): sukses `{ data: T }`, gagal `{ error }`.
- * Transport + cache-nya di helper/fetch-json-cached.ts (generik).
+ * Request di-memo per URL (helper/memo-ttl): beberapa komponen yang memanggil hook yang sama
+ * untuk URL yang sama berbagi satu request dan satu objek hasil — termasuk pemanggilan ganda
+ * React StrictMode di dev. Hanya respons `ok` yang bertahan di cache.
  *
- * `url === null` berarti "belum perlu ambil": tidak ada request, hasilnya kosong.
- * Saat `url` berganti, `data` langsung `null` dan `loading` `true` sampai jawaban URL baru
- * datang — tidak ada jeda memperlihatkan data URL lama. Untuk URL yang sudah di-cache jawabannya
- * datang di microtask berikutnya, jadi jedanya satu frame.
+ * `url === null` berarti "belum perlu ambil": tidak ada request, hasilnya kosong. Saat `url`
+ * berganti, `data` langsung `null` dan `loading` `true` sampai jawaban URL baru datang; untuk
+ * URL yang sudah di-cache jedanya satu frame.
  */
 
 import { useEffect, useState } from "react";
-import { fetchJsonCached } from "@/helper/fetch-json-cached";
+import { memoTtl } from "@/helper/memo-ttl";
 
-type Envelope<T> = { data: T } | { error: string };
+type Envelope = { data: unknown } | { error: string };
 
-interface Settled<T> {
-  url: string;
-  data: T | null;
-  error: string | null;
-}
+const fetchJson = memoTtl(
+  (url: string) => fetch(url).then(async (res) => ({ ok: res.ok, json: (await res.json()) as Envelope })),
+  10 * 60 * 1000,
+  (res) => !res.ok,
+);
 
-export interface UseApiJsonResult<T> {
-  data: T | null;
-  loading: boolean;
-  error: string | null;
-}
-
-export function useApiJson<T>(url: string | null, fallbackError: string): UseApiJsonResult<T> {
-  const [settled, setSettled] = useState<Settled<T> | null>(null);
+export function useApiJson<T>(url: string | null, fallbackError: string) {
+  const [settled, setSettled] = useState<{ url: string; data: T | null; error: string | null } | null>(null);
 
   useEffect(() => {
     if (!url) return;
     let cancelled = false;
 
-    fetchJsonCached<Envelope<T>>(url)
+    fetchJson(url)
       .then(({ ok, json }) => {
         if (cancelled) return;
         if (!ok || "error" in json) {
           setSettled({ url, data: null, error: ("error" in json && json.error) || fallbackError });
           return;
         }
-        setSettled({ url, data: json.data, error: null });
+        setSettled({ url, data: json.data as T, error: null });
       })
       .catch(() => {
         if (!cancelled) setSettled({ url, data: null, error: fallbackError });
@@ -59,10 +53,6 @@ export function useApiJson<T>(url: string | null, fallbackError: string): UseApi
 
   if (!url) return { data: null, loading: false, error: null };
 
-  const current = settled !== null && settled.url === url ? settled : null;
-  return {
-    data: current?.data ?? null,
-    loading: current === null,
-    error: current?.error ?? null,
-  };
+  const current = settled?.url === url ? settled : null;
+  return { data: current?.data ?? null, loading: current === null, error: current?.error ?? null };
 }

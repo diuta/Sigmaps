@@ -1,8 +1,3 @@
-/**
- * Konstanta peta dasar. Daftar layer/toggle (MAP_LAYERS) dan pilihan basemap (BASEMAPS)
- * yang dulu ada di sini sudah dihapus bersama LayerPanel — tidak ada UI yang memakainya.
- */
-
 export const DEFAULT_BASEMAP_ID = "street-v2.0";
 
 export function basemapStyleUrl(styleId: string): string {
