@@ -14,3 +14,4 @@
 psycopg2-binary>=2.9      # koneksi langsung PostgreSQL/PostGIS
 python-dotenv>=1.0        # baca .env.local
 requests>=2.31            # tarik Menu Go & Properti Go dari API MAPID Competition
+pyopenssl>=24.0           # hitung_rute.py: TLS ke server routing dari Python macOS berbasis LibreSSL

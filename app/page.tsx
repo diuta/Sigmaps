@@ -4,6 +4,7 @@ import BaseMap from "@/components/map/BaseMap";
 import StationLayer from "@/components/map/layers/StationLayer";
 import IsochroneLayer from "@/components/map/layers/IsochroneLayer";
 import PropertyLayer from "@/components/map/layers/PropertyLayer";
+import RouteLayer from "@/components/map/layers/RouteLayer";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { SelectedStationProvider } from "@/hooks/station/useSelectedStation";
 import { IsochroneConfigProvider } from "@/hooks/isochrone/useIsochroneConfig";
@@ -30,6 +31,10 @@ export default function Home() {
               <BaseMap>
                 {/* 1. Poligon Isokron 10 Menit (muncul saat stasiun aktif) */}
                 <IsochroneLayer />
+
+                {/* 1b. Garis rute jalan kaki properti terpilih -> stasiun (di atas isokron,
+                    di bawah marker properti yang berupa DOM) */}
+                <RouteLayer />
 
                 {/* 2. Titik-titik properti dalam isokron stasiun aktif */}
                 <PropertyLayer />

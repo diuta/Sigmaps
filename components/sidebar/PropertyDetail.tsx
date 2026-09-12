@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { PropertyUnit } from "@/types/property";
+import { formatJalanKaki } from "@/helper/format-jalan-kaki";
 
 interface Props {
   property: PropertyUnit;
@@ -52,7 +53,12 @@ export default function PropertyDetail({ property, stationName, onBack }: Props)
     headingRef.current?.focus();
   }, [property.id]);
 
-  const sewa = property.jenis_properti === "Sewa";
+  // Nilai di DB: "Disewa" / "Dijual" / "Sudah Tersewa" (aset KAI yang sudah terisi)
+  const jenis = (property.jenis_properti || "").toLowerCase();
+  const sewa = jenis.includes("sewa");
+  const tersewa = jenis.includes("tersewa");
+  // null kalau rute belum dihitung (etl/hitung_rute.py) — baris jarak disembunyikan saja
+  const jalanKaki = formatJalanKaki(property.jarak_jalan_m, property.waktu_jalan_s);
 
   return (
     <div className="motion-rise-in flex flex-col gap-[var(--space-lg)]">
@@ -84,11 +90,20 @@ export default function PropertyDetail({ property, stationName, onBack }: Props)
                 : "border-[var(--color-brand)] bg-[var(--color-accent-surface)] text-[var(--color-brand)]"
             }`}
           >
-            {sewa ? "Siap Sewa" : "Siap Jual"}
+            {tersewa ? "Sudah Tersewa" : sewa ? "Siap Sewa" : "Siap Jual"}
           </span>
         </div>
 
         <p className="t-body text-[var(--color-text-sub)]">{property.alamat}</p>
+        {jalanKaki && (
+          <p
+            className="t-micro flex items-center gap-[var(--space-xs)] text-[var(--color-brand)]"
+            title={`Rute jalan kaki ke ${stationName} mengikuti jaringan jalan, digambar di peta`}
+          >
+            <span aria-hidden="true">🚶</span>
+            <span>{jalanKaki} ke {stationName}</span>
+          </p>
+        )}
       </div>
 
       <div className="flex flex-col gap-[var(--space-md)]">

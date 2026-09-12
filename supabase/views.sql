@@ -13,6 +13,27 @@
 --   tipe3_values                  -> lib/tipe3 (prompt-request & score)
 drop view if exists stasiun_geojson;
 
+-- Rute jalan kaki properti -> stasiun, satu baris per pasangan (stasiun, properti) yang
+-- muncul di properti_go_by_station. Diisi etl/hitung_rute.py (OSRM profil foot), TIDAK
+-- dihitung live. Sengaja tanpa foreign key: properti_go dikosongkan-diisi ulang per
+-- `sumber` oleh loader, FK akan ikut menghapus rute yang sebenarnya masih valid.
+-- hitung_rute.py yang membersihkan baris yatim.
+create table if not exists rute_properti (
+  station_id  text not null,
+  property_id text not null,
+  jarak_m     integer not null,            -- panjang rute di jaringan jalan, meter
+  waktu_s     integer not null,            -- durasi jalan kaki, detik (~4,5 km/jam)
+  geom        geometry(LineString, 4326) not null,
+  engine      text not null,               -- mis. 'osrm-foot'
+  computed_at timestamptz not null default now(),
+  primary key (station_id, property_id)
+);
+alter table rute_properti enable row level security;
+drop policy if exists "baca publik" on rute_properti;
+create policy "baca publik" on rute_properti for select using (true);
+
+-- LEFT JOIN ke rute: pasangan yang belum dihitung tetap tampil dengan
+-- jarak/waktu/rute NULL. Itu kondisi normal (hitung_rute.py belum jalan), bukan galat.
 create or replace view properti_go_by_station as
 select
   a.station_id,
@@ -22,9 +43,13 @@ select
   p.alamat,
   p.foto_tampak_depan,
   p.foto_spanduk,
-  ST_AsGeoJSON(p.geom)::json as geom
+  ST_AsGeoJSON(p.geom)::json as geom,
+  r.jarak_m  as jarak_jalan_m,
+  r.waktu_s  as waktu_jalan_s,
+  ST_AsGeoJSON(r.geom)::json as rute
 from properti_go p
-join scored_areas a on ST_Within(p.geom, a.geom);
+join scored_areas a on ST_Within(p.geom, a.geom)
+left join rute_properti r on r.station_id = a.station_id and r.property_id = p.id;
 
 create or replace view community_activity_by_station as
 select

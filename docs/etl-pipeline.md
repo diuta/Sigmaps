@@ -23,12 +23,17 @@ Lalu, berurutan:
 python cek_koneksi.py      # 1. pastikan tersambung & lihat kondisi tabel
 python load_isokron.py     # 2. 43 poligon  -> scored_areas
 python tarik_mapid.py      # 3. tarik Menu Go + Properti Go dari API, simpan ke etl/data/
-python load_mapid.py       # 4. muat keduanya -> menu_go, properti_go
-python pipeline_scoring.py # 5. hitung D, median harga, pesaing, is_rankable
+python load_mapid.py       # 4. muat keduanya -> menu_go, properti_go (sumber='propertigo')
+python tarik_kai.py        # 5. tarik 546 aset komersial KAI dari space.kai.id
+python load_kai.py         # 6. muat yang di dalam isokron -> properti_go (sumber='kai_space')
+python hitung_rute.py      # 7. rute jalan kaki properti -> stasiun (OSRM foot) -> rute_properti
+python pipeline_scoring.py # 8. hitung D, median harga, pesaing, is_rankable
 ```
 
 Semua aman diulang. Tiap skrip mengosongkan tabelnya lalu mengisi ulang dalam satu transaksi;
-gagal di tengah berarti tidak ada perubahan yang tersimpan.
+gagal di tengah berarti tidak ada perubahan yang tersimpan. `properti_go` diisi dua skrip
+(`load_mapid.py`, `load_kai.py`); masing-masing hanya menghapus baris dengan `sumber`-nya
+sendiri, jadi urutan 4 dan 6 bebas dibolak-balik.
 
 **Dua tabel TIDAK diisi Python:** `stasiun` dan `katalog_restoran` diimpor manual lewat Table
 Editor Supabase (Insert → Import data from CSV). Keduanya datang sebagai berkas tabel biasa,
@@ -40,7 +45,10 @@ jadi tidak ada gunanya lewat kode.
 | `cek_koneksi.py` | Laporan kondisi database. Hanya membaca, tidak pernah menulis |
 | `load_isokron.py` | GeoJSON MAPID Isochrone Tool → `scored_areas.geom` + `area_km2` |
 | `tarik_mapid.py` | Unduh Menu Go & Properti Go dari API, simpan mentah ke `etl/data/` |
-| `load_mapid.py` | Berkas mentah → tabel `menu_go` dan `properti_go` |
+| `load_mapid.py` | Berkas mentah → tabel `menu_go` dan `properti_go` (`sumber='propertigo'`) |
+| `tarik_kai.py` | Unduh daftar aset komersial KAI (`space-api.kai.id`) ke `etl/data/kai_space.json` |
+| `load_kai.py` | Aset KAI yang jatuh di dalam isokron → `properti_go` (`sumber='kai_space'`) |
+| `hitung_rute.py` | Rute jalan kaki tiap pasangan (properti, stasiun) → `rute_properti`. Lihat [etl-hitung-rute.md](etl-hitung-rute.md) |
 | `pipeline_scoring.py` | Isi seluruh kolom komponen di `scored_areas` |
 
 ## Dependency / prasyarat
@@ -57,6 +65,7 @@ jadi tidak ada gunanya lewat kode.
 
 - `isokron.geojson` — 43 poligon dari MAPID Isochrone Tool
 - `menugo.geojson`, `propertigo.geojson` — dibuat sendiri oleh `tarik_mapid.py`
+- `kai_space.json` — dibuat sendiri oleh `tarik_kai.py`
 
 **Urutan wajib:** `stasiun` harus terisi sebelum `load_isokron.py` (ada foreign key), dan
 `menu_go` + `katalog_restoran` harus terisi sebelum `pipeline_scoring.py`.
@@ -109,6 +118,32 @@ semua".
 **10. `community_activity` bukan tugas Jalur 2.** Tabelnya ada tapi kosong. Cara menariknya
 sama persis dengan Menu Go — `tarik_mapid.py` bisa dijadikan contoh oleh Jalur 1.
 
+**11. Aset KAI Space (`load_kai.py`) — cara kerja & batasannya.**
+
+- Sumber: `GET https://space-api.kai.id/api/v1/komersialasetram`, header
+  `Authorization: Bearer space.kai.id`. Token itu **bukan rahasia** — nilai statis yang
+  dibundel di `space.kai.id/assets/assets/config/config_prod.json` situs publiknya sendiri,
+  jadi tidak masuk `.env`. Tidak perlu login, tidak ada paginasi (546 aset sekali tarik).
+- "Dekat stasiun" = **`ST_Within` ke `scored_areas`**, definisi yang sama dengan view
+  `properti_go_by_station`. Jadi `load_isokron.py` wajib sudah jalan; kalau isokron berubah,
+  jalankan `load_kai.py` lagi. Aset di luar isokron (mayoritas: Semarang, Cirebon, LRT
+  Jabodebek, dll) **tidak** dimuat.
+- Pemetaan ke kolom `properti_go` — kolom yang tidak ada padanannya dibiarkan null:
+  `kategori_properti` = "Kios Stasiun" / "Lahan Stasiun"; `jenis_properti` = "Disewa" atau
+  "Sudah Tersewa" (dari `rented`); `alamat` = `namablok - namalokasi, kabupatenkota`;
+  `foto_tampak_depan` = `https://space-api.kai.id/proxy?guid=<fotos[0]>` (URL publik,
+  dites bisa diakses tanpa header); `foto_spanduk` = null.
+- Aset yang **sudah tersewa tetap dimuat** (ada outlet CFC, HokBen, Indomaret, dll di
+  Manggarai/Pasar Senen) supaya titiknya terlihat di peta. Filter "sewa" di `PropertyLayer`
+  mencocokkan substring, jadi keduanya ikut. Kalau produk memutuskan hanya yang tersedia,
+  cukup tambah `if a.get("rented"): return False` di `layak()`.
+- Yang dilewati: iklan/sticker/ATM/vending/loket (bukan ruang usaha, lihat `BUKAN_RUANG`).
+- KAI juga punya `luastanah`, `luasbangunan`, `nilaikomersial` (harga sewa). **Sengaja tidak
+  dimuat** — `types/property/index.ts` dan `context/context-mvp.md` Langkah 4 melarang
+  kolom luas/harga/kontak di `properti_go`. Kalau mau dipakai, itu keputusan produk dulu.
+- Titik-titik kios di satu stasiun berjarak beberapa meter saja (semua di dalam bangunan
+  stasiun), jadi marker bertumpuk; `resolveOverlaps` di `PropertyLayer` yang merenggangkannya.
+
 ## Angka rujukan per 6 September 2026
 
 Dipakai untuk memastikan hasil pemuatan benar:
@@ -118,8 +153,11 @@ stasiun            43     manual
 scored_areas       43     0,493-1,580 km2, median 1,059
 katalog_restoran   6.392  5 kota, 24 kategori, manual
 menu_go            176    79 di dalam isokron, tersebar di 19 kawasan
-properti_go        191    26 di dalam isokron, hanya 9 kawasan
+properti_go        191    26 di dalam isokron, hanya 9 kawasan (sumber='propertigo')
+                   +39    semuanya di dalam isokron, 16 kawasan, Manggarai terbanyak (8)
+                          (sumber='kai_space', per 12 September 2026)
 community_activity 0      milik Jalur 1
+rute_properti      66     = jumlah pasangan di properti_go_by_station; median 241 m, maks 1.829 m
 
 is_rankable        11 dari 43
 demand             0,333 - 0,545
