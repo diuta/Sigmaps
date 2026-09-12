@@ -109,6 +109,7 @@ export default function Sidebar() {
         )}
 
         <OutputSection
+          brief={submitted}
           loading={loading}
           scored={submitted !== null && scoreResult !== null}
           stale={editing && submitted !== null}

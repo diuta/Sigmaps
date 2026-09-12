@@ -56,6 +56,7 @@ dan tautan lintas folder ditulis relatif (`../context/<nama>.md`).
 | [lib-ai-parseintent.md](../context/lib-ai-parseintent.md) | `lib/ai/parseIntent.ts` |
 | [lib-ai-summarize-sentiment.md](../context/lib-ai-summarize-sentiment.md) | `lib/ai/summarizeSentiment.ts` |
 | [lib-fixtures.md](lib-fixtures.md) | `lib/fixtures/*` — konstanta tampilan |
+| [lib-pdf-business-plan.md](lib-pdf-business-plan.md) | `lib/pdf/businessPlanDocument.tsx` — dokumen PDF ringkasan rencana usaha |
 
 ### Frontend
 
@@ -63,7 +64,7 @@ dan tautan lintas folder ditulis relatif (`../context/<nama>.md`).
 |---|---|
 | [component-base-map.md](../context/component-base-map.md) | `components/map/BaseMap.tsx` |
 | [component-map-layers.md](component-map-layers.md) | layer peta, `LayerPanel`, dev tools |
-| [component-sidebar.md](component-sidebar.md) | 13 komponen `components/sidebar/*` |
+| [component-sidebar.md](component-sidebar.md) | seluruh `components/sidebar/*` |
 | [hooks.md](hooks.md) | seluruh `hooks/*` (context & fetch) |
 | [fe/ARCHITECTURE.md](../context/fe/ARCHITECTURE.md) | struktur direktori, zona kepemilikan, kontrak antar zona |
 | [fe/DESIGN.md](../context/fe/DESIGN.md) | token desain, tipografi, spesifikasi visual |

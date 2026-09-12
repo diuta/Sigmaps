@@ -13,6 +13,9 @@ import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
 import type { PropertyUnit } from "@/types/property";
 
 interface Props {
+  /** Teks rencana usaha yang sudah disubmit — null sebelum brief pertama dinilai. Diteruskan
+   *  ke ScoredPanel untuk ExportPdfButton, tidak dipakai bagian lain di sini. */
+  brief: string | null;
   /** Rencana sedang dinilai: /api/prompt-request lalu /api/score. */
   loading: boolean;
   /** Ada brief yang sudah dinilai. */
@@ -26,7 +29,7 @@ interface Props {
  * Bagian bawah sidebar. Berdiri sendiri dari bagian rencana di atasnya: membuka
  * penyunting rencana hanya meredupkan bagian ini, tidak melepasnya dari layar.
  */
-export default function OutputSection({ loading, scored, stale, onEditBrief }: Props) {
+export default function OutputSection({ brief, loading, scored, stale, onEditBrief }: Props) {
   const { selectedStation } = useSelectedStation();
   const { intent, scoreResult } = useBriefResult();
   const { selectedProperty, setSelectedProperty } = useSelectedProperty();
@@ -127,6 +130,7 @@ export default function OutputSection({ loading, scored, stale, onEditBrief }: P
               />
             )}
             <ScoredPanel
+              brief={brief ?? ""}
               onSelectProperty={(unit, stationName) => {
                 setSelectedProperty({ ...unit });
                 setDetail({ unit, stationName });

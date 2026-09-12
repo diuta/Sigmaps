@@ -4,7 +4,7 @@ Sidebar adalah seluruh antarmuka non-peta SIGMAPS: tempat user menulis rencana u
 (Business Brief), tempat hasil skor ditampilkan, dan tempat katalog properti kawasan dibaca.
 Peta hanya menggambar; semua teks, angka, dan peringatan ada di sini.
 
-Lima belas komponen, satu file satu tanggung jawab:
+Komponen-komponen sidebar, satu file satu tanggung jawab:
 
 | File | Perannya |
 |---|---|
@@ -15,6 +15,7 @@ Lima belas komponen, satu file satu tanggung jawab:
 | `OutputSection.tsx` | Bagian bawah: memilih panel mana yang tampil |
 | `StationNoBriefPanel.tsx` | Kawasan diklik di peta tapi brief belum diisi — gambaran kawasan + `PropertyList` |
 | `ScoredPanel.tsx` | Panel hasil: peringkat, komponen skor, sentimen, properti |
+| `ExportPdfButton.tsx` | Tombol "Unduh PDF" — render ringkasan rencana usaha lewat [lib/pdf](lib-pdf-business-plan.md) |
 | `RankStrip.tsx` | Deretan tombol angka 1..n untuk pindah peringkat |
 | `ScoreComponentBar.tsx` | Satu bar komponen (D/C/S) + kalimat penjelas |
 | `AreaInsightBlock.tsx` | Ringkasan AI Community Activity |
@@ -125,13 +126,18 @@ Aturan aksesibilitas yang mengikat di alur ini (hasil `ui-ux-pro-max`, severity 
 ### Isi `ScoredPanel` — dua tab
 
 ```
-breadcrumb · RankStrip · nama kawasan + skor besar      ← selalu tampil, di atas tab
+breadcrumb · RankStrip · nama kawasan + skor besar + [Unduh PDF]  ← selalu tampil, di atas tab
 ────────────────────────────────────────────────────
 [ Skor ] [ Unit properti (7) ]
 ────────────────────────────────────────────────────
 tab "Skor" : 3 × ScoreComponentBar → AreaInsightBlock → UnrankableNotice
 tab "Unit" : PropertyList
 ```
+
+`ExportPdfButton` dipasang di header, **di luar dua tab** — isi PDF-nya menggabungkan konten
+kedua tab (skor kawasan aktif + daftar propertinya) sekaligus Top 5 ranking, jadi tombolnya
+tidak boleh terasa "milik" salah satu tab saja. Lihat
+[lib-pdf-business-plan.md](lib-pdf-business-plan.md) untuk isi dokumennya.
 
 Dua tab karena keduanya menjawab pertanyaan berbeda: skor menjawab *"kawasan ini bagus atau
 tidak?"*, daftar unit menjawab *"apa yang sebenarnya bisa saya sewa di sini?"*. Identitas
@@ -242,6 +248,8 @@ mesin dan mana kalimat yang ditulis model.
 - Token CSS di `app/globals.css` (`--color-*`, `--space-*`, `--radius-*`, `--motion-*`, kelas
   `.t-*`). **Jangan hardcode hex atau ukuran font** — lihat [docs/fe/DESIGN.md](../context/fe/DESIGN.md).
 - Endpoint `/api/prompt-request`, `/api/score`, `/api/properties`, `/api/community-sentiment`.
+- `ExportPdfButton` butuh `@react-pdf/renderer` (dependency npm) dan
+  `lib/pdf/businessPlanDocument.tsx` — lihat [lib-pdf-business-plan.md](lib-pdf-business-plan.md).
 
 ## Batasan/gotcha
 
@@ -309,3 +317,6 @@ mesin dan mana kalimat yang ditulis model.
   memang tidak ada di Properti Go. Jangan ditambahkan "jaga-jaga".
 - `PropertyList` memakai `<img>` biasa (bukan `next/image`) dengan `eslint-disable` — foto
   berasal dari domain MAPID yang belum didaftarkan di `next.config.ts`.
+- **`ScoredPanel` menerima prop baru `brief` (teks rencana usaha)**, dioper dari `Sidebar` lewat
+  `OutputSection` — satu-satunya konsumennya adalah `ExportPdfButton`. Jangan dipakai untuk
+  render lain di `ScoredPanel`; kalau butuh menampilkan teks brief, itu tugas `SubmittedBrief`.
