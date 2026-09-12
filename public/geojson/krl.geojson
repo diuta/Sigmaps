@@ -1,0 +1,37 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.85024534381431, -6.209729647966917]
+      },
+      "properties": { "name": "manggarai" }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.82377780563885, -6.202289889504992]
+      },
+      "properties": { "name": "sudirman" }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.82171821705732, -6.201414636943112]
+      },
+      "properties": { "name": "bni-city" }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.81654318748998, -6.20028543846977]
+      },
+      "properties": { "name": "karet" }
+    }
+  ]
+}

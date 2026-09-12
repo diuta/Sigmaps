@@ -1,0 +1,239 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand — Cobalt Metro */
+  --color-brand:          #1E40AF;
+  --color-brand-hover:    #1D4ED8;
+  --color-brand-active:   #172554;
+
+  /* AI / Intelligence accent — Electric Ultramarine.
+     RESERVED: konten hasil generasi AI saja. */
+  --color-accent:         #4F46E5;
+  --color-accent-surface: #EEF2FF;
+
+  /* Deterministic scoring — Neon Emerald.
+     RESERVED: output skor deterministik saja (bar D/C/S, angka skor). */
+  --color-opportunity:    #10B981;
+  --color-opportunity-bg: #ECFDF5;
+  --color-opportunity-tx: #065F46;
+
+  /* Property pin — Warm Tangerine */
+  --color-pin:            #F97316;
+  --color-pin-hover:      #EA580C;
+  --color-pin-surface:    #FFF7ED;
+
+  /* Warning — Amber Orange */
+  --color-warning:        #F59E0B;
+  --color-warning-bg:     #FEF3C7;
+  --color-warning-tx:     #92400E;
+
+  /* Neutrals */
+  --color-surface:        #FFFFFF;
+  --color-surface-muted:  #F8FAFC;
+  --color-border:         #E2E8F0;
+  --color-muted:          #94A3B8;
+  --color-text:           #0F172A;
+  --color-text-sub:       #64748B;
+
+  /* Spacing (4px base) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+
+  /* Radius */
+  --radius-card: 8px;
+  --radius-pill: 9999px;
+
+  /* Elevation */
+  --shadow-card:  0 1px 3px 0 rgba(0,0,0,.05), 0 1px 2px 0 rgba(0,0,0,.03);
+  --shadow-float: 0 10px 15px -3px rgba(0,0,0,.08), 0 4px 6px -2px rgba(0,0,0,.03);
+
+  /* Layout */
+  --sidebar-width: 380px;
+
+  /* Motion — tidak ada di DESIGN.md, tambahan pass 3. Semua transisi memakai token ini. */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 320ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-jakarta), -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+/* Typography tokens — DESIGN.md §3 */
+.t-display-score { font-size: 28px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em; }
+.t-heading-1     { font-size: 18px; line-height: 24px; font-weight: 700; letter-spacing: -0.01em; }
+.t-heading-2     { font-size: 15px; line-height: 20px; font-weight: 600; }
+.t-body          { font-size: 13px; line-height: 18px; font-weight: 400; }
+.t-button        { font-size: 13px; line-height: 16px; font-weight: 600; letter-spacing: 0.01em; }
+.t-tabular       { font-size: 12px; line-height: 16px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.t-micro         { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.02em; }
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.motion-rise-in { animation: rise-in var(--motion-base) var(--ease-out) both; }
+.motion-pop-in  { animation: pop-in var(--motion-fast) var(--ease-out) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+/* =========================================================================
+   STATION MARKER INTERACTIVE STATES (ZONA CACA) - HIG REFINED
+   ========================================================================= */
+
+.station-marker-container {
+  position: relative;
+  cursor: pointer;
+  transform-origin: 50% 100%;
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+              filter 0.25s ease,
+              opacity 0.2s ease;
+  will-change: transform, filter;
+  z-index: 30;
+}
+
+/* State A: Idle (Clean, elegant, non-intrusive) */
+.station-marker-container.state-idle {
+  opacity: 0.95;
+  transform: scale(0.95);
+  filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.18));
+}
+
+/* State B: Hover (Lifted, focused, premium glow) */
+.station-marker-container.state-hover,
+.station-marker-container:hover {
+  opacity: 1;
+  transform: scale(1.1) translateY(-6px);
+  filter: drop-shadow(0 10px 18px rgba(30, 64, 175, 0.4))
+          drop-shadow(0 3px 6px rgba(0, 0, 0, 0.2));
+  z-index: 50 !important;
+}
+
+/* State C: Active (The undisputed hero element on the map) */
+.station-marker-container.state-active {
+  opacity: 1;
+  transform: scale(1.2) translateY(-10px);
+  filter: drop-shadow(0 0 20px rgba(30, 64, 175, 0.7))
+          drop-shadow(0 14px 24px rgba(15, 23, 42, 0.45));
+  z-index: 60 !important;
+}
+
+/* Inactive station marker (is_rankable = false) */
+.station-marker-container.is-inactive {
+  opacity: 0.75;
+  filter: grayscale(0.3) drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15));
+}
+
+.station-marker-container.is-inactive:hover {
+  opacity: 0.95;
+  transform: scale(1.05) translateY(-4px);
+  filter: grayscale(0) drop-shadow(0 6px 12px rgba(148, 163, 184, 0.35));
+}
+
+/* Pulsing radar ring on Active State */
+@keyframes marker-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.0);
+    opacity: 0;
+  }
+}
+
+.marker-active-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 64px;
+  height: 64px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.35) 0%, rgba(30, 64, 175, 0) 70%);
+  border: 1.5px solid rgba(79, 70, 229, 0.6);
+  pointer-events: none;
+  animation: marker-pulse 2.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  z-index: -1;
+}
+
+/* =========================================================================
+   PROPERTY PIN INTERACTIVE STATES (ZONA CACA) - SUBORDINATE & CLEAN
+   ========================================================================= */
+
+.property-marker-container {
+  position: relative;
+  cursor: pointer;
+  transform-origin: 50% 100%;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              filter 0.2s ease,
+              opacity 0.2s ease;
+  will-change: transform, filter;
+  opacity: 0.92;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+  z-index: 20;
+}
+
+.property-marker-container:hover {
+  opacity: 1;
+  transform: scale(1.25) translateY(-4px);
+  filter: drop-shadow(0 6px 12px rgba(234, 88, 12, 0.5))
+          drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+  z-index: 40 !important;
+}
+
+.property-marker-container.is-active {
+  opacity: 1;
+  transform: scale(1.35) translateY(-6px);
+  filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.8))
+          drop-shadow(0 8px 14px rgba(0, 0, 0, 0.35));
+  z-index: 45 !important;
+}
+
+/* MapLibre custom popup styling override */
+.maplibregl-popup-content {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 12px !important;
+}
+
+.maplibregl-popup-close-button {
+  top: 8px !important;
+  right: 8px !important;
+  color: white !important;
+  background: rgba(15, 23, 42, 0.7) !important;
+  border-radius: 9999px !important;
+  width: 22px !important;
+  height: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  z-index: 10 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(4px) !important;
+}

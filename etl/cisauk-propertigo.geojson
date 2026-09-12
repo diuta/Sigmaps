@@ -1,0 +1,404 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "_id": "6a8d67a3872d148e0d5a1219",
+      "mission": "properti",
+      "key": "3f771a4dbe4e427381523353655e9e21",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64316058168805,
+          -6.32064913865764
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Retail (toko baju, peralatan olahraga, toko elektronik, dll)",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642682576_stamped_1787642681261.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642691406_stamped_1787642690096.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a1218",
+      "key": "33a774dbf8ca4118afd8c9ca237f4f17",
+      "mission": "properti",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64316058168805,
+          -6.32064913865764
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Retail (toko baju, peralatan olahraga, toko elektronik, dll)",
+        "jenis_properti": "Disewa",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642623954_stamped_1787642622708.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642633010_stamped_1787642631852.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a1217",
+      "mission": "properti",
+      "key": "4dfd4ef87a944dfa9f1bfe84ae70fccd",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64316058168805,
+          -6.32064913865764
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Retail (toko baju, peralatan olahraga, toko elektronik, dll)",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642578842_stamped_1787642577775.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642585742_stamped_1787642584652.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a1216",
+      "key": "9fc73e41119141d8b3cb1b0ceef4aaa4",
+      "mission": "properti",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64316058168805,
+          -6.32064913865764
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Retail (toko baju, peralatan olahraga, toko elektronik, dll)",
+        "jenis_properti": "Disewa",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642548990_stamped_1787642547836.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642555161_stamped_1787642554112.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a1215",
+      "mission": "properti",
+      "key": "ea31348606cf4520a5b044ec0b2da299",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64313772984735,
+          -6.320949857003106
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Retail (toko baju, peralatan olahraga, toko elektronik, dll)",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642490648_stamped_1787642489609.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642496321_stamped_1787642495093.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a1214",
+      "key": "7b1b01ad564948d29c455f25cb68ec30",
+      "mission": "properti",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64313772984735,
+          -6.320949857003106
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Retail (toko baju, peralatan olahraga, toko elektronik, dll)",
+        "jenis_properti": "Disewa",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642467177_stamped_1787642465871.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642473456_stamped_1787642472489.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a1213",
+      "mission": "properti",
+      "key": "2591ec69efd84021983829f982c00b3b",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64313772984735,
+          -6.320949857003106
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Retail (toko baju, peralatan olahraga, toko elektronik, dll)",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642371643_stamped_1787642370546.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642378553_stamped_1787642377422.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a1212",
+      "key": "525d4b7f8eab42f8b6575d908a3ff373",
+      "mission": "properti",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64313772984735,
+          -6.320949857003106
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Retail (toko baju, peralatan olahraga, toko elektronik, dll)",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642335962_stamped_1787642334756.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642345078_stamped_1787642343924.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a1211",
+      "mission": "properti",
+      "key": "24a51bbb93a847db833f722e6e642889",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64310181292547,
+          -6.321463652082738
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Ruko",
+        "jenis_properti": "Disewa",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642224273_stamped_1787642223039.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642232400_stamped_1787642231299.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a1210",
+      "key": "39ec59f3616d4d3a8c7c49b122f71980",
+      "mission": "properti",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64310181292547,
+          -6.321463652082738
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Ruko",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642193840_stamped_1787642192375.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642204987_stamped_1787642203811.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a120f",
+      "mission": "properti",
+      "key": "4d38239cddf647d4b93b5c6edbaa0db8",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64310181292547,
+          -6.321463652082738
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Ruko",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642161603_stamped_1787642160328.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642168370_stamped_1787642167096.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a120d",
+      "mission": "properti",
+      "key": "ad7d317630c04593a20b5998af8ddee4",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64304482716375,
+          -6.3213122464024165
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Ruko",
+        "jenis_properti": "Disewa",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4deaf2ba07be1870383fbc/1787642114697_stamped_1787642112806.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4deaf2ba07be1870383fbc/1787642123327_stamped_1787642121925.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a120c",
+      "key": "173d911a387f446ab9de93ba7270cb01",
+      "mission": "properti",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64310181292547,
+          -6.321463652082738
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Ruko",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642120658_stamped_1787642119429.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787642128017_stamped_1787642126722.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a120b",
+      "mission": "properti",
+      "key": "39d48e53c6f048f289c442a62e13ceba",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64304482716375,
+          -6.3213122464024165
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Ruko",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4deaf2ba07be1870383fbc/1787642025932_stamped_1787642023924.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4deaf2ba07be1870383fbc/1787642036436_stamped_1787642034843.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a120a",
+      "key": "3f71f89e01b64928ae28a92b34f55732",
+      "mission": "properti",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64310181292547,
+          -6.321463652082738
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Ruko",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787641988951_stamped_1787641986405.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787641996941_stamped_1787641995499.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a1209",
+      "mission": "properti",
+      "key": "e6c3817db5cb4491b87e0b0e37ed4305",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64310181292547,
+          -6.321463652082738
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Ruko",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787641921573_stamped_1787641919418.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787641932894_stamped_1787641927745.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a1208",
+      "key": "834d4409be31406188449e45061d4180",
+      "mission": "properti",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64333012511975,
+          -6.321652316845618
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Ruko",
+        "jenis_properti": "Dijual",
+        "tanggal": {},
+        "alamat": "Jalan BSD Raya Utama 32, BSD City, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787641761434_stamped_1787641759287.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787641708640_stamped_1787641704228.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a11f6",
+      "key": "18d89b30318448959bb380ea19693d37",
+      "mission": "properti",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.64071455893901,
+          -6.325009308108448
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Ruko",
+        "jenis_properti": "Disewa",
+        "tanggal": {},
+        "alamat": "Jalan Raya Cisauk 11, Cibogo Cisauk Tangerang, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787639566966_stamped_1787639565379.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787639574489_stamped_1787639573038.jpg"
+      },
+      "type": "Feature"
+    },
+    {
+      "_id": "6a8d67a3872d148e0d5a11f5",
+      "mission": "properti",
+      "key": "09c887eccfd2406fb6a710f560143929",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.6411334820553,
+          -6.324807113087676
+        ]
+      },
+      "properties": {
+        "kategori_properti": "Ruko",
+        "jenis_properti": "Disewa",
+        "tanggal": {},
+        "alamat": "Jalan Raya Cisauk 11, Cibogo Cisauk Tangerang, Cisauk, Indonesia",
+        "foto_tampak_depan": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787639380267_image_picker_768d41ae-ae49-47db-b864-b9344f6231b7-22052-0000090f461aae15.jpg",
+        "foto_spanduk": "https://mapid-app-chat.cdn.mapid.io/mapid_apps_survei/6a4caca6689fb7f40fff1318/1787639395683_stamped_1787639393602.jpg"
+      },
+      "type": "Feature"
+    }
+  ]
+}
