@@ -30,6 +30,15 @@ export interface PropertyUnit {
   /** WGS-84, dibutuhkan PropertyLayer untuk render marker */
   lat: number;
   lng: number;
+  /**
+   * Rute jalan kaki properti → stasiun aktif, hasil batch etl/hitung_rute.py (OSRM foot),
+   * dibaca dari tabel rute_properti lewat view properti_go_by_station.
+   * null/undefined = belum dihitung — tampilkan tanpa jarak, bukan galat.
+   */
+  jarak_jalan_m?: number | null;
+  waktu_jalan_s?: number | null;
+  /** GeoJSON LineString rute; digambar RouteLayer saat properti dipilih */
+  rute?: { type: "LineString"; coordinates: [number, number][] } | null;
 }
 
 /**

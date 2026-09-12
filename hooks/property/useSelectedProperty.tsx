@@ -8,6 +8,8 @@
  * - Sidebar (PropertyList) menulis: setSelectedProperty(unit) saat user klik property card.
  * - Map (BaseMap) membaca: untuk trigger flyTo() ke koordinat properti.
  * - Map (PropertyLayer) membaca: untuk auto-open popup pin properti yang bersangkutan.
+ * - Map (PropertyLayer) menulis previewProperty saat popup pin dibuka/ditutup;
+ *   Map (RouteLayer) membaca previewProperty ?? selectedProperty untuk menggambar rute.
  *
  * ⛔ PENTING: Sidebar TIDAK boleh import useMapInstance atau memanggil map.flyTo() langsung.
  */
@@ -22,9 +24,12 @@ const SelectedPropertyContext = createContext<SelectedPropertyContextValue | und
 
 export function SelectedPropertyProvider({ children }: { children: ReactNode }) {
   const [selectedProperty, setSelectedProperty] = useState<PropertyUnit | null>(null);
+  const [previewProperty, setPreviewProperty] = useState<PropertyUnit | null>(null);
 
   return (
-    <SelectedPropertyContext.Provider value={{ selectedProperty, setSelectedProperty }}>
+    <SelectedPropertyContext.Provider
+      value={{ selectedProperty, setSelectedProperty, previewProperty, setPreviewProperty }}
+    >
       {children}
     </SelectedPropertyContext.Provider>
   );

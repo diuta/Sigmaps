@@ -89,11 +89,12 @@ def muat_properti_go(cur):
                      p.get("alamat"), p.get("foto_tampak_depan"), p.get("foto_spanduk"),
                      json.dumps(f["geometry"])))
 
-    cur.execute("delete from properti_go;")
+    # Hanya hapus baris milik sumber ini — properti_go juga diisi load_kai.py.
+    cur.execute("delete from properti_go where sumber = 'propertigo';")
     cur.executemany(
         """insert into properti_go (id, kategori_properti, jenis_properti, alamat,
-                                    foto_tampak_depan, foto_spanduk, geom)
-           values (%s, %s, %s, %s, %s, %s, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));""",
+                                    foto_tampak_depan, foto_spanduk, geom, sumber)
+           values (%s, %s, %s, %s, %s, %s, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326), 'propertigo');""",
         rows,
     )
     print(f"properti_go : {len(rows)} baris")

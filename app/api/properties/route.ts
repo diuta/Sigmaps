@@ -23,7 +23,9 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabaseServer
     .from('properti_go_by_station')
-    .select('id, kategori_properti, jenis_properti, alamat, foto_tampak_depan, foto_spanduk, geom')
+    .select(
+      'id, kategori_properti, jenis_properti, alamat, foto_tampak_depan, foto_spanduk, geom, jarak_jalan_m, waktu_jalan_s, rute'
+    )
     .eq('station_id', stationId)
 
   if (error) {

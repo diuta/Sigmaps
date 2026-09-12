@@ -22,6 +22,7 @@ import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
 import { usePropertyFilter } from "@/hooks/property/usePropertyFilter";
 import type { PropertyUnit } from "@/types/property";
 import { useProperties } from "@/hooks/property/useProperties";
+import { formatJalanKaki } from "@/helper/format-jalan-kaki";
 
 function renderPopupHTML(prop: PropertyUnit): string {
   const photoSrc =
@@ -29,11 +30,16 @@ function renderPopupHTML(prop: PropertyUnit): string {
     "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&auto=format&fit=crop&q=80";
 
   // Design #4: Clean light card with full-bleed photo & gradient scrim
-  const badgeColor =
-    prop.jenis_properti === "Sewa"
-      ? "background:#F59E0B;color:#431407"
-      : "background:#10B981;color:#052e16";
-  const badgeLabel = prop.jenis_properti === "Sewa" ? "DISEWA" : "DIJUAL";
+  // Nilai di DB: "Disewa" / "Dijual" / "Sudah Tersewa" — cocokkan substring, sama seperti filter
+  const sewa = (prop.jenis_properti || "").toLowerCase().includes("sewa");
+  const badgeColor = sewa
+    ? "background:#F59E0B;color:#431407"
+    : "background:#10B981;color:#052e16";
+  const badgeLabel = sewa ? "DISEWA" : "DIJUAL";
+  const jalanKaki = formatJalanKaki(prop.jarak_jalan_m, prop.waktu_jalan_s);
+  const barisJarak = jalanKaki
+    ? `<p style="margin:5px 0 0;font-size:11px;font-weight:600;color:#1e40af;line-height:1.4">🚶 ${jalanKaki}</p>`
+    : "";
 
   return `
     <div style="width:252px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.18),0 2px 8px rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.06);font-family:system-ui,-apple-system,sans-serif;cursor:pointer">
@@ -49,6 +55,7 @@ function renderPopupHTML(prop: PropertyUnit): string {
       <!-- Body: address & call-to-action hint -->
       <div style="padding:9px 12px 11px">
         <p style="margin:0;font-size:11px;color:#64748b;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${prop.alamat}</p>
+        ${barisJarak}
         <div style="margin-top:6px;padding-top:6px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600;color:#2563eb">
           <span>Lihat detail properti</span>
           <span style="font-size:13px;line-height:1">›</span>
@@ -103,7 +110,7 @@ function resolveOverlaps(
 export default function PropertyLayer() {
   const { map } = useMapInstance();
   const { selectedStation } = useSelectedStation();
-  const { selectedProperty, setSelectedProperty } = useSelectedProperty();
+  const { selectedProperty, setSelectedProperty, setPreviewProperty } = useSelectedProperty();
   const { properties } = useProperties(selectedStation?.area_id ?? null);
   const { propertyTypes, transactionTypes, hasPhotoOnly } = usePropertyFilter();
 
@@ -154,6 +161,7 @@ export default function PropertyLayer() {
       activePopupRef.current.remove();
       activePopupRef.current = null;
     }
+    setPreviewProperty(null);
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
@@ -199,6 +207,14 @@ export default function PropertyLayer() {
         maxWidth: "300px",
       }).setDOMContent(popupEl);
 
+      // Popup terbuka = properti "dipratinjau": RouteLayer langsung menggambar rutenya.
+      // Ditutup (tombol X / klik peta / popup lain dibuka) = pratinjau selesai.
+      popup.on("open", () => setPreviewProperty({ ...prop, lng, lat }));
+      popup.on("close", () => {
+        if (activePopupRef.current === popup) activePopupRef.current = null;
+        setPreviewProperty((current) => (current?.id === prop.id ? null : current));
+      });
+
       // Simpan dengan koordinat offset agar sidebar-click bisa buka di posisi yang benar
       popupMapRef.current.set(prop.id, { popup, prop: { ...prop, lng, lat } });
 
@@ -235,7 +251,7 @@ export default function PropertyLayer() {
       markersRef.current = [];
       popupMapRef.current.clear();
     };
-  }, [map, selectedStation, filteredProperties, setSelectedProperty]);
+  }, [map, selectedStation, filteredProperties, setSelectedProperty, setPreviewProperty]);
 
   // 2. React to selectedProperty (klik dari sidebar atau peta) → buka popup pin yang sesuai
   useEffect(() => {
