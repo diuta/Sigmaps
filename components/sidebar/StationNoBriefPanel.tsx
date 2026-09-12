@@ -32,8 +32,8 @@ export default function StationNoBriefPanel({ onSelectProperty }: Props) {
     selectedStation?.is_rankable ? selectedStation.area_id : null,
   );
 
-  // Tiap klik stasiun = 1 panggilan Gemini (endpoint ini belum punya cache) — batasan
-  // yang diketahui, lihat docs/api-community-sentiment.md.
+  // Klik pertama sebuah stasiun = 1 panggilan Gemini; klik berikutnya dilayani cache server
+  // (lib/sentiment). Lihat docs/api-community-sentiment.md.
   const { sentiment, loading: sentimentLoading } = useCommunitySentiment(
     selectedStation?.is_rankable ? selectedStation.area_id : null,
   );

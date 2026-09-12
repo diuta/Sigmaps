@@ -33,9 +33,9 @@ Respons gagal — kode galat mengikuti `context/context-mvp.md` §6.8b:
 
 - [lib/ai/gemini.ts](lib-ai-gemini.md) — client Gemini, butuh `GEMINI_API_KEY`.
 - [lib/ai/parseIntent.ts](../context/lib-ai-parseintent.md) — fungsi yang memanggil Gemini & memvalidasi hasilnya.
-- `lib/schemas/prompt-request.ts` — `PromptRequestSchema` (validasi request),
-  `buildIntentSchema(tipe3Values)` (kontrak publik), `buildGeminiRawSchema(tipe3Values)`
-  (skema internal parsing output Gemini, lihat `lib-ai-parseintent.md`).
+- `lib/schemas/prompt-request.ts` — `PromptRequestSchema` (validasi request) dan
+  `buildGeminiRawSchema(tipe3Values)` (skema parsing output Gemini, lihat
+  `lib-ai-parseintent.md`); bentuk respons publiknya tipe `Intent` di berkas yang sama.
 - [lib/tipe3/index.ts](../context/lib-tipe3.md) — sumber `tipe_3` yang sah, dibaca dari Supabase.
 
 ## Batasan/gotcha

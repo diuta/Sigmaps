@@ -26,17 +26,6 @@ export function buildGeminiRawSchema(tipe3Values: string[]) {
   })
 }
 
-/** §6.6. Tidak ada field null — alur one-shot tidak boleh berhenti di tengah. */
-export function buildIntentSchema(tipe3Values: string[]) {
-  return z.object({
-    tipe_3: tipe3Enum(tipe3Values),
-    harga_target: z.number().int().min(1000).max(1_000_000),
-    harga_sumber: z.enum(['pengguna', 'perkiraan']),
-    /** Tidak masuk rumus. Jangan dipakai memblokir apa pun. */
-    confidence: z.number().min(0).max(1),
-  })
-}
-
 export type Intent = {
   tipe_3: string
   harga_target: number

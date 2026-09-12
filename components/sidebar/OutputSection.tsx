@@ -111,9 +111,9 @@ export default function OutputSection({ brief, loading, scored, stale, onEditBri
       {/*
         Panel di balik halaman detail tetap TER-MOUNT, cuma disembunyikan. Melepasnya akan
         mereset pilihan tab di ScoredPanel (kembali dari detail harus mendarat lagi di tab
-        "Unit properti") dan membuat useCommunitySentiment memanggil Gemini sekali lagi —
-        endpoint itu belum punya cache dan kuotanya per project. Pola yang sama dipakai
-        Sidebar saat panelnya ditutup.
+        "Unit properti"). (Dulu ini juga mencegah panggilan Gemini ulang; sekarang
+        /api/community-sentiment di-cache per stasiun di server — lib/sentiment.) Pola yang
+        sama dipakai Sidebar saat panelnya ditutup.
       */}
       <div
         hidden={detail !== null}

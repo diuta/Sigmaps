@@ -4,10 +4,6 @@
  * Sumber: context/context-mvp.md §6.8b
  */
 
-export interface CommunitySentimentRequest {
-  station_id: string;
-}
-
 export interface CommunitySentimentResponse {
   /**
    * Ringkasan Gemini dari Community Activity kawasan ini.

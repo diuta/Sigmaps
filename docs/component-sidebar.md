@@ -165,8 +165,8 @@ itulah user memutuskan kawasan mana yang layak ditulis rencananya — kalau tida
 pun, keputusan itu diambil tanpa dasar.
 
 - `AreaInsightBlock` di sini memakai hook yang sama dengan `ScoredPanel`
-  (`useCommunitySentiment(area_id)`), jadi **tidak ada endpoint baru**. Konsekuensinya: tiap klik
-  pin stasiun memicu satu panggilan Gemini, karena endpoint itu belum punya cache. Lihat
+  (`useCommunitySentiment(area_id)`), jadi **tidak ada endpoint baru**. Klik pertama sebuah pin
+  memicu satu panggilan Gemini; klik berikutnya dilayani cache server per stasiun. Lihat
   [api-community-sentiment.md](../context/api-community-sentiment.md).
 - Blok hanya dirender kalau `ringkasan` tidak kosong; saat `error`, panel **tidak menampilkan apa
   pun** — kegagalan AI tidak boleh menghalangi daftar properti.
@@ -296,10 +296,10 @@ mesin dan mana kalimat yang ditulis model.
   `OutputSection` menutupnya — daftar di baliknya sudah berganti kawasan, jadi "Kembali" akan
   mendarat di hasil yang lain.
 - **Isi panel tetap ter-mount saat sidebar ditutup** (digeser keluar layar dengan `transform`,
-  bukan `hidden` maupun unmount). Melepas `OutputSection` membuat `useCommunitySentiment`
-  memanggil Gemini lagi setiap sidebar dibuka; `/api/community-sentiment` belum punya cache dan
-  kuotanya dipakai bersama seluruh pengunjung. Jangan "merapikan" jadi `{open && <OutputSection />}`,
-  dan jangan pakai `hidden` — `display:none` mematikan animasi transform-nya.
+  bukan `hidden` maupun unmount), supaya draft/tab/kawasan aktif tidak hilang tiap buka-tutup.
+  (Dulu ini juga penahan panggilan Gemini ulang; sekarang `/api/community-sentiment` di-cache per
+  stasiun di server.) Jangan "merapikan" jadi `{open && <OutputSection />}`, dan jangan pakai
+  `hidden` — `display:none` mematikan animasi transform-nya.
 - **Daftar "data belum cukup" dibaca dari `/api/stations`, bukan dari selisih terhadap
   `/api/score`.** `UnrankableNotice` diisi dengan memfilter `feature.properties.is_rankable === false`
   milik `useStations()`. Perbandingan `=== false` disengaja: `null` berarti pipeline skoring

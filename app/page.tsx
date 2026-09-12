@@ -7,7 +7,6 @@ import PropertyLayer from "@/components/map/layers/PropertyLayer";
 import RouteLayer from "@/components/map/layers/RouteLayer";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { SelectedStationProvider } from "@/hooks/station/useSelectedStation";
-import { IsochroneConfigProvider } from "@/hooks/isochrone/useIsochroneConfig";
 import { BriefResultProvider } from "@/hooks/brief/useBriefResult";
 import { SelectedPropertyProvider } from "@/hooks/property/useSelectedProperty";
 import { PropertyFilterProvider } from "@/hooks/property/usePropertyFilter";
@@ -23,28 +22,26 @@ export default function Home() {
           (StationLayer, untuk gambar rank di pin) — makanya providernya di sini,
           di atas keduanya, bukan di dalam Sidebar saja. */}
       <BriefResultProvider>
-        <IsochroneConfigProvider>
-          <main className="flex h-screen w-screen overflow-hidden bg-slate-900">
-            <Sidebar />
+        <main className="flex h-screen w-screen overflow-hidden bg-slate-900">
+          <Sidebar />
 
-            <div className="relative flex-1 overflow-hidden z-0 isolate">
-              <BaseMap>
-                {/* 1. Poligon Isokron 10 Menit (muncul saat stasiun aktif) */}
-                <IsochroneLayer />
+          <div className="relative flex-1 overflow-hidden z-0 isolate">
+            <BaseMap>
+              {/* 1. Poligon Isokron 10 Menit (muncul saat stasiun aktif) */}
+              <IsochroneLayer />
 
-                {/* 1b. Garis rute jalan kaki properti terpilih -> stasiun (di atas isokron,
-                    di bawah marker properti yang berupa DOM) */}
-                <RouteLayer />
+              {/* 1b. Garis rute jalan kaki properti terpilih -> stasiun (di atas isokron,
+                  di bawah marker properti yang berupa DOM) */}
+              <RouteLayer />
 
-                {/* 2. Titik-titik properti dalam isokron stasiun aktif */}
-                <PropertyLayer />
+              {/* 2. Titik-titik properti dalam isokron stasiun aktif */}
+              <PropertyLayer />
 
-                {/* 3. Layer stasiun KRL dengan 3 state interaktif (Idle, Hover, Active) */}
-                <StationLayer />
-              </BaseMap>
-            </div>
-          </main>
-        </IsochroneConfigProvider>
+              {/* 3. Layer stasiun KRL dengan 3 state interaktif (Idle, Hover, Active) */}
+              <StationLayer />
+            </BaseMap>
+          </div>
+        </main>
       </BriefResultProvider>
       </PropertyFilterProvider>
       </SelectedPropertyProvider>

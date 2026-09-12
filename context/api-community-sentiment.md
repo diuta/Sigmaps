@@ -34,7 +34,9 @@ Respons gagal:
 
 - [lib/supabase/server.ts](lib-supabase-server.md).
 - [lib/ai/gemini.ts](lib-ai-gemini.md) — butuh `GEMINI_API_KEY`.
-- `lib/ai/summarizeSentiment.ts` — prompt + validasi Zod hasil Gemini.
+- `lib/sentiment/index.ts` — `getCommunitySentiment(stationId)`: query view + Gemini + cache per
+  stasiun. Route hanya memanggil fungsi ini dan memetakan galatnya ke kode status.
+- `lib/ai/summarizeSentiment.ts` — prompt + validasi Zod hasil Gemini (dipanggil `lib/sentiment`).
 - `lib/schemas/community-sentiment.ts` — `CommunitySentimentSchema`, `CommunitySentimentQuerySchema`.
 - View `community_activity_by_station` di `supabase/views.sql`.
 - Tabel `community_activity` dan `scored_areas` sudah terisi.
@@ -55,15 +57,15 @@ Respons gagal:
 - **Pakai `generateText` + `JSON.parse` manual**, sama seperti `parseIntent.ts` — kalau
   Gemini tidak balikin JSON valid, route ini balas `503` (ditangkap generic try/catch),
   bukan melempar stack trace ke client.
-- **Cache belum diimplementasikan.** `context-mvp.md` §6.8b mewajibkan cache per kawasan
-  karena kuota Gemini per project dipakai bersama semua pengunjung — endpoint ini memanggil
-  Gemini setiap request. Perlu ditambahkan sebelum publik (lihat juga `middleware.ts`
-  rate-limit di `CLAUDE.md`).
-- ⚠️ **Sejak 8 September 2026 pemanggilnya bertambah**, dan ini memperbesar dampak butir cache
-  di atas. Dulu endpoint ini hanya dipanggil `ScoredPanel` (setelah user mengirim rencana
-  usaha); sekarang `StationNoBriefPanel` juga memanggilnya, jadi **tiap klik pin stasiun di peta
-  = satu panggilan Gemini**, termasuk oleh user yang cuma menjelajah peta. Diterima sadar demi
-  gambaran kawasan sebelum brief, tapi jadikan cache prioritas pertama kalau kuota mulai terasa.
+- **Cache per stasiun ada di `lib/sentiment` (sejak 12 September 2026)**, memenuhi
+  `context-mvp.md` §6.8b. Terukur: panggilan pertama sebuah stasiun 1,3–2,5 detik (Gemini),
+  panggilan berikutnya ~5 ms; dua permintaan bersamaan untuk stasiun yang sama berbagi satu
+  panggilan Gemini (yang di-cache promise-nya). TTL 6 jam, di memori proses — per instance di
+  Vercel, hilang saat cold start. Kalau `community_activity` dimuat ulang lewat
+  `etl/load_activity.py`, ringkasan lama bisa bertahan sampai TTL habis atau redeploy.
+- Pemanggilnya dua: `ScoredPanel` (setelah brief) dan `StationNoBriefPanel` (klik pin di peta).
+  Dengan cache, menjelajah peta hanya membayar Gemini sekali per stasiun per instance.
+  `middleware.ts` rate-limit (`CLAUDE.md`) tetap perlu sebelum publik.
 - **Rencana field `kategori_jarang` belum dikerjakan.** Sidebar sudah punya `AreaGapBlock`
   ("Kategori yang belum banyak di sini") dengan isi dummy. Sumber aslinya direncanakan menumpang
   panggilan Gemini di endpoint ini — tambah satu field ke `CommunitySentimentSchema` dan satu

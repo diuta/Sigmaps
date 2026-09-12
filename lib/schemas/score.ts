@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { ScoredArea, ScoringResult } from '@/lib/scoring'
 
 // Body yang dikirim client ke POST /api/score (context/context-mvp.md §6.8).
 // `harga_sumber` sengaja opsional — kontrak MVP di dokumen cuma menyebut { tipe_3,
@@ -23,4 +24,38 @@ export type ScoreRequest = {
   tipe_3: string
   harga_target: number
   harga_sumber?: 'pengguna' | 'perkiraan'
+}
+
+// ---------------------------------------------------------------------------------------
+// Bentuk RESPONS /api/score — SATU-SATUNYA definisi. types/scoring/index.ts (yang dipakai
+// klien) cuma mengalias tipe di bawah ini, jadi server dan klien tidak bisa saling geser.
+// Dulu keduanya didefinisikan terpisah dan sudah sempat berbeda (`skor: number` di klien vs
+// `number | null` di server; `catatan` klien cuma punya 1 dari 6 field).
+// ---------------------------------------------------------------------------------------
+
+/**
+ * Kawasan yang boleh masuk Top 5: `is_rankable` DAN skornya benar-benar terhitung. Di
+ * lib/scoring `skor`/`demand`/`segment_match` bertipe `number | null` karena baris yang
+ * pipeline-nya belum jalan ikut dihitung (skala persentil C butuh semuanya); untuk yang
+ * dikirim ke klien, null tidak boleh lolos — kalau lolos, `area.skor.toLocaleString()` di
+ * sidebar melempar galat.
+ */
+export type RankedArea = Omit<ScoredArea, 'skor' | 'komponen'> & {
+  skor: number
+  komponen: { demand: number; competitive_headroom: number; segment_match: number }
+}
+
+export function isRankedArea(area: ScoredArea): area is RankedArea {
+  return (
+    area.is_rankable &&
+    area.skor !== null &&
+    area.komponen.demand !== null &&
+    area.komponen.segment_match !== null
+  )
+}
+
+export type ScoreResponse = {
+  /** Top 5, terurut skor desc, semuanya lolos `isRankedArea`. */
+  areas: RankedArea[]
+  catatan: ScoringResult['catatan'] & { harga_sumber: 'pengguna' | 'perkiraan' }
 }

@@ -6,19 +6,17 @@ kalau butuh angka atau baris dari database, tempatnya bukan di sini.
 
 | File | Isi |
 |---|---|
-| `layers.ts` | `BASEMAPS`, `DEFAULT_BASEMAP_ID`, `basemapStyleUrl()`, `MAP_LAYERS` |
+| `layers.ts` | `DEFAULT_BASEMAP_ID`, `basemapStyleUrl()` |
 | `brief.ts` | `BRIEF_PLACEHOLDER`, `SUGGESTION_CHIPS` |
 
 ## Cara pakai
 
 ```ts
-import { basemapStyleUrl, DEFAULT_BASEMAP_ID, BASEMAPS, MAP_LAYERS } from '@/lib/fixtures/layers'
+import { basemapStyleUrl, DEFAULT_BASEMAP_ID } from '@/lib/fixtures/layers'
 
 new maplibregl.Map({ style: basemapStyleUrl(DEFAULT_BASEMAP_ID), /* ... */ })
 // https://v2.basemap.mapid.io/styles/street-v2.0/style.json?key=<NEXT_PUBLIC_MAPID_MAPS_KEY>
 
-BASEMAPS   // [{ id: 'street-v2.0', label: 'Jalan' }, 'light-v2.0', 'dark-v2.0', 'satellite-v2.0']
-MAP_LAYERS // [{ id: 'station-pins', label: 'Titik stasiun', defaultOn: true }, ...]
 ```
 
 ```ts
@@ -29,7 +27,9 @@ import { BRIEF_PLACEHOLDER, SUGGESTION_CHIPS } from '@/lib/fixtures/brief'
 ## Dependency/prasyarat
 
 - Env var `NEXT_PUBLIC_MAPID_MAPS_KEY` (public, sengaja dibundel ke browser).
-- Keempat gaya di `BASEMAPS` sudah diverifikasi tersedia di `v2.basemap.mapid.io`.
+- Gaya lain yang tersedia di `v2.basemap.mapid.io`: `light-v2.0`, `dark-v2.0`, `satellite-v2.0`
+  (daftar `BASEMAPS` lama dihapus bersama `LayerPanel`; kalau pemilih peta dasar dibuat lagi,
+  taruh daftarnya kembali di sini).
 
 ## Batasan/gotcha
 
@@ -38,11 +38,9 @@ import { BRIEF_PLACEHOLDER, SUGGESTION_CHIPS } from '@/lib/fixtures/brief'
   dan membuat basemap gagal total dengan `?key=undefined`. `basemapStyleUrl()` sengaja tidak
   melempar galat saat key kosong, jadi gejalanya muncul sebagai `AJAXError: Failed to fetch`
   pada `style.json`, bukan pesan yang jelas.
-- **`MAP_LAYERS` sekarang menyebut id yang tidak terdaftar di map** (`station-pins`,
-  `station-labels`) — `StationLayer` memakai marker HTML, bukan layer MapLibre, jadi toggle-nya
-  tidak berefek. Detail & pilihan perbaikannya di
-  [docs/component-map-layers.md](component-map-layers.md). Sebelum menambah entri di sini,
-  pastikan id-nya benar-benar hasil `map.addLayer()`.
+- Kalau nanti ada daftar toggle layer lagi: `StationLayer`/`PropertyLayer` memakai marker HTML,
+  bukan layer MapLibre — hanya id hasil `map.addLayer()` (`isochrone-*`, `route-*`) yang bisa
+  di-toggle lewat `setLayoutProperty`. Lihat [docs/component-map-layers.md](component-map-layers.md).
 - `brief.ts` **hanya teks contoh untuk manusia**, bukan preset parameter — chip yang diklik
   tetap melewati `/api/prompt-request` seperti kalimat yang diketik sendiri, tidak ada jalur
   pintas yang melewati AI.

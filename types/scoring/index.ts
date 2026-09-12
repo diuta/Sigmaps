@@ -1,67 +1,39 @@
 /**
  * types/scoring/index.ts
- * Kontrak request/response /api/score — cerminan context/context-mvp.md §6.8 persis.
- * Jangan ubah tanpa diskusi bersama.
+ * Kontrak request/response /api/score untuk sisi klien — cerminan context/context-mvp.md §6.8.
+ *
+ * SEMUA tipe di sini hanya ALIAS dari lib/schemas/score.ts (yang diturunkan dari lib/scoring),
+ * jadi bentuk yang dilihat klien selalu persis bentuk yang dikirim server. Jangan definisikan
+ * ulang field di sini — versi lama berkas ini menyalin bentuknya dan sempat berbeda dari server
+ * (`skor: number` vs `number | null`; `catatan` cuma punya `harga_sumber`, padahal server
+ * mengirim `kelompok_dinilai`, `fallback_ke_semua`, `kawasan_berisi`, `kawasan_diperingkat`,
+ * `total_kawasan` juga).
+ *
+ * Impor di sini `import type` semua, jadi tidak ada kode server (zod, lib/scoring) yang ikut
+ * ke bundle klien.
  */
 
-import type { Tipe3 } from "@/types/tipe3";
+import type {
+  RankedArea,
+  ScoreRequest as ScoreRequestContract,
+  ScoreResponse as ScoreResponseContract,
+} from "@/lib/schemas/score";
 
-// ---------------------------------------------------------------------------
-// /api/score request
-// ---------------------------------------------------------------------------
+export type ScoreRequest = ScoreRequestContract;
 
-export interface ScoreRequest {
-  tipe_3: Tipe3;
-  harga_target: number;
-}
+/**
+ * Satu kawasan di Top 5. `skor` 0–100 = 100 × (0.25·D + 0.50·C + 0.25·S); `komponen` masing-
+ * masing 0–1; `bobot` tetap dari server (`lib/scoring` WEIGHTS), tidak dikirim klien.
+ * Selalu `is_rankable: true` dan tidak ada nilai null — route menyaringnya (`isRankedArea`).
+ */
+export type AreaScore = RankedArea;
 
-// ---------------------------------------------------------------------------
-// /api/score response (context-mvp §6.8)
-// ---------------------------------------------------------------------------
+export type ScoreComponentKey = keyof AreaScore["komponen"];
 
-export type ScoreComponentKey = "demand" | "competitive_headroom" | "segment_match";
-
-export interface AreaScore {
-  /** Match ke area_id di scored_areas & StationRanking */
-  area_id: string;
-  /**
-   * Ditambahkan context-mvp.md §6.8 (4 Sep 2026) — dipakai frontend untuk
-   * memanggil /api/properties dan /api/community-sentiment saat kawasan diklik.
-   * Nilainya sama dengan area_id untuk MVP (relasi stasiun↔kawasan 1:1).
-   */
-  station_id: string;
-  station_name: string;
-  /** 0–100 = 100 × (0.25·D + 0.50·C + 0.25·S) */
-  skor: number;
-  komponen: {
-    demand: number;               // D, 0–1
-    competitive_headroom: number; // C, 0–1
-    segment_match: number;        // S, 0–1
-  };
-  /** Bobot fixed di server — tidak dikirim dari klien */
-  bobot: {
-    wD: 0.25;
-    wC: 0.50;
-    wS: 0.25;
-  };
-  n_observations: number;
-  n_price: number;
-  /**
-   * Kawasan dengan is_rankable=false TETAP dikirim supaya bisa
-   * digambar di peta dengan label "data belum cukup".
-   * Jangan tampilkan di ranking list.
-   */
-  is_rankable: boolean;
-}
-
-export interface ScoreResponse {
-  /**
-   * Semua kawasan — termasuk is_rankable=false.
-   * Sudah diurutkan: rankable areas (by skor desc) → non-rankable areas.
-   */
-  areas: AreaScore[];
-  catatan: {
-    /** 'perkiraan' → tampilkan warning "harga tidak disebutkan, kami perkirakan..." */
-    harga_sumber: "pengguna" | "perkiraan";
-  };
-}
+/**
+ * `areas`: Top 5 kawasan is_rankable, terurut skor desc (dipotong di server).
+ * `catatan.harga_sumber` 'perkiraan' → tampilkan peringatan "harga tidak disebutkan, kami
+ * perkirakan..."; field `catatan` lainnya menjelaskan kelompok kategori yang dinilai dan
+ * apakah terjadi fallback ke 'SEMUA' (lihat docs/api-score.md).
+ */
+export type ScoreResponse = ScoreResponseContract;

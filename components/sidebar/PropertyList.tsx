@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { PropertyUnit } from "@/types/property";
 import { usePropertyFilter } from "@/hooks/property/usePropertyFilter";
+import { matchesPropertyFilter } from "@/lib/property/filter";
 
 interface Props {
   properties: readonly PropertyUnit[];
@@ -27,39 +28,14 @@ export default function PropertyList({ properties, loading, onSelect }: Props) {
   const isFilterActive =
     propertyTypes.length > 0 || transactionTypes.length > 0 || hasPhotoOnly;
 
-  const filteredProperties = useMemo(() => {
-    return properties.filter((unit) => {
-      // 1. Tipe properti (multi-select)
-      if (propertyTypes.length > 0) {
-        const cat = (unit.kategori_properti || "").toLowerCase();
-        const matchesAny = propertyTypes.some((t) => {
-          if (t === "rumah") return cat.includes("rumah");
-          if (t === "kos") return cat.includes("kos") || cat.includes("kost");
-          if (t === "ruko") return cat.includes("ruko");
-          if (t === "kantor") return cat.includes("kantor") || cat.includes("office");
-          if (t === "tanah") return cat.includes("tanah") || cat.includes("lahan");
-          if (t === "retail") return cat.includes("retail") || cat.includes("ritel") || cat.includes("toko");
-          return cat.includes(t.toLowerCase());
-        });
-        if (!matchesAny) return false;
-      }
-      // 2. Jenis transaksi (multi-select)
-      if (transactionTypes.length > 0) {
-        const jenis = (unit.jenis_properti || "").toLowerCase();
-        const matchesType = transactionTypes.some((t) => {
-          if (t === "sewa") return jenis.includes("sewa");
-          if (t === "jual") return jenis.includes("jual");
-          return jenis.includes(t.toLowerCase());
-        });
-        if (!matchesType) return false;
-      }
-      // 3. Foto fisik
-      if (hasPhotoOnly && !unit.foto_tampak_depan && !unit.foto_spanduk) {
-        return false;
-      }
-      return true;
-    });
-  }, [properties, propertyTypes, transactionTypes, hasPhotoOnly]);
+  // Predikatnya di lib/property/filter.ts — sama persis dengan PropertyLayer & StationSearchBar.
+  const filteredProperties = useMemo(
+    () =>
+      properties.filter((unit) =>
+        matchesPropertyFilter(unit, { propertyTypes, transactionTypes, hasPhotoOnly }),
+      ),
+    [properties, propertyTypes, transactionTypes, hasPhotoOnly],
+  );
 
   if (loading) {
     return <p className="t-body text-[var(--color-text-sub)]">Memuat properti...</p>;
