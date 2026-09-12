@@ -1,0 +1,31 @@
+# Konteks build di docker-compose.yml adalah ROOT repo (`context: .`), jadi
+# HANYA .dockerignore di root ini yang dibaca Docker — .dockerignore di dalam
+# subfolder (mis. etl/) tidak pernah berlaku. n8n/Dockerfile memang cuma
+# COPY etl/, tapi tanpa berkas ini SELURUH repo (node_modules, .next, .git,
+# .env) tetap dikirim ke daemon sebagai konteks tiap kali build.
+#
+# Pola: buang semua, lalu izinkan kembali hanya etl/, lalu buang lagi bagian
+# etl/ yang tidak boleh masuk image. Urutan penting — pola belakangan menang.
+
+*
+!etl
+
+# Hasil unduhan runtime — dipasang sebagai volume di docker-compose.yml,
+# bukan dibekukan ke image.
+etl/data
+
+# Lingkungan lokal, bukan bagian kode.
+etl/.venv
+etl/__pycache__
+etl/*.pyc
+
+# Duplikat tidak sengaja ("db 2.py" dst, identik byte-per-byte dengan versi
+# tanpa " 2"). Masih ada di repo dan layak dibersihkan terpisah — tapi jangan
+# ikut ke image.
+etl/* 2.py
+etl/* 2.txt
+
+# Berkas GeoJSON contoh lama di root etl/ (bukan etl/data/, tempat pipeline
+# yang sekarang benar-benar baca/tulis) — peninggalan sebelum konvensi DATA_DIR.
+etl/cisauk-*.geojson
+etl/isauk-*.geojson

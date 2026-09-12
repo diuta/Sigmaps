@@ -1,0 +1,52 @@
+services:
+  n8n:
+    build:
+      context: .
+      dockerfile: n8n/Dockerfile
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Asia/Jakarta
+      - TZ=Asia/Jakarta
+      # n8n >= 1.x menolak cookie sesi di http (bukan https) kecuali ini
+      # diset — cukup untuk pemakaian lokal/di belakang VPN. Kalau nanti
+      # di-deploy publik, pasang HTTPS beneran dan hapus baris ini.
+      - N8N_SECURE_COOKIE=false
+      # n8n >= 2.0 MENGECUALIKAN node "Execute Command" secara default
+      # (default NODES_EXCLUDE = ["n8n-nodes-base.executeCommand",
+      # "n8n-nodes-base.localFileTrigger"] — lihat @n8n/config nodes.config).
+      # Tanpa baris ini workflow etl-pipeline.json tidak bisa dijalankan
+      # ("Unrecognized node type"). Node itu justru inti dari image ini, jadi
+      # daftar pengecualiannya dikosongkan. Instance ini lokal & tidak
+      # dibagikan ke pengguna lain — kalau nanti multi-user, pertimbangkan
+      # lagi karena Execute Command = shell access ke kontainer.
+      - NODES_EXCLUDE=[]
+      # Log startup selalu memuat peringatan "Failed to start Python task
+      # runner ... Python 3 is missing" — ABAIKAN. Itu runner untuk node "Code"
+      # mode Python (butuh venv @n8n/task-runner-python yang tidak ada di
+      # image), bukan yang dipakai pipeline ini (Execute Command + Python di
+      # /opt/python). Tidak ada env var yang mematikan probe-nya; hanya warn.
+    env_file:
+      # Variabel yang benar-benar dipakai skrip etl/: DATABASE_URL,
+      # MAPID_API_KEY. Yang lain (SUPABASE_SERVICE_ROLE_KEY, GEMINI_API_KEY,
+      # dll) ikut termuat tapi tidak dipakai proses ini — tidak masalah,
+      # env_file cuma menyuntikkan, bukan memvalidasi.
+      #
+      # Project ini punya `.env` (bukan `.env.local`) — dipakai apa adanya.
+      # Kalau nanti pindah ke `.env.local`, ganti nama file di sini juga.
+      - .env
+    volumes:
+      # Data n8n sendiri (workflow tersimpan, kredensial, riwayat eksekusi).
+      - n8n_data:/home/node/.n8n
+      # etl/data/ dipasang dari host, BUKAN dibekukan ke image:
+      #  - unduhan tarik_mapid.py bisa diperiksa langsung dari luar kontainer
+      #  - isokron.geojson (dari MAPID Isochrone Tool, disiapkan manual) bisa
+      #    ditaruh di sini tanpa build ulang image
+      - ./etl/data:/app/etl/data
+      # Workflow siap-impor, read-only — supaya bisa diimpor lewat CLI tanpa
+      # buka UI: docker compose exec n8n n8n import:workflow --input=/app/n8n/workflows/etl-pipeline.json
+      - ./n8n/workflows:/app/n8n/workflows:ro
+    restart: unless-stopped
+
+volumes:
+  n8n_data:
