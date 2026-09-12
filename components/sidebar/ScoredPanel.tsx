@@ -3,6 +3,7 @@
 import { useState } from "react";
 import AiLoadingBlock from "@/components/sidebar/AiLoadingBlock";
 import AreaInsightBlock from "@/components/sidebar/AreaInsightBlock";
+import ExportPdfButton from "@/components/sidebar/ExportPdfButton";
 import PropertyList from "@/components/sidebar/PropertyList";
 import RankStrip from "@/components/sidebar/RankStrip";
 import ScoreComponentBar from "@/components/sidebar/ScoreComponentBar";
@@ -29,13 +30,15 @@ const COMPONENT_ORDER: readonly { key: ScoreComponentKey; weight: number }[] = [
 
 
 interface Props {
+  /** Teks rencana usaha yang sedang dinilai — dibutuhkan ExportPdfButton, tidak dipakai render lain di sini. */
+  brief: string;
   /** Buka halaman detail satu unit. Panel ini tidak tahu bentuk halamannya — cuma meneruskan. */
   onSelectProperty: (unit: PropertyUnit, stationName: string) => void;
 }
 
-export default function ScoredPanel({ onSelectProperty }: Props) {
+export default function ScoredPanel({ brief, onSelectProperty }: Props) {
   const { setSelectedStation } = useSelectedStation();
-  const { scoreResult } = useBriefResult();
+  const { intent, scoreResult } = useBriefResult();
   const { stations } = useStations();
 
   // Terurut dan dipotong Top 5 di server. Jangan menyimpulkan apa pun dari
@@ -134,6 +137,18 @@ export default function ScoredPanel({ onSelectProperty }: Props) {
             })}
           </span>
         </div>
+
+        {/* intent selalu terisi begitu ada scoreResult (satu alur submitBrief) — dijaga
+            lewat guard ini saja karena tipenya tetap `| null` di context. */}
+        {intent && (
+          <ExportPdfButton
+            brief={brief}
+            intent={intent}
+            areas={rankedAreas}
+            activeArea={area}
+            properties={properties}
+          />
+        )}
       </div>
 
       {/*
