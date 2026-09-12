@@ -74,6 +74,7 @@ dan tautan lintas folder ditulis relatif (`../context/<nama>.md`).
 | Dokumen | Isi |
 |---|---|
 | [etl-pipeline.md](etl-pipeline.md) | skrip `etl/*.py`, urutan, env var, angka rujukan |
+| [etl-extract-phone-spanduk.md](etl-extract-phone-spanduk.md) | `extract_phone_spanduk.py` — OCR nomor WA dari foto_spanduk, isi `properti_go.contact_number` |
 | [etl-n8n-automation.md](etl-n8n-automation.md) | `run_pipeline.py` terjadwal lewat n8n di Docker (`docker-compose.yml`, `n8n/`) |
 | [etl-github-actions.md](etl-github-actions.md) | `run_pipeline.py` terjadwal di GitHub Actions, tanpa laptop (`.github/workflows/etl-pipeline.yml`) |
 

@@ -40,6 +40,7 @@ TAHAP = [
     ("Cek koneksi & kondisi database", "cek_koneksi.py"),
     ("Tarik Menu Go / Properti Go / Activities dari MAPID", "tarik_mapid.py"),
     ("Muat Menu Go & Properti Go ke Supabase", "load_mapid.py"),
+    ("Ekstrak nomor WhatsApp dari foto_spanduk (OCR)", "extract_phone_spanduk.py"),
     ("Muat Community Activity ke Supabase", "load_activity.py"),
     ("Hitung ulang komponen skor (scored_areas)", "pipeline_scoring.py"),
 ]
