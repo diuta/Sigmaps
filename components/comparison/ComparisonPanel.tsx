@@ -4,10 +4,9 @@
  * components/comparison/ComparisonPanel.tsx
  *
  * Bottom comparison workspace overlay:
- * - 100% scrollable all the way to the bottom (with generous pb-24 buffer)
- * - Complete comparison process lives here (Slot A & Slot B side-by-side)
- * - Allows picking, changing, and removing properties directly in the panel
- * - Seamlessly integrated with PropertyPickerModal
+ * - Collapsible into a compact dock allowing user to tap pinpoints directly on the map
+ * - Allows picking via Map Pin ("Pilih dari Peta") OR visual list ("Pilih dari Daftar")
+ * - 100% scrollable down to the bottom with generous pb-28 buffer
  */
 
 import { useRef, useEffect, useState } from "react";
@@ -75,12 +74,14 @@ function InsightBlock({
 function PropertyColumn({
   item,
   label,
-  onChange,
+  onChangeList,
+  onChangeMap,
   onRemove,
 }: {
   item: CompareItem;
   label: "A" | "B";
-  onChange: () => void;
+  onChangeList: () => void;
+  onChangeMap: () => void;
   onRemove: () => void;
 }) {
   const { sentiment, loading } = useCommunitySentiment(item.stationId);
@@ -89,7 +90,7 @@ function PropertyColumn({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Top Header Row with Change & Remove */}
+      {/* Top Header Row with Ganti (Map/List) & Remove */}
       <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-2.5">
         <div className="flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-brand)] text-xs font-bold text-white shadow-xs">
@@ -99,13 +100,21 @@ function PropertyColumn({
             Slot {label}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={onChange}
-            className="cursor-pointer text-xs font-bold text-[var(--color-brand)] hover:underline"
+            onClick={onChangeMap}
+            title="Kecilkan panel dan pilih pin di peta"
+            className="cursor-pointer rounded px-2 py-1 text-[11px] font-bold text-[var(--color-brand)] bg-[var(--color-accent-surface)] hover:bg-[var(--color-brand)] hover:text-white transition-colors"
           >
-            🔄 Ganti
+            📍 Ganti via Peta
+          </button>
+          <button
+            type="button"
+            onClick={onChangeList}
+            className="cursor-pointer rounded px-2 py-1 text-[11px] font-bold text-[var(--color-brand)] hover:underline"
+          >
+            📋 Daftar
           </button>
           <span className="text-[var(--color-border)]">·</span>
           <button
@@ -178,13 +187,15 @@ function PropertyColumn({
 
 function EmptySlotCard({
   label,
-  onSelect,
+  onPickFromMap,
+  onPickFromList,
 }: {
   label: "A" | "B";
-  onSelect: () => void;
+  onPickFromMap: () => void;
+  onPickFromList: () => void;
 }) {
   return (
-    <div className="flex h-full min-h-[380px] flex-col items-center justify-center rounded-[16px] border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface-muted)]/40 p-8 text-center transition-all hover:border-[var(--color-brand)] hover:bg-[var(--color-accent-surface)]/20">
+    <div className="flex h-full min-h-[380px] flex-col items-center justify-center rounded-[16px] border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface-muted)]/40 p-8 text-center transition-all hover:border-[var(--color-brand)]">
       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-brand)]/10 text-lg font-bold text-[var(--color-brand)]">
         {label}
       </div>
@@ -192,15 +203,27 @@ function EmptySlotCard({
         Slot {label} Belum Dipilih
       </h3>
       <p className="t-body mb-5 max-w-xs text-xs text-[var(--color-muted)]">
-        Pilih properti untuk Slot {label} dari stasiun mana pun
+        Pilih properti untuk Slot {label} dengan tap langsung di peta atau pilih dari daftar
       </p>
-      <button
-        type="button"
-        onClick={onSelect}
-        className="t-button cursor-pointer rounded-[var(--radius-card)] bg-[var(--color-brand)] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[var(--color-brand-hover)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
-      >
-        ＋ Pilih Properti Slot {label}
-      </button>
+      
+      <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full max-w-xs">
+        <button
+          type="button"
+          onClick={onPickFromMap}
+          className="t-button flex-1 w-full flex items-center justify-center gap-1.5 cursor-pointer rounded-[var(--radius-card)] bg-[var(--color-brand)] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[var(--color-brand-hover)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
+        >
+          <span>📍</span>
+          <span>Pilih di Peta</span>
+        </button>
+        <button
+          type="button"
+          onClick={onPickFromList}
+          className="t-button flex-1 w-full flex items-center justify-center gap-1.5 cursor-pointer rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-xs font-semibold text-[var(--color-text)] shadow-xs transition-all hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+        >
+          <span>📋</span>
+          <span>Daftar Unit</span>
+        </button>
+      </div>
     </div>
   );
 }
@@ -213,7 +236,12 @@ export default function ComparisonPanel() {
   const {
     slotA,
     slotB,
+    activeTargetSlot,
+    setActiveTargetSlot,
     isPanelOpen,
+    isPanelMinimized,
+    minimizePanel,
+    expandPanel,
     closePanel,
     setSlot,
     clearSlot,
@@ -239,25 +267,143 @@ export default function ComparisonPanel() {
     }
   }
 
-  // Move focus to close button when panel opens
+  // Move focus to close button when panel opens in expanded state
   useEffect(() => {
-    if (isPanelOpen) {
+    if (isPanelOpen && !isPanelMinimized) {
       closeButtonRef.current?.focus();
     }
-  }, [isPanelOpen]);
+  }, [isPanelOpen, isPanelMinimized]);
+
+  if (!isPanelOpen) return null;
 
   const sidebarWidth = "var(--sidebar-width)";
   const filledCount = (slotA ? 1 : 0) + (slotB ? 1 : 0);
 
+  function handlePickFromMap(slot: CompareSlot) {
+    setActiveTargetSlot(slot);
+    minimizePanel();
+  }
+
+  // ── MODE 1: MINIMIZED (Collapsed Bottom Dock allowing full map tapping) ──
+  if (isPanelMinimized) {
+    return (
+      <div
+        role="region"
+        aria-label="Toolbar perbandingan properti"
+        className="fixed bottom-3 z-[85] flex items-center justify-between gap-3 rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)]/95 px-5 py-2.5 shadow-2xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-2 duration-200"
+        style={{
+          left: sidebarOpen ? "calc(var(--sidebar-width) + 16px)" : "16px",
+          right: "16px",
+        }}
+      >
+        {/* Left: Indicator & Guide */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-brand)] text-sm font-bold text-white shadow-xs">
+            ⚖️
+          </div>
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-[var(--color-text)]">
+                Bandingkan Properti
+              </span>
+              <span className="rounded-full bg-[var(--color-brand)]/15 px-2 py-0.2 text-[10px] font-bold text-[var(--color-brand)]">
+                📍 Mode Peta: Slot {activeTargetSlot}
+              </span>
+            </div>
+            <p className="t-micro text-[var(--color-muted)] truncate">
+              Klik pin properti di peta untuk mengisi <strong>Slot {activeTargetSlot}</strong>
+            </p>
+          </div>
+        </div>
+
+        {/* Center: Slot Chips */}
+        <div className="hidden md:flex items-center gap-2">
+          {/* Slot A Pill */}
+          <div
+            onClick={() => setActiveTargetSlot("A")}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold cursor-pointer transition-all ${
+              activeTargetSlot === "A"
+                ? "border-2 border-[var(--color-brand)] bg-[var(--color-accent-surface)] text-[var(--color-brand)] shadow-xs"
+                : slotA
+                ? "border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)]"
+                : "border border-dashed border-[var(--color-border)] text-[var(--color-muted)]"
+            }`}
+          >
+            <span>Slot A: {slotA ? slotA.unit.kategori_properti : "Kosong"}</span>
+            {slotA && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearSlot("A");
+                }}
+                className="hover:text-rose-600 ml-1"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <span className="text-[10px] font-bold text-[var(--color-muted)]">VS</span>
+
+          {/* Slot B Pill */}
+          <div
+            onClick={() => setActiveTargetSlot("B")}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold cursor-pointer transition-all ${
+              activeTargetSlot === "B"
+                ? "border-2 border-[var(--color-brand)] bg-[var(--color-accent-surface)] text-[var(--color-brand)] shadow-xs"
+                : slotB
+                ? "border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)]"
+                : "border border-dashed border-[var(--color-border)] text-[var(--color-muted)]"
+            }`}
+          >
+            <span>Slot B: {slotB ? slotB.unit.kategori_properti : "Kosong"}</span>
+            {slotB && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearSlot("B");
+                }}
+                className="hover:text-rose-600 ml-1"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            type="button"
+            onClick={expandPanel}
+            className="t-button flex items-center gap-1.5 cursor-pointer rounded-[var(--radius-card)] bg-[var(--color-brand)] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[var(--color-brand-hover)] transition-all"
+          >
+            <span>▴</span>
+            <span>Buka Panel ({filledCount}/2)</span>
+          </button>
+          <button
+            type="button"
+            onClick={closePanel}
+            aria-label="Tutup"
+            className="rounded-full p-2 text-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── MODE 2: EXPANDED (Full Side-by-Side Comparison Workspace) ──
   return (
     <>
       {/* Backdrop */}
       <div
         aria-hidden
-        onClick={closePanel}
-        className={`fixed inset-0 z-[90] bg-slate-950/25 backdrop-blur-xs transition-opacity duration-[var(--motion-base)] ${
-          isPanelOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        onClick={minimizePanel}
+        className="fixed inset-0 z-[90] bg-slate-950/30 backdrop-blur-xs transition-opacity duration-[var(--motion-base)]"
         style={{
           right: 0,
           left: sidebarOpen ? sidebarWidth : 0,
@@ -269,9 +415,7 @@ export default function ComparisonPanel() {
         role="dialog"
         aria-modal="true"
         aria-label="Perbandingan properti"
-        className={`fixed bottom-0 z-[95] flex h-[78vh] max-h-[85vh] flex-col overflow-hidden rounded-t-[16px] border border-b-0 border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)] ${
-          isPanelOpen ? "translate-y-0" : "translate-y-full"
-        }`}
+        className="fixed bottom-0 z-[95] flex h-[78vh] max-h-[85vh] flex-col overflow-hidden rounded-t-[16px] border border-b-0 border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)]"
         style={{
           left: sidebarOpen ? sidebarWidth : 0,
           right: 0,
@@ -299,22 +443,34 @@ export default function ComparisonPanel() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {filledCount > 0 && (
               <button
                 type="button"
                 onClick={clearAll}
-                className="t-micro cursor-pointer font-medium text-[var(--color-muted)] transition-colors hover:text-rose-600"
+                className="t-micro cursor-pointer font-medium text-[var(--color-muted)] transition-colors hover:text-rose-600 mr-1"
               >
                 Hapus Semua
               </button>
             )}
+
+            {/* Collapse button: direct answer to user request */}
+            <button
+              type="button"
+              onClick={minimizePanel}
+              title="Kecilkan panel untuk memilih pin langsung di peta"
+              className="t-button flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-card)] border border-[var(--color-brand)]/40 bg-[var(--color-accent-surface)] px-3 py-1.5 text-xs font-bold text-[var(--color-brand)] transition-colors hover:bg-[var(--color-brand)] hover:text-white"
+            >
+              <span>▾</span>
+              <span>Kecilkan (Pilih di Peta)</span>
+            </button>
+
             <button
               ref={closeButtonRef}
               type="button"
               onClick={closePanel}
               aria-label="Tutup perbandingan"
-              className="t-button flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3.5 py-1.5 text-xs font-semibold text-[var(--color-text-sub)] transition-colors hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+              className="t-button flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text-sub)] transition-colors hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -343,13 +499,15 @@ export default function ComparisonPanel() {
               <PropertyColumn
                 item={slotA}
                 label="A"
-                onChange={() => setActivePickerSlot("A")}
+                onChangeList={() => setActivePickerSlot("A")}
+                onChangeMap={() => handlePickFromMap("A")}
                 onRemove={() => clearSlot("A")}
               />
             ) : (
               <EmptySlotCard
                 label="A"
-                onSelect={() => setActivePickerSlot("A")}
+                onPickFromMap={() => handlePickFromMap("A")}
+                onPickFromList={() => setActivePickerSlot("A")}
               />
             )}
           </div>
@@ -364,13 +522,15 @@ export default function ComparisonPanel() {
               <PropertyColumn
                 item={slotB}
                 label="B"
-                onChange={() => setActivePickerSlot("B")}
+                onChangeList={() => setActivePickerSlot("B")}
+                onChangeMap={() => handlePickFromMap("B")}
                 onRemove={() => clearSlot("B")}
               />
             ) : (
               <EmptySlotCard
                 label="B"
-                onSelect={() => setActivePickerSlot("B")}
+                onPickFromMap={() => handlePickFromMap("B")}
+                onPickFromList={() => setActivePickerSlot("B")}
               />
             )}
           </div>

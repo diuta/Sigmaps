@@ -20,26 +20,29 @@ export interface ComparisonContextValue {
   slotA: CompareItem | null;
   /** Slot B — null if empty */
   slotB: CompareItem | null;
-  /** Currently active target slot that user is picking for (defaults to "A" if A is empty, else "B") */
+  /** Currently active target slot that user is picking for ("A" or "B") */
   activeTargetSlot: CompareSlot;
   setActiveTargetSlot: (slot: CompareSlot) => void;
-  /** Whether the bottom comparison panel is open */
+  /** Whether the bottom comparison panel is active (open or collapsed) */
   isPanelOpen: boolean;
+  /** Whether the comparison panel is collapsed into a compact bottom bar */
+  isPanelMinimized: boolean;
+  setIsPanelMinimized: (minimized: boolean) => void;
+  minimizePanel: () => void;
+  expandPanel: () => void;
   /** Add or replace a specific slot */
   setSlot: (slot: CompareSlot, item: CompareItem) => void;
   /** Clear a specific slot */
   clearSlot: (slot: CompareSlot) => void;
   /** Clear both slots */
   clearAll: () => void;
-  /** Open the comparison panel */
+  /** Open the comparison panel (in expanded state) */
   openPanel: () => void;
-  /** Close the comparison panel */
+  /** Close the comparison panel completely */
   closePanel: () => void;
-  /**
-   * Smart add: fills the active target slot (or first empty slot).
-   */
+  /** Smart add */
   addToCompare: (item: CompareItem) => "added-A" | "added-B" | "full";
-  /** Explicitly assigns item to activeTargetSlot and rotates to the other slot if empty */
+  /** Explicitly assigns item to activeTargetSlot */
   assignToActiveSlot: (item: CompareItem) => CompareSlot;
   /** Check whether a unit is already in compare queue */
   isInCompare: (unitId: string) => boolean;

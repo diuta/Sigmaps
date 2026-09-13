@@ -124,6 +124,10 @@ export default function PropertyLayer() {
     clearSlot,
     getSlotFor,
     isInCompare,
+    expandPanel,
+    isPanelOpen,
+    isPanelMinimized,
+    setIsPanelMinimized,
   } = useComparison();
 
   const activePopupElRef = useRef<HTMLElement | null>(null);
@@ -138,6 +142,10 @@ export default function PropertyLayer() {
     getSlotFor,
     isInCompare,
     selectedStation,
+    expandPanel,
+    isPanelOpen,
+    isPanelMinimized,
+    setIsPanelMinimized,
   });
   compStateRef.current = {
     slotA,
@@ -148,6 +156,10 @@ export default function PropertyLayer() {
     getSlotFor,
     isInCompare,
     selectedStation,
+    expandPanel,
+    isPanelOpen,
+    isPanelMinimized,
+    setIsPanelMinimized,
   };
 
   // Synchronize button in open map popup whenever comparison state changes
@@ -261,6 +273,13 @@ export default function PropertyLayer() {
             const stId = state.selectedStation?.area_id ?? "";
             const stName = state.selectedStation?.station_name ?? "";
             state.assignToActiveSlot({ unit: { ...prop }, stationId: stId, stationName: stName });
+            const isOtherFilled = (state.activeTargetSlot === "A" && state.slotB !== null) ||
+                                  (state.activeTargetSlot === "B" && state.slotA !== null);
+            if (isOtherFilled) {
+              state.expandPanel();
+            } else {
+              state.setIsPanelMinimized(true);
+            }
           }
           setSelectedProperty({ ...prop });
           return;

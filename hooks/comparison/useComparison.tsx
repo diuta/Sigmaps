@@ -6,8 +6,8 @@
  * Global state for the property comparison feature.
  * - Slot A and Slot B hold a CompareItem each (unit + stationId + stationName)
  * - activeTargetSlot tracks which slot the user is currently targeting ("A" or "B")
- * - assignToActiveSlot() places the selected item into activeTargetSlot
- * - isPanelOpen controls the bottom comparison panel visibility
+ * - isPanelOpen: whether the comparison feature is active
+ * - isPanelMinimized: whether the panel is collapsed to a compact dock allowing full map interaction
  */
 
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
@@ -24,11 +24,13 @@ export function ComparisonProvider({ children }: { children: ReactNode }) {
   const [slotB, setSlotB] = useState<CompareItem | null>(null);
   const [activeTargetSlot, setActiveTargetSlot] = useState<CompareSlot>("A");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isPanelMinimized, setIsPanelMinimized] = useState(false);
 
-  // When both slots are filled, open panel
+  // Auto-open panel when both slots are filled
   useEffect(() => {
     if (slotA !== null && slotB !== null) {
       setIsPanelOpen(true);
+      setIsPanelMinimized(false);
     }
   }, [slotA, slotB]);
 
@@ -50,7 +52,6 @@ export function ComparisonProvider({ children }: { children: ReactNode }) {
       setSlotB(null);
       setActiveTargetSlot("B");
     }
-    setIsPanelOpen(false);
   }, []);
 
   const clearAll = useCallback(() => {
@@ -58,21 +59,42 @@ export function ComparisonProvider({ children }: { children: ReactNode }) {
     setSlotB(null);
     setActiveTargetSlot("A");
     setIsPanelOpen(false);
+    setIsPanelMinimized(false);
   }, []);
 
-  const openPanel = useCallback(() => setIsPanelOpen(true), []);
-  const closePanel = useCallback(() => setIsPanelOpen(false), []);
+  const openPanel = useCallback(() => {
+    setIsPanelOpen(true);
+    setIsPanelMinimized(false);
+  }, []);
+
+  const closePanel = useCallback(() => {
+    setIsPanelOpen(false);
+    setIsPanelMinimized(false);
+  }, []);
+
+  const minimizePanel = useCallback(() => {
+    setIsPanelMinimized(true);
+  }, []);
+
+  const expandPanel = useCallback(() => {
+    setIsPanelOpen(true);
+    setIsPanelMinimized(false);
+  }, []);
 
   const assignToActiveSlot = useCallback(
     (item: CompareItem): CompareSlot => {
       const target = activeTargetSlot;
       if (target === "A") {
         setSlotA(item);
-        if (!slotB) setActiveTargetSlot("B");
+        if (!slotB) {
+          setActiveTargetSlot("B");
+        }
         return "A";
       } else {
         setSlotB(item);
-        if (!slotA) setActiveTargetSlot("A");
+        if (!slotA) {
+          setActiveTargetSlot("A");
+        }
         return "B";
       }
     },
@@ -110,6 +132,10 @@ export function ComparisonProvider({ children }: { children: ReactNode }) {
         activeTargetSlot,
         setActiveTargetSlot,
         isPanelOpen,
+        isPanelMinimized,
+        setIsPanelMinimized,
+        minimizePanel,
+        expandPanel,
         setSlot,
         clearSlot,
         clearAll,
