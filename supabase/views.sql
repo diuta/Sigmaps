@@ -1,6 +1,35 @@
 -- Jalankan sekali di Supabase SQL Editor, urutan atas-ke-bawah, setelah keenam tabel
 -- MVP dibuat. Dipanggil lewat supabaseServer.from(view).select(), bukan .rpc().
 --
+-- Kolom contact_number pada properti_go: nomor WhatsApp hasil OCR (bukan AI generatif)
+-- atas foto_spanduk, diisi etl/extract_phone_spanduk.py. Nullable (foto_spanduk sendiri
+-- nullable, dan OCR di bawah ambang kepercayaan sengaja tidak diisi — lihat script-nya).
+-- Ditulis di sini karena belum ada folder migrasi khusus di project ini, dan ini satu-
+-- satunya berkas SQL yang dijalankan manual di SQL Editor.
+alter table properti_go add column if not exists contact_number text;
+
+-- Cache OCR untuk extract_phone_spanduk.py — SENGAJA tanpa foreign key ke properti_go(id).
+-- load_mapid.py men-delete+insert ulang seluruh properti_go tiap dijalankan (lihat komentar
+-- di skrip itu); kalau tabel ini punya FK ke properti_go, delete itu akan gagal (FK restrict)
+-- atau cache ini ikut terhapus (FK cascade) — dua-duanya merusak tujuan tabel ini, yaitu
+-- BERTAHAN lewat wipe properti_go supaya foto yang tidak berubah tidak perlu di-OCR ulang.
+-- Keterkaitan ke properti_go.id murni konvensi (sama string id), bukan constraint database.
+create table if not exists properti_go_spanduk_ocr (
+  properti_go_id   text primary key,
+  contact_number   text,
+  ocr_confidence   numeric,
+  updated_at       timestamptz not null default now()
+);
+
+-- Dua baris di bawah menjamin kolomnya benar APAPUN kondisi tabel saat ini —
+-- belum pernah dibuat sama sekali, dibuat dengan create table di atas (tanpa
+-- foto_spanduk_url), atau dibuat dari versi awal berkas ini yang sempat menamainya
+-- foto_spanduk_hash (sebelum desain cache pindah dari hash-gambar ke URL-foto).
+-- Tabelnya selalu kosong di titik ini (skrip yang mengisinya belum pernah sukses
+-- jalan), jadi aman drop kolom lama tanpa kehilangan data.
+alter table properti_go_spanduk_ocr add column if not exists foto_spanduk_url text;
+alter table properti_go_spanduk_ocr drop column if exists foto_spanduk_hash;
+--
 -- View dipakai HANYA untuk dua hal yang memang tidak bisa lewat query builder:
 --   1. Spatial join ST_Within (properti_go / community_activity / scored_areas)
 --   2. Konversi kolom geometry ke GeoJSON — PostgREST membalas WKB hex

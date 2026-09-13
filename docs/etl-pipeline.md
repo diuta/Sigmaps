@@ -3,8 +3,15 @@
 ## Apa fungsinya
 
 Mengisi tabel Supabase yang dibaca aplikasi. Berjalan offline, dijalankan manual, **tanpa AI
-sama sekali**. Satu-satunya jembatan antara Python dan Next.js adalah tabel di Supabase —
+generatif/LLM**. Satu-satunya jembatan antara Python dan Next.js adalah tabel di Supabase —
 `app/` dan `lib/` tidak pernah mengimpor apa pun dari sini.
+
+⚠️ **Catatan revisi:** `extract_phone_spanduk.py` (lihat
+[etl-extract-phone-spanduk.md](etl-extract-phone-spanduk.md)) memakai PaddleOCR, model deep
+learning untuk pengenalan teks — bukan LLM/AI generatif, tapi tetap model ML, bukan kode
+deterministik murni seperti skrip lain di sini. Klaim "tanpa AI sama sekali" di paragraf ini
+dan di `context/context-mvp.md` §3 ("tahap batch Python sekarang tanpa AI sama sekali")
+perlu ditinjau ulang tim mengingat perubahan ini — belum diperbarui di sana.
 
 Yang dihitung di sini hanya **D** dan bahan mentah untuk C dan S. Skor akhir, C, dan S
 dihitung `lib/scoring.ts` saat request.
@@ -24,16 +31,23 @@ python cek_koneksi.py      # 1. pastikan tersambung & lihat kondisi tabel
 python load_isokron.py     # 2. 43 poligon  -> scored_areas
 python tarik_mapid.py      # 3. tarik Menu Go + Properti Go dari API, simpan ke etl/data/
 python load_mapid.py       # 4. muat keduanya -> menu_go, properti_go (sumber='propertigo')
-python tarik_kai.py        # 5. tarik 546 aset komersial KAI dari space.kai.id
-python load_kai.py         # 6. muat yang di dalam isokron -> properti_go (sumber='kai_space')
-python hitung_rute.py      # 7. rute jalan kaki properti -> stasiun (OSRM foot) -> rute_properti
-python pipeline_scoring.py # 8. hitung D, median harga, pesaing, is_rankable
+python extract_phone_spanduk.py # 4b. OCR foto_spanduk -> properti_go.contact_number
+python load_activity.py    # 5. muat Community Activity -> community_activity
+python tarik_kai.py        # 6. tarik 546 aset komersial KAI dari space.kai.id
+python load_kai.py         # 7. muat yang di dalam isokron -> properti_go (sumber='kai_space')
+python hitung_rute.py      # 8. rute jalan kaki properti -> stasiun (OSRM foot) -> rute_properti
+python pipeline_scoring.py # 9. hitung D, median harga, pesaing, is_rankable
 ```
 
 Semua aman diulang. Tiap skrip mengosongkan tabelnya lalu mengisi ulang dalam satu transaksi;
 gagal di tengah berarti tidak ada perubahan yang tersimpan. `properti_go` diisi dua skrip
 (`load_mapid.py`, `load_kai.py`); masing-masing hanya menghapus baris dengan `sumber`-nya
 sendiri, jadi urutan 4 dan 6 bebas dibolak-balik.
+
+Langkah 1, 3, 4, 4b, 5, dan 9 juga bisa dijalankan sebagai **satu perintah**, `python run_pipeline.py`
+(berhenti di kegagalan pertama), dan **terjadwal harian lewat GitHub Actions** — lihat
+[etl-github-actions.md](etl-github-actions.md). Langkah 2 (`load_isokron.py`) sengaja tidak ikut
+karena berkas isokronnya disiapkan manual.
 
 **Dua tabel TIDAK diisi Python:** `stasiun` dan `katalog_restoran` diimpor manual lewat Table
 Editor Supabase (Insert → Import data from CSV). Keduanya datang sebagai berkas tabel biasa,
@@ -44,12 +58,15 @@ jadi tidak ada gunanya lewat kode.
 | `db.py` | Koneksi bersama. Satu-satunya tempat `DATABASE_URL` dibaca |
 | `cek_koneksi.py` | Laporan kondisi database. Hanya membaca, tidak pernah menulis |
 | `load_isokron.py` | GeoJSON MAPID Isochrone Tool → `scored_areas.geom` + `area_km2` |
-| `tarik_mapid.py` | Unduh Menu Go & Properti Go dari API, simpan mentah ke `etl/data/` |
+| `tarik_mapid.py` | Unduh Menu Go, Properti Go & Activities dari API, simpan mentah ke `etl/data/` |
 | `load_mapid.py` | Berkas mentah → tabel `menu_go` dan `properti_go` (`sumber='propertigo'`) |
+| `extract_phone_spanduk.py` | OCR `foto_spanduk` (PaddleOCR) → `properti_go.contact_number` |
+| `load_activity.py` | `activities.geojson` → tabel `community_activity` (tanpa kolom identitas pengguna — sengaja) |
 | `tarik_kai.py` | Unduh daftar aset komersial KAI (`space-api.kai.id`) ke `etl/data/kai_space.json` |
 | `load_kai.py` | Aset KAI yang jatuh di dalam isokron → `properti_go` (`sumber='kai_space'`) |
 | `hitung_rute.py` | Rute jalan kaki tiap pasangan (properti, stasiun) → `rute_properti`. Lihat [etl-hitung-rute.md](etl-hitung-rute.md) |
 | `pipeline_scoring.py` | Isi seluruh kolom komponen di `scored_areas` |
+| `run_pipeline.py` | Orkestrator: jalankan 1, 3, 4, 4b, 5, 9 berurutan sebagai satu perintah (dipakai GitHub Actions). Langkah KAI & rute (6–8) belum ikut |
 
 ## Dependency / prasyarat
 
@@ -64,7 +81,7 @@ jadi tidak ada gunanya lewat kode.
 **Berkas sumber** di `etl/data/` (di-gitignore, tidak ikut ter-commit):
 
 - `isokron.geojson` — 43 poligon dari MAPID Isochrone Tool
-- `menugo.geojson`, `propertigo.geojson` — dibuat sendiri oleh `tarik_mapid.py`
+- `menugo.geojson`, `propertigo.geojson`, `activities.geojson` — dibuat sendiri oleh `tarik_mapid.py`
 - `kai_space.json` — dibuat sendiri oleh `tarik_kai.py`
 
 **Urutan wajib:** `stasiun` harus terisi sebelum `load_isokron.py` (ada foreign key), dan
@@ -115,8 +132,11 @@ tetap utuh kalau daftar stasiun berubah, dan pemeriksaan "berapa yang jatuh di l
 kawasan" tetap bisa dijawab. API MAPID mewajibkan poligon wilayah; tidak ada opsi "kirim
 semua".
 
-**10. `community_activity` bukan tugas Jalur 2.** Tabelnya ada tapi kosong. Cara menariknya
-sama persis dengan Menu Go — `tarik_mapid.py` bisa dijadikan contoh oleh Jalur 1.
+**10. `community_activity` sekarang diisi `load_activity.py`** (dari `activities.geojson` yang
+ditarik `tarik_mapid.py` dengan rentang tanggal penuh — tanpa `start_date`/`end_date`, API diam-diam
+memotong ke jendela terbaru, 96% data hilang). Kolom identitas pengguna (`user_name`,
+`user_full_name`, foto) sengaja **tidak** disimpan — jangan ditambahkan. Angka rujukan
+`community_activity 0` di bawah berasal dari sebelum skrip ini ada.
 
 **11. Aset KAI Space (`load_kai.py`) — cara kerja & batasannya.**
 
