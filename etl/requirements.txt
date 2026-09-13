@@ -1,0 +1,23 @@
+# Dependensi pipeline batch Jalur 2.
+#
+# Pasang di virtualenv, JANGAN di Python sistem:
+#   cd etl && python3 -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt
+#
+# Sengaja TANPA geopandas/shapely: seluruh operasi spasial (spatial join,
+# hitung luas) dikerjakan PostGIS di sisi database. Lebih cepat, dan menghapus
+# satu kelas ketidakcocokan versi yang terkenal merepotkan.
+#
+# Sengaja TANPA openpyxl: sensus restoran diimpor manual lewat Table Editor
+# Supabase, bukan lewat Python.
+
+psycopg2-binary>=2.9      # koneksi langsung PostgreSQL/PostGIS
+python-dotenv>=1.0        # baca .env.local
+requests>=2.31            # tarik Menu Go & Properti Go dari API MAPID Competition
+pyopenssl>=24.0           # hitung_rute.py: TLS ke server routing dari Python macOS berbasis LibreSSL
+
+# --- extract_phone_spanduk.py: OCR nomor WhatsApp dari foto_spanduk, TANPA AI generatif ---
+paddleocr>=2.7             # deteksi+pengenalan teks pada foto (cocok untuk teks di spanduk/papan)
+paddlepaddle>=2.5          # backend CPU untuk PaddleOCR
+phonenumbers>=8.13         # validasi & normalisasi nomor Indonesia (libphonenumber)
+opencv-python-headless>=4.9 # decode gambar dari bytes sebelum di-OCR
