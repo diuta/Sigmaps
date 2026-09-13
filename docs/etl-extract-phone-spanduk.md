@@ -33,7 +33,9 @@ lolos ambang kepercayaan; sisanya dibiarkan `null`.
 - Baris `load_mapid.py` di `properti_go` (butuh `foto_spanduk` terisi).
 - Model PaddleOCR (~ratusan MB) diunduh otomatis saat pertama kali `PaddleOCR()`
   dipanggil, disimpan di `~/.paddlex/official_models/`. Butuh koneksi internet di
-  mesin yang menjalankan pipeline (termasuk di n8n/Docker — lihat gotcha di bawah).
+  mesin yang menjalankan pipeline. Di GitHub Actions folder itu di-cache antar run
+  (step "Cache model PaddleOCR" di `.github/workflows/etl-pipeline.yml`), jadi
+  unduhan hanya terjadi saat run pertama atau saat `requirements.txt` berubah.
 
 ## Batasan/gotcha
 

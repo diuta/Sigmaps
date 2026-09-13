@@ -2,8 +2,8 @@
 
     cd etl && source .venv/bin/activate && python run_pipeline.py
 
-Dibuat supaya n8n (atau cron apa pun) punya SATU command untuk dipanggil, bukan
-enam. Tiap tahap dijalankan sebagai proses terpisah (persis seperti kalau
+Dibuat supaya GitHub Actions (atau cron apa pun) punya SATU command untuk
+dipanggil, bukan enam. Tiap tahap dijalankan sebagai proses terpisah (persis seperti kalau
 dijalankan manual satu-satu) — bukan di-import sebagai modul — supaya galat di
 satu tahap tidak mewariskan state Python ke tahap berikutnya, dan exit code tiap
 skrip tetap apa adanya.
@@ -53,7 +53,7 @@ def jalankan(label: str, skrip: str) -> None:
     print("=" * 70)
 
     # Wajib flush sebelum anak proses mulai menulis ke fd yang sama. Saat stdout
-    # bukan terminal (n8n, cron, `> log.txt`), print() di sini block-buffered
+    # bukan terminal (GitHub Actions, cron, `> log.txt`), print() di sini block-buffered
     # sementara anak proses menulis langsung — tanpa flush, semua header tahap
     # muncul MENUMPUK di akhir log, setelah seluruh output anak-anaknya.
     sys.stdout.flush()

@@ -1,6 +1,6 @@
-# Pipeline batch etl/ terjadwal di GitHub Actions — versi "tanpa laptop" dari
-# otomasi n8n lokal (docs/etl-n8n-automation.md). Dua-duanya menjalankan skrip
-# yang persis sama: etl/run_pipeline.py. Lihat docs/etl-github-actions.md.
+# Pipeline batch etl/ terjadwal di GitHub Actions: menjalankan etl/run_pipeline.py
+# (skrip yang sama yang dipakai manual dari terminal) di runner GitHub, supaya
+# data tersegarkan tanpa bergantung laptop siapa pun. Lihat docs/etl-github-actions.md.
 #
 # Sesuai context/context-final.md (tabel deployment): batch Python =
 # "Lokal / GitHub Actions (schedule + workflow_dispatch), tidak di-deploy
@@ -11,12 +11,13 @@ name: ETL Pipeline
 on:
   schedule:
     # Cron GitHub Actions SELALU UTC. 20:00 UTC = 03:00 WIB (Asia/Jakarta,
-    # UTC+7) — sama dengan jadwal default workflow n8n. GitHub bisa menunda
-    # eksekusi terjadwal beberapa menit (kadang lebih) saat beban tinggi —
-    # ini bukan cron presisi. Jadwal HANYA berjalan dari default branch (main).
+    # UTC+7). GitHub bisa menunda eksekusi terjadwal beberapa menit (kadang
+    # lebih) saat beban tinggi — ini bukan cron presisi. Jadwal HANYA berjalan
+    # dari default branch (main), dan hanya kalau file ini ada di sana.
     - cron: "0 20 * * *"
   workflow_dispatch:
-    # Jalankan manual dari tab Actions (dari branch mana pun yang punya file ini).
+    # Tombol "Run workflow" di tab Actions. Tombolnya baru muncul kalau file ini
+    # ada di default branch; setelah itu bisa dijalankan dari branch mana pun.
 
 permissions:
   contents: read
@@ -32,9 +33,12 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    # Normalnya ~1 menit (load_activity ~35 dtk). Batas ini cuma pengaman kalau
-    # API MAPID atau Supabase menggantung.
-    timeout-minutes: 15
+    # Tanpa OCR ~1 menit (load_activity ~35 dtk). Tahap extract_phone_spanduk.py
+    # (PaddleOCR, CPU) menambah: pasang paddlepaddle+paddleocr (~1 GB), unduh
+    # model saat run pertama, lalu OCR tiap foto_spanduk yang belum ada di cache
+    # properti_go_spanduk_ocr. Batas ini pengaman kalau API MAPID/Supabase
+    # menggantung — kalau run normal mendekati batas, naikkan, jangan dipaksa.
+    timeout-minutes: 30
 
     env:
       # Dibaca etl/db.py (DATABASE_URL) dan etl/tarik_mapid.py (MAPID_API_KEY)
@@ -57,6 +61,16 @@ jobs:
 
       - name: Pasang dependency etl/
         run: pip install -r etl/requirements.txt
+
+      - name: Cache model PaddleOCR
+        # extract_phone_spanduk.py mengunduh model (~ratusan MB) ke ~/.paddlex
+        # saat PaddleOCR() pertama dipanggil. Runner GitHub selalu bersih, jadi
+        # tanpa cache ini tiap run mengunduh ulang. Kunci ikut requirements.txt:
+        # versi paddleocr baru = model baru.
+        uses: actions/cache@v4
+        with:
+          path: ~/.paddlex
+          key: paddlex-${{ runner.os }}-${{ hashFiles('etl/requirements.txt') }}
 
       - name: Pastikan secret terisi
         # Gagal cepat dengan pesan jelas, bukan traceback psycopg2 di tengah jalan.

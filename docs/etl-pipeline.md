@@ -45,9 +45,8 @@ gagal di tengah berarti tidak ada perubahan yang tersimpan. `properti_go` diisi 
 sendiri, jadi urutan 4 dan 6 bebas dibolak-balik.
 
 Langkah 1, 3, 4, 4b, 5, dan 9 juga bisa dijalankan sebagai **satu perintah**, `python run_pipeline.py`
-(berhenti di kegagalan pertama), dan terjadwal — **lokal lewat n8n di Docker**
-([etl-n8n-automation.md](etl-n8n-automation.md)) atau **tanpa laptop lewat GitHub Actions**
-([etl-github-actions.md](etl-github-actions.md)). Langkah 2 (`load_isokron.py`) sengaja tidak ikut
+(berhenti di kegagalan pertama), dan **terjadwal harian lewat GitHub Actions** — lihat
+[etl-github-actions.md](etl-github-actions.md). Langkah 2 (`load_isokron.py`) sengaja tidak ikut
 karena berkas isokronnya disiapkan manual.
 
 **Dua tabel TIDAK diisi Python:** `stasiun` dan `katalog_restoran` diimpor manual lewat Table
@@ -67,7 +66,7 @@ jadi tidak ada gunanya lewat kode.
 | `load_kai.py` | Aset KAI yang jatuh di dalam isokron → `properti_go` (`sumber='kai_space'`) |
 | `hitung_rute.py` | Rute jalan kaki tiap pasangan (properti, stasiun) → `rute_properti`. Lihat [etl-hitung-rute.md](etl-hitung-rute.md) |
 | `pipeline_scoring.py` | Isi seluruh kolom komponen di `scored_areas` |
-| `run_pipeline.py` | Orkestrator: jalankan 1, 3, 4, 4b, 5, 9 berurutan sebagai satu perintah (dipakai n8n). Langkah KAI & rute (6–8) belum ikut |
+| `run_pipeline.py` | Orkestrator: jalankan 1, 3, 4, 4b, 5, 9 berurutan sebagai satu perintah (dipakai GitHub Actions). Langkah KAI & rute (6–8) belum ikut |
 
 ## Dependency / prasyarat
 
