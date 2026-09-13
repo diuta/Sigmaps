@@ -3,6 +3,9 @@
 import { useEffect, useRef } from "react";
 import type { PropertyUnit } from "@/types/property";
 import { formatJalanKaki } from "@/helper/format-jalan-kaki";
+import CompareToggleButton from "@/components/comparison/CompareToggleButton";
+import { useComparison } from "@/hooks/comparison/useComparison";
+import type { CompareItem } from "@/hooks/comparison/useComparison.types";
 
 interface Props {
   property: PropertyUnit;
@@ -60,6 +63,14 @@ export default function PropertyDetail({ property, stationName, onBack }: Props)
   // null kalau rute belum dihitung (etl/hitung_rute.py) — baris jarak disembunyikan saja
   const jalanKaki = formatJalanKaki(property.jarak_jalan_m, property.waktu_jalan_s);
 
+  // Compare
+  const { selectedStation: _ignored } = { selectedStation: null }; // not needed here
+  const compareItem: CompareItem = {
+    unit: property,
+    stationId: stationName.toLowerCase().replace(/\s+/g, "_"),  // best-effort id from name
+    stationName,
+  };
+
   return (
     <div className="motion-rise-in flex flex-col gap-[var(--space-lg)]">
       <button
@@ -104,6 +115,11 @@ export default function PropertyDetail({ property, stationName, onBack }: Props)
             <span>{jalanKaki} ke {stationName}</span>
           </p>
         )}
+
+        {/* 1-Click Compare Action in Detail */}
+        <div className="pt-1">
+          <CompareToggleButton item={compareItem} />
+        </div>
       </div>
 
       <div className="flex flex-col gap-[var(--space-md)]">

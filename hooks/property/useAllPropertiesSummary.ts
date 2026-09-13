@@ -18,8 +18,11 @@ export interface PropertySummaryItem {
   station_id: string;
   kategori_properti: string;
   jenis_properti: string;
+  alamat?: string;
   foto_tampak_depan: string | null;
   foto_spanduk: string | null;
+  jarak_jalan_m?: number | null;
+  waktu_jalan_s?: number | null;
 }
 
 export interface StationPropertyMeta {

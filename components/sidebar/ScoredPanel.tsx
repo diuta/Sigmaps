@@ -211,6 +211,8 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
           <PropertyList
             properties={properties}
             loading={propertiesLoading}
+            stationId={area.station_id}
+            stationName={area.station_name}
             onSelect={(unit) => onSelectProperty(unit, area.station_name)}
           />
         </div>

@@ -70,6 +70,14 @@ dan tautan lintas folder ditulis relatif (`../context/<nama>.md`).
 | [fe/ARCHITECTURE.md](../context/fe/ARCHITECTURE.md) | struktur direktori, zona kepemilikan, kontrak antar zona |
 | [fe/DESIGN.md](../context/fe/DESIGN.md) | token desain, tipografi, spesifikasi visual |
 
+### Pipeline batch (`etl/`)
+
+| Dokumen | Isi |
+|---|---|
+| [etl-pipeline.md](etl-pipeline.md) | skrip `etl/*.py`, urutan, env var, angka rujukan |
+| [etl-extract-phone-spanduk.md](etl-extract-phone-spanduk.md) | `extract_phone_spanduk.py` — OCR nomor WA dari foto_spanduk, isi `properti_go.contact_number` |
+| [etl-github-actions.md](etl-github-actions.md) | `run_pipeline.py` terjadwal harian di GitHub Actions (`.github/workflows/etl-pipeline.yml`) |
+
 ### Arsip
 
 | Dokumen | Catatan |

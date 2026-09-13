@@ -1,0 +1,107 @@
+# Pipeline batch etl/ terjadwal di GitHub Actions: menjalankan etl/run_pipeline.py
+# (skrip yang sama yang dipakai manual dari terminal) di runner GitHub, supaya
+# data tersegarkan tanpa bergantung laptop siapa pun. Lihat docs/etl-github-actions.md.
+#
+# Sesuai context/context-final.md (tabel deployment): batch Python =
+# "Lokal / GitHub Actions (schedule + workflow_dispatch), tidak di-deploy
+# sebagai service selalu-hidup".
+
+name: ETL Pipeline
+
+on:
+  schedule:
+    # Cron GitHub Actions SELALU UTC. 20:00 UTC = 03:00 WIB (Asia/Jakarta,
+    # UTC+7). GitHub bisa menunda eksekusi terjadwal beberapa menit (kadang
+    # lebih) saat beban tinggi — ini bukan cron presisi. Jadwal HANYA berjalan
+    # dari default branch (main), dan hanya kalau file ini ada di sana.
+    - cron: "0 20 * * *"
+  workflow_dispatch:
+    # Tombol "Run workflow" di tab Actions. Tombolnya baru muncul kalau file ini
+    # ada di default branch; setelah itu bisa dijalankan dari branch mana pun.
+
+permissions:
+  contents: read
+
+# Jangan pernah ada dua pipeline jalan bersamaan: tiap skrip load_* mengosongkan
+# tabelnya lalu mengisi ulang — dua run yang bertumpuk bisa saling menimpa.
+# cancel-in-progress: false = run kedua MENUNGGU, bukan membatalkan yang sedang
+# jalan.
+concurrency:
+  group: etl-pipeline
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    # Tanpa OCR ~1 menit (load_activity ~35 dtk). Tahap extract_phone_spanduk.py
+    # (PaddleOCR, CPU) menambah: pasang paddlepaddle+paddleocr (~1 GB), unduh
+    # model saat run pertama, lalu OCR tiap foto_spanduk yang belum ada di cache
+    # properti_go_spanduk_ocr. Batas ini pengaman kalau API MAPID/Supabase
+    # menggantung — kalau run normal mendekati batas, naikkan, jangan dipaksa.
+    timeout-minutes: 30
+
+    env:
+      # Dibaca etl/db.py (DATABASE_URL) dan etl/tarik_mapid.py (MAPID_API_KEY)
+      # lewat os.getenv — load_dotenv() di db.py tidak masalah kalau .env-nya
+      # tidak ada. Isi di: repo Settings > Secrets and variables > Actions.
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      MAPID_API_KEY: ${{ secrets.MAPID_API_KEY }}
+      # Output anak proses ikut mengalir langsung ke log Actions (bukan
+      # menumpuk sampai skrip selesai).
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: etl/requirements.txt
+
+      - name: Pasang dependency etl/
+        run: pip install -r etl/requirements.txt
+
+      - name: Cache model PaddleOCR
+        # extract_phone_spanduk.py mengunduh model (~ratusan MB) ke ~/.paddlex
+        # saat PaddleOCR() pertama dipanggil. Runner GitHub selalu bersih, jadi
+        # tanpa cache ini tiap run mengunduh ulang. Kunci ikut requirements.txt:
+        # versi paddleocr baru = model baru.
+        uses: actions/cache@v4
+        with:
+          path: ~/.paddlex
+          key: paddlex-${{ runner.os }}-${{ hashFiles('etl/requirements.txt') }}
+
+      - name: Pastikan secret terisi
+        # Gagal cepat dengan pesan jelas, bukan traceback psycopg2 di tengah jalan.
+        run: |
+          missing=""
+          [ -n "$DATABASE_URL" ]  || missing="$missing DATABASE_URL"
+          [ -n "$MAPID_API_KEY" ] || missing="$missing MAPID_API_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Secret belum diisi di repo Settings > Secrets and variables > Actions:$missing"
+            exit 1
+          fi
+
+      - name: Jalankan pipeline
+        run: python etl/run_pipeline.py
+
+      - name: Simpan unduhan mentah sebagai artifact
+        # Berkas hasil tarik_mapid.py — berguna untuk memeriksa apa yang
+        # sebenarnya dikembalikan API pada run itu, terutama kalau tahap
+        # berikutnya gagal. if: always() supaya tetap tersimpan saat gagal;
+        # ignore kalau gagalnya sebelum tarik_mapid sempat jalan.
+        #
+        # activities.geojson SENGAJA TIDAK ikut: berkas mentahnya memuat
+        # user_name / user_full_name / foto profil dari API — kolom yang
+        # load_activity.py sengaja buang (lihat catatan PRIVASI di sana).
+        # Artifact bisa diunduh siapa pun yang punya akses baca ke repo.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: etl-data-${{ github.run_number }}
+          path: |
+            etl/data/menugo.geojson
+            etl/data/propertigo.geojson
+          if-no-files-found: ignore
+          retention-days: 7
