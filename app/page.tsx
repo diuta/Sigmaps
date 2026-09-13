@@ -12,10 +12,13 @@ import { BriefResultProvider } from "@/hooks/brief/useBriefResult";
 import { SelectedPropertyProvider } from "@/hooks/property/useSelectedProperty";
 import { PropertyFilterProvider } from "@/hooks/property/usePropertyFilter";
 import { SidebarOpenProvider } from "@/hooks/sidebar/useSidebarOpen";
+import { ComparisonProvider } from "@/hooks/comparison/useComparison";
+import ComparisonPanel from "@/components/comparison/ComparisonPanel";
 
 export default function Home() {
   return (
     <SidebarOpenProvider>
+    <ComparisonProvider>
     <SelectedStationProvider>
       <SelectedPropertyProvider>
       <PropertyFilterProvider>
@@ -26,6 +29,7 @@ export default function Home() {
         <IsochroneConfigProvider>
           <main className="flex h-screen w-screen overflow-hidden bg-slate-900">
             <Sidebar />
+            <ComparisonPanel />
 
             <div className="relative flex-1 overflow-hidden z-0 isolate">
               <BaseMap>
@@ -49,6 +53,7 @@ export default function Home() {
       </PropertyFilterProvider>
       </SelectedPropertyProvider>
     </SelectedStationProvider>
+    </ComparisonProvider>
     </SidebarOpenProvider>
   );
 }

@@ -11,6 +11,7 @@ import { useSelectedStation } from "@/hooks/station/useSelectedStation";
 import { useBriefResult } from "@/hooks/brief/useBriefResult";
 import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
 import type { PropertyUnit } from "@/types/property";
+import CompareBar from "@/components/comparison/CompareBar";
 
 interface Props {
   /** Teks rencana usaha yang sudah disubmit — null sebelum brief pertama dinilai. Diteruskan
@@ -146,6 +147,9 @@ export default function OutputSection({ brief, loading, scored, stale, onEditBri
           />
         )}
       </div>
+
+      {/* Bandingkan Properti — selalu tampil di bagian bawah, independen dari detail/scoring */}
+      <CompareBar />
     </div>
   );
 }

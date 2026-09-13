@@ -42,7 +42,7 @@ export default function ExportPdfButton(props: Props) {
   }
 
   return (
-    <div className="flex flex-col items-end gap-[var(--space-xs)]">
+    <div className="flex flex-col items-start gap-[var(--space-xs)]">
       <button
         type="button"
         onClick={handleClick}
