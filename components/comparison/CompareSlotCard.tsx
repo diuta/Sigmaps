@@ -2,6 +2,7 @@
 
 import { formatJalanKaki } from "@/helper/format-jalan-kaki";
 import type { CompareItem, CompareSlot } from "@/hooks/comparison/useComparison.types";
+import { getSlotLabel, getSlotNumber } from "@/hooks/comparison/useComparison.types";
 
 interface Props {
   slot: CompareSlot;
@@ -39,7 +40,7 @@ export default function CompareSlotCard({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="t-micro font-bold text-[var(--color-brand)]">Slot {slot}</span>
+            <span className="t-micro font-bold text-[var(--color-brand)]">{getSlotLabel(slot)}</span>
             {isActiveTarget && (
               <span className="rounded-full bg-[var(--color-brand)] px-1.5 py-0.2 text-[9px] font-bold text-white">
                 Aktif
@@ -143,12 +144,12 @@ export default function CompareSlotCard({
               : "bg-[var(--color-brand)]/10 text-[var(--color-brand)]"
           }`}
         >
-          {slot}
+          {getSlotNumber(slot)}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <p className="t-body truncate text-xs font-bold text-[var(--color-text)]">
-              Pilih Properti Slot {slot}
+              Pilih {getSlotLabel(slot)}
             </p>
             {isActiveTarget && (
               <span className="rounded-full bg-[var(--color-brand)] px-1.5 py-0.2 text-[9px] font-bold text-white">
@@ -157,7 +158,7 @@ export default function CompareSlotCard({
             )}
           </div>
           <p className="t-micro truncate text-[var(--color-muted)]">
-            {isActiveTarget ? "Sedang memilih properti..." : "Klik untuk memilih slot ini"}
+            {isActiveTarget ? "Sedang memilih properti..." : `Klik untuk memilih ${getSlotLabel(slot).toLowerCase()}`}
           </p>
         </div>
       </div>

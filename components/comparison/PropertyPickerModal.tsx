@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAllPropertiesSummary, type PropertySummaryItem } from "@/hooks/property/useAllPropertiesSummary";
 import { formatJalanKaki } from "@/helper/format-jalan-kaki";
 import type { CompareItem, CompareSlot } from "@/hooks/comparison/useComparison.types";
+import { getSlotLabel, getSlotNumber } from "@/hooks/comparison/useComparison.types";
 import type { PropertyUnit } from "@/types/property";
 
 interface Props {
@@ -109,7 +110,7 @@ export default function PropertyPickerModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Pilih Properti untuk Slot ${slot}`}
+      aria-label={`Pilih ${getSlotLabel(slot)}`}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
     >
       {/* Click outside backdrop */}
@@ -122,10 +123,10 @@ export default function PropertyPickerModal({
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-brand)] text-xs font-bold text-white">
-                {slot}
+                {getSlotNumber(slot)}
               </span>
               <h2 className="t-heading-1 text-base text-[var(--color-text)]">
-                Pilih Properti untuk Slot {slot}
+                Pilih {getSlotLabel(slot)}
               </h2>
             </div>
             <p className="t-micro font-normal text-[var(--color-text-sub)]">
@@ -325,7 +326,7 @@ export default function PropertyPickerModal({
 
                       {isOther && (
                         <span className="mt-1 text-[10px] font-bold text-[var(--color-muted)]">
-                          ✓ Terpilih di Slot {otherSlotName}
+                          ✓ Terpilih di {getSlotLabel(otherSlotName)}
                         </span>
                       )}
                     </div>

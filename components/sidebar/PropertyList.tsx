@@ -1,36 +1,35 @@
 "use client";
 
-import { useMemo, useState } from "react";
+/**
+ * components/sidebar/PropertyList.tsx
+ *
+ * Daftar properti Properti Go di sekitar stasiun aktif.
+ * - Menampilkan grid kartu properti bersih & elegan
+ * - Klik kartu langsung membuka halaman detail properti
+ * - Filter multi-select kategori, transaksi, dan foto fisik
+ */
+
+import { useMemo } from "react";
 import type { PropertyUnit } from "@/types/property";
 import { usePropertyFilter } from "@/hooks/property/usePropertyFilter";
 import { useComparison } from "@/hooks/comparison/useComparison";
-import type { CompareItem } from "@/hooks/comparison/useComparison.types";
+import { getSlotLabel } from "@/hooks/comparison/useComparison.types";
 
 interface Props {
-  properties: readonly PropertyUnit[];
+  properties: PropertyUnit[];
   loading: boolean;
-  /** Nama stasiun aktif — dioper ke CompareItem supaya panel bisa tampilkan insight kawasan. */
-  stationId: string;
-  stationName: string;
-  /** Buka halaman detail unit ini. */
-  onSelect: (unit: PropertyUnit) => void;
+  stationId?: string;
+  stationName?: string;
+  onSelect: (property: PropertyUnit) => void;
 }
 
-/**
- * Daftar unit properti dalam grid 2 kolom.
- *
- * Tap pertama → card melebar, muncul 2 tombol aksi di bawahnya:
- *   [Lihat Detail]  [⚖️ Bandingkan]
- * Tap kedua (card yang sama) → collapse kembali.
- *
- * Ini menghilangkan keharusan membuka halaman detail hanya untuk menambah ke compare.
- */
-export default function PropertyList({ properties, loading, stationId, stationName, onSelect }: Props) {
+export default function PropertyList({
+  properties,
+  loading,
+  onSelect,
+}: Props) {
   const { propertyTypes, transactionTypes, hasPhotoOnly, resetFilters } = usePropertyFilter();
-  const { activeTargetSlot, assignToActiveSlot, isInCompare, getSlotFor, clearSlot, slotA, slotB } = useComparison();
-
-  /** id unit yang sedang "expanded" (menampilkan action row) */
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const { isInCompare, getSlotFor } = useComparison();
 
   const isFilterActive = propertyTypes.length > 0 || transactionTypes.length > 0 || hasPhotoOnly;
 
@@ -49,28 +48,43 @@ export default function PropertyList({ properties, loading, stationId, stationNa
         });
         if (!matchesAny) return false;
       }
+
       if (transactionTypes.length > 0) {
         const jenis = (unit.jenis_properti || "").toLowerCase();
-        const matchesType = transactionTypes.some((t) => {
+        const matchesJenis = transactionTypes.some((t) => {
           if (t === "sewa") return jenis.includes("sewa");
           if (t === "jual") return jenis.includes("jual");
-          return jenis.includes(t.toLowerCase());
+          return false;
         });
-        if (!matchesType) return false;
+        if (!matchesJenis) return false;
       }
-      if (hasPhotoOnly && !unit.foto_tampak_depan && !unit.foto_spanduk) return false;
+
+      if (hasPhotoOnly && !unit.foto_tampak_depan && !unit.foto_spanduk) {
+        return false;
+      }
+
       return true;
     });
   }, [properties, propertyTypes, transactionTypes, hasPhotoOnly]);
 
   if (loading) {
-    return <p className="t-body text-[var(--color-text-sub)]">Memuat properti...</p>;
+    return (
+      <div className="flex flex-col gap-[var(--space-md)]">
+        <div className="h-4 w-32 animate-pulse rounded bg-[var(--color-surface-muted)]" />
+        <ul className="grid grid-cols-2 gap-[var(--space-sm)]">
+          {[1, 2, 3, 4].map((i) => (
+            <li
+              key={i}
+              className="flex aspect-[3/4] animate-pulse flex-col rounded-[var(--radius-card)] bg-[var(--color-surface-muted)]"
+            />
+          ))}
+        </ul>
+      </div>
+    );
   }
 
-  const bothFull = slotA !== null && slotB !== null;
-
   return (
-    <section className="flex flex-col gap-[var(--space-md)]">
+    <section aria-label="Daftar properti" className="flex flex-col gap-[var(--space-md)]">
       <div className="flex items-center justify-between">
         <p className="t-micro font-normal text-[var(--color-text-sub)]">
           {isFilterActive
@@ -107,57 +121,27 @@ export default function PropertyList({ properties, loading, stationId, stationNa
         </div>
       ) : (
         /*
-          Grid 2 kolom. Card full-width dalam li agar action row bisa span seluruh lebar.
-          Tanpa max-h + overflow sendiri: sidebar sudah jadi satu-satunya scroll container.
+          Grid 2 kolom. Kartu bersih: klik langsung membuka detail properti.
         */
         <ul className="grid grid-cols-2 gap-[var(--space-sm)]">
           {filteredProperties.map((unit) => {
-            const isExpanded = expandedId === unit.id;
             const inCompare = isInCompare(unit.id);
             const occupiedSlot = getSlotFor(unit.id);
 
-            function handleCardTap() {
-              // Toggle expand: tap same card collapses it
-              setExpandedId(isExpanded ? null : unit.id);
-            }
-
-            function handleDetail(e: React.MouseEvent) {
-              e.stopPropagation();
-              setExpandedId(null);
-              onSelect(unit);
-            }
-
-            function handleCompare(e: React.MouseEvent) {
-              e.stopPropagation();
-              if (inCompare && occupiedSlot) {
-                clearSlot(occupiedSlot);
-                return;
-              }
-              const item: CompareItem = { unit, stationId, stationName };
-              assignToActiveSlot(item);
-            }
-
             return (
-              <li key={unit.id} className="flex flex-col">
-                {/*
-                  Card body — single tap toggles action row.
-                  id dipakai OutputSection untuk kembalikan fokus setelah detail ditutup.
-                */}
+              <li key={unit.id}>
                 <button
                   type="button"
                   id={`unit-${unit.id}`}
-                  onClick={handleCardTap}
-                  aria-expanded={isExpanded}
+                  onClick={() => onSelect(unit)}
                   aria-label={`${unit.kategori_properti} di ${unit.alamat}`}
-                  className={`flex w-full flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border bg-[var(--color-surface)] p-[var(--space-sm)] text-left shadow-[var(--shadow-card)] transition-all duration-[var(--motion-fast)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] ${
-                    isExpanded
-                      ? "rounded-b-none border-[var(--color-brand)] shadow-[var(--shadow-float)]"
-                      : inCompare
-                      ? "border-[var(--color-brand)]/50 hover:border-[var(--color-brand)]"
-                      : "border-[var(--color-border)] hover:-translate-y-[1px] hover:border-[var(--color-pin)] hover:shadow-[var(--shadow-float)]"
+                  className={`group flex w-full flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border bg-[var(--color-surface)] p-[var(--space-sm)] text-left shadow-[var(--shadow-card)] transition-all duration-[var(--motion-fast)] hover:-translate-y-[1px] hover:shadow-[var(--shadow-float)] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] ${
+                    inCompare
+                      ? "border-[var(--color-brand)] ring-1 ring-[var(--color-brand)]/40"
+                      : "border-[var(--color-border)] hover:border-[var(--color-brand)]"
                   }`}
                 >
-                  {/* Photo / initial placeholder */}
+                  {/* Photo / placeholder */}
                   {unit.foto_tampak_depan ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -176,61 +160,20 @@ export default function PropertyList({ properties, loading, stationId, stationNa
 
                   <div className="flex flex-col gap-[var(--space-xs)]">
                     <div className="flex items-start justify-between gap-[2px]">
-                      <span className="t-heading-2 flex-1">{unit.kategori_properti}</span>
+                      <span className="t-heading-2 flex-1 group-hover:text-[var(--color-brand)] transition-colors">
+                        {unit.kategori_properti}
+                      </span>
                       {/* In-compare indicator badge on card */}
                       {inCompare && (
-                        <span className="t-micro whitespace-nowrap rounded-full bg-[var(--color-brand)] px-[6px] py-[2px] text-white">
-                          {occupiedSlot}
+                        <span className="t-micro whitespace-nowrap rounded-full bg-[var(--color-brand)] px-[6px] py-[2px] text-white font-bold text-[9px]">
+                          {getSlotLabel(occupiedSlot)}
                         </span>
                       )}
                     </div>
                     <span className="t-micro text-[var(--color-pin-hover)]">{unit.jenis_properti}</span>
-                    <span className="t-body text-[var(--color-text-sub)]">{unit.alamat}</span>
+                    <span className="t-body text-[var(--color-text-sub)] line-clamp-2">{unit.alamat}</span>
                   </div>
                 </button>
-
-                {/* ── Action row (slides in below card when expanded) ── */}
-                <div
-                  aria-hidden={!isExpanded}
-                  className={`grid overflow-hidden rounded-b-[var(--radius-card)] border border-t-0 border-[var(--color-brand)] transition-all duration-[var(--motion-base)] ease-[var(--ease-out)] ${
-                    isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                  }`}
-                >
-                  <div className="min-h-0">
-                    <div className="grid grid-cols-2 divide-x divide-[var(--color-border)] bg-[var(--color-surface-muted)]">
-                      {/* Detail button */}
-                      <button
-                        type="button"
-                        tabIndex={isExpanded ? 0 : -1}
-                        onClick={handleDetail}
-                        className="t-button flex items-center justify-center gap-[var(--space-xs)] py-[var(--space-sm)] text-[var(--color-text-sub)] transition-colors duration-[var(--motion-fast)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
-                      >
-                        <span aria-hidden className="text-[11px]">🔍</span>
-                        Detail
-                      </button>
-
-                      {/* Compare button */}
-                      <button
-                        type="button"
-                        tabIndex={isExpanded ? 0 : -1}
-                        onClick={handleCompare}
-                        className={`t-button flex items-center justify-center gap-[var(--space-xs)] py-[var(--space-sm)] transition-colors duration-[var(--motion-fast)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand)] cursor-pointer ${
-                          inCompare
-                            ? "bg-[var(--color-brand)] text-white hover:bg-rose-600"
-                            : "text-[var(--color-brand)] hover:bg-[var(--color-accent-surface)] font-semibold"
-                        }`}
-                        aria-label={
-                          inCompare
-                            ? `Hapus dari Slot ${occupiedSlot}`
-                            : `Masukkan ke Slot ${activeTargetSlot}`
-                        }
-                      >
-                        <span aria-hidden className="text-[11px]">{inCompare ? "✓" : "⚖️"}</span>
-                        {inCompare ? `Slot ${occupiedSlot} (Batal)` : `+ Slot ${activeTargetSlot}`}
-                      </button>
-                    </div>
-                  </div>
-                </div>
               </li>
             );
           })}

@@ -17,6 +17,7 @@ import { useSidebarOpen } from "@/hooks/sidebar/useSidebarOpen";
 import { useBriefResult } from "@/hooks/brief/useBriefResult";
 import { useStations } from "@/hooks/station/useStations";
 import type { CompareItem, CompareSlot } from "@/hooks/comparison/useComparison.types";
+import { getSlotLabel, getSlotNumber } from "@/hooks/comparison/useComparison.types";
 import type { CommunitySentimentResponse } from "@/types/sentiment";
 import PropertyPickerModal from "@/components/comparison/PropertyPickerModal";
 
@@ -73,13 +74,13 @@ function InsightBlock({
 
 function PropertyColumn({
   item,
-  label,
+  slot,
   onChangeList,
   onChangeMap,
   onRemove,
 }: {
   item: CompareItem;
-  label: "A" | "B";
+  slot: CompareSlot;
   onChangeList: () => void;
   onChangeMap: () => void;
   onRemove: () => void;
@@ -94,10 +95,10 @@ function PropertyColumn({
       <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-2.5">
         <div className="flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-brand)] text-xs font-bold text-white shadow-xs">
-            {label}
+            {getSlotNumber(slot)}
           </span>
           <span className="t-heading-2 text-xs font-bold text-[var(--color-text)]">
-            Slot {label}
+            {getSlotLabel(slot)}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -186,24 +187,26 @@ function PropertyColumn({
 }
 
 function EmptySlotCard({
-  label,
+  slot,
   onPickFromMap,
   onPickFromList,
 }: {
-  label: "A" | "B";
+  slot: CompareSlot;
   onPickFromMap: () => void;
   onPickFromList: () => void;
 }) {
+  const slotLabel = getSlotLabel(slot);
+  const slotNumber = getSlotNumber(slot);
   return (
     <div className="flex h-full min-h-[380px] flex-col items-center justify-center rounded-[16px] border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface-muted)]/40 p-8 text-center transition-all hover:border-[var(--color-brand)]">
       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-brand)]/10 text-lg font-bold text-[var(--color-brand)]">
-        {label}
+        {slotNumber}
       </div>
       <h3 className="t-heading-1 mb-1 text-sm font-bold text-[var(--color-text)]">
-        Slot {label} Belum Dipilih
+        {slotLabel} Belum Dipilih
       </h3>
       <p className="t-body mb-5 max-w-xs text-xs text-[var(--color-muted)]">
-        Pilih properti untuk Slot {label} dengan tap langsung di peta atau pilih dari daftar
+        Pilih {slotLabel.toLowerCase()} dengan tap langsung di peta atau pilih dari daftar
       </p>
       
       <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full max-w-xs">
@@ -307,18 +310,18 @@ export default function ComparisonPanel() {
                 Bandingkan Properti
               </span>
               <span className="rounded-full bg-[var(--color-brand)]/15 px-2 py-0.2 text-[10px] font-bold text-[var(--color-brand)]">
-                📍 Mode Peta: Slot {activeTargetSlot}
+                📍 Target: {getSlotLabel(activeTargetSlot)}
               </span>
             </div>
             <p className="t-micro text-[var(--color-muted)] truncate">
-              Klik pin properti di peta untuk mengisi <strong>Slot {activeTargetSlot}</strong>
+              Klik pin properti di peta untuk mengisi <strong>{getSlotLabel(activeTargetSlot)}</strong>
             </p>
           </div>
         </div>
 
-        {/* Center: Slot Chips */}
+        {/* Center: Property Chips */}
         <div className="hidden md:flex items-center gap-2">
-          {/* Slot A Pill */}
+          {/* Properti 1 Pill */}
           <div
             onClick={() => setActiveTargetSlot("A")}
             className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold cursor-pointer transition-all ${
@@ -329,7 +332,7 @@ export default function ComparisonPanel() {
                 : "border border-dashed border-[var(--color-border)] text-[var(--color-muted)]"
             }`}
           >
-            <span>Slot A: {slotA ? slotA.unit.kategori_properti : "Kosong"}</span>
+            <span>Properti 1: {slotA ? slotA.unit.kategori_properti : "Kosong"}</span>
             {slotA && (
               <button
                 type="button"
@@ -338,6 +341,7 @@ export default function ComparisonPanel() {
                   clearSlot("A");
                 }}
                 className="hover:text-rose-600 ml-1"
+                aria-label="Hapus Properti 1"
               >
                 ✕
               </button>
@@ -346,7 +350,7 @@ export default function ComparisonPanel() {
 
           <span className="text-[10px] font-bold text-[var(--color-muted)]">VS</span>
 
-          {/* Slot B Pill */}
+          {/* Properti 2 Pill */}
           <div
             onClick={() => setActiveTargetSlot("B")}
             className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold cursor-pointer transition-all ${
@@ -357,7 +361,7 @@ export default function ComparisonPanel() {
                 : "border border-dashed border-[var(--color-border)] text-[var(--color-muted)]"
             }`}
           >
-            <span>Slot B: {slotB ? slotB.unit.kategori_properti : "Kosong"}</span>
+            <span>Properti 2: {slotB ? slotB.unit.kategori_properti : "Kosong"}</span>
             {slotB && (
               <button
                 type="button"
@@ -366,6 +370,7 @@ export default function ComparisonPanel() {
                   clearSlot("B");
                 }}
                 className="hover:text-rose-600 ml-1"
+                aria-label="Hapus Properti 2"
               >
                 ✕
               </button>
@@ -498,14 +503,14 @@ export default function ComparisonPanel() {
             {slotA ? (
               <PropertyColumn
                 item={slotA}
-                label="A"
+                slot="A"
                 onChangeList={() => setActivePickerSlot("A")}
                 onChangeMap={() => handlePickFromMap("A")}
                 onRemove={() => clearSlot("A")}
               />
             ) : (
               <EmptySlotCard
-                label="A"
+                slot="A"
                 onPickFromMap={() => handlePickFromMap("A")}
                 onPickFromList={() => setActivePickerSlot("A")}
               />
@@ -521,14 +526,14 @@ export default function ComparisonPanel() {
             {slotB ? (
               <PropertyColumn
                 item={slotB}
-                label="B"
+                slot="B"
                 onChangeList={() => setActivePickerSlot("B")}
                 onChangeMap={() => handlePickFromMap("B")}
                 onRemove={() => clearSlot("B")}
               />
             ) : (
               <EmptySlotCard
-                label="B"
+                slot="B"
                 onPickFromMap={() => handlePickFromMap("B")}
                 onPickFromList={() => setActivePickerSlot("B")}
               />
