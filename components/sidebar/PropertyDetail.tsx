@@ -3,8 +3,6 @@
 import { useEffect, useRef } from "react";
 import type { PropertyUnit } from "@/types/property";
 import { formatJalanKaki } from "@/helper/format-jalan-kaki";
-import CompareToggleButton from "@/components/comparison/CompareToggleButton";
-import type { CompareItem } from "@/hooks/comparison/useComparison.types";
 
 /**
  * Format nomor WhatsApp dari DB ke URL wa.me.
@@ -73,8 +71,6 @@ export default function PropertyDetail({ property, stationId, stationName, onBac
   const tersewa = jenis.includes("tersewa");
   // null kalau rute belum dihitung (etl/hitung_rute.py) — baris jarak disembunyikan saja
   const jalanKaki = formatJalanKaki(property.jarak_jalan_m, property.waktu_jalan_s);
-
-  const compareItem: CompareItem = { unit: property, stationId, stationName };
 
   return (
     <div className="motion-rise-in flex flex-col gap-[var(--space-lg)]">
@@ -165,10 +161,7 @@ export default function PropertyDetail({ property, stationId, stationName, onBac
           </div>
         )}
 
-        {/* 1-Click Compare Action in Detail */}
-        <div className="pt-1">
-          <CompareToggleButton item={compareItem} />
-        </div>
+
       </div>
 
       <div className="flex flex-col gap-[var(--space-md)]">

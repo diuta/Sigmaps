@@ -24,6 +24,8 @@ import type { PropertyUnit } from "@/types/property";
 import { useProperties } from "@/hooks/property/useProperties";
 import { formatJalanKaki } from "@/helper/format-jalan-kaki";
 import { matchesPropertyFilter } from "@/lib/property/filter";
+import { useComparison } from "@/hooks/comparison/useComparison";
+import type { CompareItem } from "@/hooks/comparison/useComparison.types";
 
 function renderPopupHTML(prop: PropertyUnit): string {
   const photoSrc =
@@ -103,6 +105,7 @@ export default function PropertyLayer() {
   const { properties } = useProperties("all");
   const { selectedProperty, setSelectedProperty, setPreviewProperty } = useSelectedProperty();
   const { propertyTypes, transactionTypes, hasPhotoOnly } = usePropertyFilter();
+  const { isPanelOpen, assignToActiveSlot, openPanel } = useComparison();
 
   // Predikatnya di lib/property/filter.ts — sama persis dengan PropertyList & StationSearchBar.
   const filteredProperties = useMemo(
@@ -118,7 +121,7 @@ export default function PropertyLayer() {
   // Map property id → its Popup instance for programmatic open from sidebar
   const popupMapRef = useRef<Map<string, { popup: maplibregl.Popup; prop: PropertyUnit }>>(new Map());
 
-  function handleSelectProperty(prop: PropertyUnit) {
+  function resolveStationForProp(prop: PropertyUnit) {
     if (prop.station_id && (!selectedStation || selectedStation.area_id !== prop.station_id)) {
       const targetStation = stations?.features.find(
         (f) => f.properties.station_id === prop.station_id
@@ -131,8 +134,32 @@ export default function PropertyLayer() {
           lat: targetStation.geometry.coordinates[1],
           is_rankable: targetStation.properties.is_rankable !== false,
         });
+        return {
+          stationId: targetStation.properties.station_id as string,
+          stationName: targetStation.properties.nama as string,
+        };
       }
     }
+    return selectedStation
+      ? { stationId: selectedStation.area_id, stationName: selectedStation.station_name }
+      : null;
+  }
+
+  function handleSelectProperty(prop: PropertyUnit) {
+    const stationInfo = resolveStationForProp(prop);
+
+    if (isPanelOpen && stationInfo) {
+      // Comparison mode: langsung assign ke active slot tanpa buka detail
+      const compareItem: CompareItem = {
+        unit: { ...prop },
+        stationId: stationInfo.stationId,
+        stationName: stationInfo.stationName,
+      };
+      assignToActiveSlot(compareItem);
+      // Jangan set selectedProperty agar tidak membuka detail view
+      return;
+    }
+
     setSelectedProperty({ ...prop });
   }
 
@@ -153,8 +180,8 @@ export default function PropertyLayer() {
     placed.forEach(({ prop, lng, lat }) => {
       const isCurrentStation = Boolean(selectedStation && prop.station_id === selectedStation.area_id);
       const el = document.createElement("div");
-      el.className = `property-marker-container select-none cursor-pointer transition-transform duration-200 ${
-        isCurrentStation ? "z-20 scale-100" : "z-10 opacity-80 hover:opacity-100 hover:scale-110"
+      el.className = `property-marker-container select-none cursor-pointer ${
+        isCurrentStation ? "z-20 opacity-100" : "z-10 opacity-75 hover:opacity-100"
       }`;
 
       const svgSrc = isCurrentStation
@@ -166,10 +193,10 @@ export default function PropertyLayer() {
           <img 
             src="${svgSrc}" 
             alt="${prop.kategori_properti}" 
-            class="${isCurrentStation ? "w-[22px] h-[27px]" : "w-[19px] h-[24px]"} object-contain transition-transform duration-200" 
+            class="${isCurrentStation ? "w-[22px] h-[27px]" : "w-[19px] h-[24px]"} object-contain pointer-events-auto" 
             draggable="false"
           />
-          <div class="absolute -top-6 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] font-semibold rounded-md shadow-md whitespace-nowrap border border-slate-700/60 backdrop-blur-sm z-30">
+          <div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] font-semibold rounded-md shadow-md whitespace-nowrap border border-slate-700/60 backdrop-blur-sm z-30">
             ${prop.kategori_properti} · ${prop.jenis_properti}
           </div>
         </div>
@@ -210,6 +237,15 @@ export default function PropertyLayer() {
 
       el.addEventListener("click", (e) => {
         e.stopPropagation();
+        // Mode perbandingan: klik pinpoint langsung assign ke slot aktif, tanpa popup
+        if (isPanelOpen) {
+          if (activePopupRef.current) {
+            activePopupRef.current.remove();
+            activePopupRef.current = null;
+          }
+          handleSelectProperty(prop);
+          return;
+        }
         if (activePopupRef.current === popup) {
           handleSelectProperty(prop);
           return;
@@ -241,7 +277,7 @@ export default function PropertyLayer() {
       markersRef.current = [];
       popupMapRef.current.clear();
     };
-  }, [map, selectedStation, filteredProperties, stations, setSelectedStation, setSelectedProperty, setPreviewProperty]);
+  }, [map, selectedStation, filteredProperties, stations, isPanelOpen, assignToActiveSlot, setSelectedStation, setSelectedProperty, setPreviewProperty]);
 
   // 2. React to selectedProperty (klik dari sidebar atau peta) → buka popup pin yang sesuai
   useEffect(() => {
