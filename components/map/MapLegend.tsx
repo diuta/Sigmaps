@@ -12,6 +12,7 @@
 
 import { useState } from "react";
 import { useSidebarOpen } from "@/hooks/sidebar/useSidebarOpen";
+import { useComparison } from "@/hooks/comparison/useComparison";
 
 // Simbol: stasiun aktif — pin biru dengan ikon kereta (vektor tajam persis marker peta)
 function StationActiveSymbol() {
@@ -105,10 +106,10 @@ interface LegendItem {
 }
 
 const LEGEND_ITEMS: LegendItem[] = [
-  { symbol: <StationActiveSymbol />, label: "Stasiun aktif", sub: "Stasiun yang dipilih" },
-  { symbol: <StationInactiveSymbol />, label: "Stasiun lainnya", sub: "Jaringan KRL Jabodetabek" },
-  { symbol: <PropertySymbol />, label: "Properti tersedia", sub: "Dalam zona jalan kaki" },
-  { symbol: <IsochroneSymbol />, label: "Zona jalan kaki 10 mnt", sub: "Dari stasiun aktif" },
+  { symbol: <StationActiveSymbol />, label: "Stasiun Teranalisis", sub: "Tercakup dalam evaluasi & ranking" },
+  { symbol: <StationInactiveSymbol />, label: "Jaringan Sekunder", sub: "Titik transit tanpa penilaian" },
+  { symbol: <PropertySymbol />, label: "Listing Properti", sub: "Tersedia di sekitar stasiun" },
+  { symbol: <IsochroneSymbol />, label: "Zona Jalan Kaki 10 Mnt", sub: "Jangkauan dari stasiun terpilih" },
 ];
 
 /** px of the toggle tab that sticks out when sidebar is closed */
@@ -122,18 +123,23 @@ const TRANSLATE_OPEN_PX = 380 - SIDEBAR_CLOSED_PX;
 
 export default function MapLegend() {
   const { sidebarOpen } = useSidebarOpen();
+  const { isPanelOpen, isPanelMinimized } = useComparison();
   const [collapsed, setCollapsed] = useState(false);
 
+  const isDockVisible = isPanelOpen && isPanelMinimized;
+
   const translateX = sidebarOpen ? TRANSLATE_OPEN_PX : 0;
+  // When comparison dock is active at the bottom, animate legend up by 68px to avoid collision
+  const translateY = isDockVisible ? -68 : 0;
 
   return (
     <div
-      className="absolute bottom-[52px] z-40 transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)]"
+      className="absolute bottom-[52px] z-40 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
       role="region"
       aria-label="Legenda peta"
       style={{
         left: BASE_LEFT_PX,
-        transform: `translateX(${translateX}px)`,
+        transform: `translate(${translateX}px, ${translateY}px)`,
       }}
     >
       <div
@@ -145,7 +151,7 @@ export default function MapLegend() {
           type="button"
           onClick={() => setCollapsed((v) => !v)}
           aria-expanded={!collapsed}
-          className={`flex w-full items-center justify-between gap-[var(--space-md)] px-[var(--space-md)] py-[var(--space-sm)] bg-[var(--color-surface-muted)] transition-colors duration-[var(--motion-fast)] hover:bg-[var(--color-border)] ${
+          className={`flex h-11 w-full items-center justify-between gap-[var(--space-md)] px-3.5 bg-[var(--color-surface-muted)] transition-colors duration-[var(--motion-fast)] hover:bg-[var(--color-border)] ${
             collapsed ? "" : "border-b border-[var(--color-border)]"
           }`}
         >

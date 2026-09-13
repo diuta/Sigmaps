@@ -88,7 +88,7 @@ export default function StationLayer() {
                 : ""
             }
             <span>${station.station_name}</span>
-            ${station.dataBelumCukup ? ' <span class="text-[9px] text-amber-300 font-normal">· Data belum cukup</span>' : ""}
+            ${station.dataBelumCukup ? ' <span class="text-[9px] text-slate-400 font-normal">· Luar cakupan</span>' : ""}
           </div>
 
           <div class="relative flex items-center justify-center">
