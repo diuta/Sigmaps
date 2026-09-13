@@ -10,7 +10,7 @@
 import { useComparison } from "@/hooks/comparison/useComparison";
 
 export default function CompareBar() {
-  const { slotA, slotB, openPanel, isPanelOpen } = useComparison();
+  const { slotA, slotB, openPanel, closePanel, isPanelOpen } = useComparison();
 
   const count = (slotA ? 1 : 0) + (slotB ? 1 : 0);
 
@@ -18,7 +18,7 @@ export default function CompareBar() {
     <section aria-label="Bandingkan properti" className="pt-1">
       <button
         type="button"
-        onClick={openPanel}
+        onClick={isPanelOpen ? closePanel : openPanel}
         className={`group flex h-11 w-full cursor-pointer items-center justify-between gap-2.5 rounded-[var(--radius-card)] border px-3 text-left transition-all shadow-xs ${
           isPanelOpen
             ? "border-[var(--color-brand)] bg-[var(--color-brand)] text-white shadow-md ring-2 ring-[var(--color-brand)]/30"
@@ -66,7 +66,7 @@ export default function CompareBar() {
               : "text-[var(--color-brand)]"
           }`}
         >
-          {isPanelOpen ? "Aktif ✓" : "Buka →"}
+          {isPanelOpen ? "Tutup ✕" : "Buka →"}
         </span>
       </button>
     </section>
