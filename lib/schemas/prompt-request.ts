@@ -1,40 +1,31 @@
 import { z } from 'zod'
 
-// Body yang dikirim client ke POST /api/prompt-request.
+// Nama field `teks` mengikuti context-mvp.md §2, bukan `text` atau `prompt`.
 export const PromptRequestSchema = z.object({
-  prompt: z.string().min(1, 'prompt tidak boleh kosong'),
+  teks: z.string().min(1, 'teks tidak boleh kosong'),
 })
 
-// Skema final MVP (context/context-final.md §7.2 titik #3, context/context-mvp.md §6.6).
-// Mengganti total skema v1 (`kategori_usaha`, `target_jam`, `segmen`, `skala`, `weights`) —
-// nama-nama itu sudah dilarang dipakai.
+// TIDAK ADA TIPE_3_VALUES hardcoded di sini, dan jangan ditambahkan. Daftar sah
+// selalu dari getTipe3Values() (view tipe3_values) — versi lama berkas ini memuat
+// empat nilai karangan berkapitalisasi judul yang tidak cocok dengan sensus.
 //
-// `tipe_3` dibangun DINAMIS dari `getTipe3Values()` (lib/tipe3.ts), bukan enum statis —
-// context-mvp.md §6.8b: "TIPE_3_VALUES wajib dihasilkan dari query
-// (select distinct tipe_3 from katalog_restoran order by tipe_3), bukan diketik manual".
-// Konsekuensinya skema ini tidak bisa jadi konstanta top-level lagi (nilai enum baru
-// diketahui setelah query Supabase selesai), jadi dibungkus fungsi `buildIntentSchema`.
-export function buildIntentSchema(tipe3Values: string[]) {
+// 'SEMUA' wajib ikut: penanda "jangan saring kategori", tidak ada di sensus.
+// Tanpa pengecualian ini jalur fallback ditolak validasinya sendiri.
+function tipe3Enum(tipe3Values: string[]) {
+  return z.enum([...tipe3Values, 'SEMUA'] as unknown as [string, ...string[]])
+}
+
+/** Bentuk mentah dari Gemini. `is_kuliner` dipakai untuk menolak, lalu dibuang. */
+export function buildGeminiRawSchema(tipe3Values: string[]) {
   return z.object({
-    tipe_3: z.enum([...tipe3Values, 'SEMUA'] as unknown as [string, ...string[]]),
+    is_kuliner: z.boolean(),
+    tipe_3: tipe3Enum(tipe3Values),
     harga_target: z.number().int().min(1000).max(1_000_000),
     harga_sumber: z.enum(['pengguna', 'perkiraan']),
     confidence: z.number().min(0).max(1),
   })
 }
 
-// Skema INTERNAL untuk parsing output mentah Gemini (lib/ai/parseIntent.ts) — superset dari
-// IntentSchema publik di atas, menambahkan `is_kuliner`. Field ini TIDAK masuk kontrak publik
-// (§6.6 cuma tipe_3/harga_target/harga_sumber/confidence, persis 4 field) — dipakai internal
-// supaya parseIntent bisa menolak usaha non-kuliner (context-mvp.md §6.8b: "'SEMUA' bukan
-// tempat pembuangan, usaha non-kuliner wajib ditolak 400") sebelum melepas hasil ke luar.
-export function buildGeminiRawSchema(tipe3Values: string[]) {
-  return buildIntentSchema(tipe3Values).extend({
-    is_kuliner: z.boolean(),
-  })
-}
-
-// Tipe manual, bukan z.infer — enum tipe_3 dinamis jadi hasil infer-nya cuma `string`.
 export type Intent = {
   tipe_3: string
   harga_target: number

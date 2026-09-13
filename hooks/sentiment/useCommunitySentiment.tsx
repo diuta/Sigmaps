@@ -3,61 +3,20 @@
 /**
  * hooks/sentiment/useCommunitySentiment.tsx
  * Ambil ringkasan Community Activity satu stasiun dari /api/community-sentiment.
- * Endpoint ini memanggil Gemini tiap request (belum ada cache — lihat
- * docs/api-community-sentiment.md), jadi jangan panggil hook ini kalau
+ * Server meng-cache hasilnya per station_id (lib/sentiment), dan klien meng-cache per URL
+ * (hooks/api/useApiJson), jadi memanggil ulang untuk stasiun yang sama itu murah; panggilan
+ * pertama tiap stasiun tetap 1–3 detik Gemini. Tetap jangan panggil hook ini kalau
  * station_id belum ada / belum jelas dibutuhkan.
  */
 
-import { useEffect, useState } from "react";
+import { useApiJson } from "@/hooks/api/useApiJson";
+import type { CommunitySentimentResponse } from "@/types/sentiment";
 import type { UseCommunitySentimentResult } from "./useCommunitySentiment.types";
 
 export function useCommunitySentiment(stationId: string | null): UseCommunitySentimentResult {
-  const [sentiment, setSentiment] = useState<UseCommunitySentimentResult["sentiment"]>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      if (!stationId) {
-        setSentiment(null);
-        setError(null);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const res = await fetch(`/api/community-sentiment?station_id=${encodeURIComponent(stationId)}`);
-        const json = await res.json();
-
-        if (cancelled) return;
-
-        if (!res.ok || "error" in json) {
-          setError(json.error ?? "Gagal mengambil ringkasan komunitas");
-          setSentiment(null);
-          return;
-        }
-
-        setSentiment(json.data);
-      } catch {
-        if (!cancelled) {
-          setError("Gagal mengambil ringkasan komunitas");
-          setSentiment(null);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [stationId]);
-
-  return { sentiment, loading, error };
+  const { data, loading, error } = useApiJson<CommunitySentimentResponse>(
+    stationId ? `/api/community-sentiment?station_id=${encodeURIComponent(stationId)}` : null,
+    "Gagal mengambil ringkasan komunitas",
+  );
+  return { sentiment: data, loading, error };
 }

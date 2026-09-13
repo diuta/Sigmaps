@@ -14,10 +14,15 @@
  */
 
 import React, { useEffect, useRef, useState, ReactNode } from "react";
+import MapLegend from "@/components/map/MapLegend";
+import MapNavigationControl from "@/components/map/MapNavigationControl";
+import MapBrandBadge from "@/components/map/MapBrandBadge";
+import StationSearchBar from "@/components/map/StationSearchBar";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapInstanceProvider } from "@/hooks/map/useMapInstance";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
 import { basemapStyleUrl, DEFAULT_BASEMAP_ID } from "@/lib/fixtures/layers";
 
 interface BaseMapProps {
@@ -32,6 +37,7 @@ export default function BaseMap({ children }: BaseMapProps) {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
 
   const { selectedStation } = useSelectedStation();
+  const { selectedProperty } = useSelectedProperty();
 
   // 1. Inisialisasi MapLibre GL + jaga canvas tetap sama besar dengan kontainernya.
   //
@@ -58,10 +64,15 @@ export default function BaseMap({ children }: BaseMapProps) {
       zoom: 13,
       pitch: 0,
       bearing: 0,
+      attributionControl: false,
     });
 
     const resizeObserver = new ResizeObserver(() => mapInstance.resize());
     resizeObserver.observe(mapContainerRef.current);
+
+    // Tambahkan scale control metrik (misal 500m / 1km) untuk verifikasi akurasi skala
+    const scaleControl = new maplibregl.ScaleControl({ maxWidth: 100, unit: "metric" });
+    mapInstance.addControl(scaleControl, "bottom-left");
 
     mapInstance.on("load", () => {
       setMap(mapInstance);
@@ -88,10 +99,36 @@ export default function BaseMap({ children }: BaseMapProps) {
     });
   }, [map, selectedStation]);
 
+  // 3. Unidirectional Reaction: Fly to selectedProperty (dari klik property card di sidebar)
+  // Zoom lebih dekat (16.5) supaya pin properti jelas terlihat.
+  useEffect(() => {
+    if (!map || !selectedProperty) return;
+
+    map.flyTo({
+      center: [selectedProperty.lng, selectedProperty.lat],
+      zoom: Math.max(map.getZoom(), 16.5),
+      speed: 1.2,
+      curve: 1.4,
+      essential: true,
+    });
+  }, [map, selectedProperty]);
+
   return (
     <div className="relative w-full h-full overflow-hidden">
-      <div ref={mapContainerRef} className="w-full h-full" />
-      {map && <MapInstanceProvider map={map}>{children}</MapInstanceProvider>}
+      <div ref={mapContainerRef} className="w-full h-full relative z-0" />
+      {map && (
+        <MapInstanceProvider map={map}>
+          {children}
+          {/* Kontrol navigasi peta: Zoom In, Zoom Out, Recenter */}
+          <MapNavigationControl />
+        </MapInstanceProvider>
+      )}
+      {/* Floating Station Search Bar: bergeser sinkron dengan sidebar */}
+      <StationSearchBar />
+      {/* Legenda peta: posisinya mengikuti sidebar via useSidebarOpen */}
+      <MapLegend />
+      {/* Co-branding badge: SIGMAPS & Powered by MAPID */}
+      <MapBrandBadge />
     </div>
   );
 }

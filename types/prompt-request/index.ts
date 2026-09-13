@@ -6,13 +6,9 @@
 
 import type { Tipe3 } from "@/types/tipe3";
 
-// ---------------------------------------------------------------------------
-// Request
-// ---------------------------------------------------------------------------
-
-export interface PromptRequestBody {
-  prompt: string; // Business Brief mentah dari user input
-}
+// Bentuk request ({ teks: string }) didefinisikan sekali di lib/schemas/prompt-request.ts
+// (PromptRequestSchema). Jangan duplikasi di sini — versi lama berkas ini pernah salah
+// menyebut field `prompt`, padahal server memvalidasi `teks`.
 
 // ---------------------------------------------------------------------------
 // Response — cerminan IntentSchema Zod di server.

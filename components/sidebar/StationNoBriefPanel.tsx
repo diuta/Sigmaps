@@ -1,18 +1,43 @@
 "use client";
 
+import AiLoadingBlock from "@/components/sidebar/AiLoadingBlock";
+import AreaGapBlock, { DUMMY_KATEGORI_JARANG } from "@/components/sidebar/AreaGapBlock";
+import AreaInsightBlock from "@/components/sidebar/AreaInsightBlock";
 import PropertyList from "@/components/sidebar/PropertyList";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { useProperties } from "@/hooks/property/useProperties";
+import { useCommunitySentiment } from "@/hooks/sentiment/useCommunitySentiment";
+import type { PropertyUnit } from "@/types/property";
+
+interface Props {
+  onSelectProperty: (unit: PropertyUnit, stationId: string, stationName: string) => void;
+}
 
 /**
  * Keadaan "kawasan dipilih di peta, rencana belum diisi" — belum ada skor apa pun.
  *
- * Sebelumnya menampilkan "gambaran kawasan" hasil AI (kategori jarang, komposisi usaha)
- * lewat AiCategoryBlock/AreaCompositionList — dihapus di sini karena tidak ada endpoint
- * yang pernah menghasilkan data itu. docs/fe/ARCHITECTURE.md secara eksplisit menandai
- * "narasi AI area insight" di luar scope MVP, jadi bukan sesuatu yang perlu disambungkan.
+ * Ini gambaran kawasan yang bisa dibaca SEBELUM user menulis rencana usaha, jadi dia bisa
+ * memilih kawasan mana yang layak dinilai. Dua blok di atas daftar properti:
+ *   - "Kategori yang belum banyak di sini" — masih DUMMY, lihat AreaGapBlock.tsx.
+ *   - "Gambaran kawasan" — nyata, dari /api/community-sentiment (sama seperti di ScoredPanel).
+ * Blok "Isi kawasan sekarang" (jumlah pedagang per kategori) di mockup sengaja tidak dibuat:
+ * tidak ada view/tabel yang menyimpan komposisi pedagang per kawasan.
  */
-export default function StationNoBriefPanel() {
+export default function StationNoBriefPanel({ onSelectProperty }: Props) {
   const { selectedStation } = useSelectedStation();
+
+  // Sengaja TANPA tab bar: di sini cuma ada satu hal untuk ditampilkan, jadi tab tunggal
+  // hanya jadi derau. Bandingkan dengan ScoredPanel yang punya dua tampilan.
+  const { properties, loading } = useProperties(
+    selectedStation?.is_rankable ? selectedStation.area_id : null,
+  );
+
+  // Klik pertama sebuah stasiun = 1 panggilan Gemini; klik berikutnya dilayani cache server
+  // (lib/sentiment). Lihat docs/api-community-sentiment.md.
+  const { sentiment, loading: sentimentLoading } = useCommunitySentiment(
+    selectedStation?.is_rankable ? selectedStation.area_id : null,
+  );
+
   if (!selectedStation) return null;
 
   return (
@@ -28,7 +53,22 @@ export default function StationNoBriefPanel() {
       </div>
 
       {selectedStation.is_rankable ? (
-        <PropertyList stationId={selectedStation.area_id} />
+        <>
+          <AreaGapBlock kategori={DUMMY_KATEGORI_JARANG} />
+
+          {/* Gagal ambil ringkasan tidak boleh menghalangi daftar properti — diam saja. */}
+          {sentimentLoading ? (
+            <AiLoadingBlock judul="Gambaran kawasan" />
+          ) : (
+            sentiment?.ringkasan && <AreaInsightBlock paragraf={sentiment.ringkasan} />
+          )}
+
+          <PropertyList
+            properties={properties}
+            loading={loading}
+            onSelect={(unit) => onSelectProperty(unit, selectedStation.area_id, selectedStation.station_name)}
+          />
+        </>
       ) : (
         <section className="flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-[var(--space-md)]">
           <h2 className="t-heading-2 text-[var(--color-warning-tx)]">Data belum cukup</h2>

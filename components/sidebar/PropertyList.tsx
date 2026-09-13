@@ -1,60 +1,156 @@
 "use client";
 
-import { useProperties } from "@/hooks/property/useProperties";
+/**
+ * components/sidebar/PropertyList.tsx
+ *
+ * Daftar properti Properti Go di sekitar stasiun aktif.
+ * - Menampilkan grid kartu properti bersih & elegan
+ * - Klik kartu langsung membuka halaman detail properti
+ * - Filter multi-select kategori, transaksi, dan foto fisik
+ */
+
+import { useMemo } from "react";
+import type { PropertyUnit } from "@/types/property";
+import { usePropertyFilter } from "@/hooks/property/usePropertyFilter";
+import { matchesPropertyFilter } from "@/lib/property/filter";
+import { useComparison } from "@/hooks/comparison/useComparison";
+import { getSlotLabel } from "@/hooks/comparison/useComparison.types";
 
 interface Props {
-  stationId: string;
+  properties: PropertyUnit[];
+  loading: boolean;
+  onSelect: (property: PropertyUnit) => void;
 }
 
-/** Empat field per unit: kategori, jenis, alamat, foto. Tanpa luas, harga, kontak. */
-export default function PropertyList({ stationId }: Props) {
-  const { properties, loading } = useProperties(stationId);
+export default function PropertyList({
+  properties,
+  loading,
+  onSelect,
+}: Props) {
+  const { propertyTypes, transactionTypes, hasPhotoOnly, resetFilters } = usePropertyFilter();
+  const { isInCompare, getSlotFor } = useComparison();
+
+  const isFilterActive = propertyTypes.length > 0 || transactionTypes.length > 0 || hasPhotoOnly;
+
+  // Predikatnya di lib/property/filter.ts — sama persis dengan PropertyLayer & StationSearchBar.
+  const filteredProperties = useMemo(
+    () =>
+      properties.filter((unit) =>
+        matchesPropertyFilter(unit, { propertyTypes, transactionTypes, hasPhotoOnly }),
+      ),
+    [properties, propertyTypes, transactionTypes, hasPhotoOnly],
+  );
 
   if (loading) {
-    return <p className="t-body text-[var(--color-text-sub)]">Memuat properti...</p>;
+    return (
+      <div className="flex flex-col gap-[var(--space-md)]">
+        <div className="h-4 w-32 animate-pulse rounded bg-[var(--color-surface-muted)]" />
+        <ul className="grid grid-cols-2 gap-[var(--space-sm)]">
+          {[1, 2, 3, 4].map((i) => (
+            <li
+              key={i}
+              className="flex aspect-[3/4] animate-pulse flex-col rounded-[var(--radius-card)] bg-[var(--color-surface-muted)]"
+            />
+          ))}
+        </ul>
+      </div>
+    );
   }
 
   return (
-    <section className="flex flex-col gap-[var(--space-md)]">
-      <div className="flex flex-col gap-[var(--space-xs)]">
-        <h2 className="t-heading-2">Properti di kawasan</h2>
+    <section aria-label="Daftar properti" className="flex flex-col gap-[var(--space-md)]">
+      <div className="flex items-center justify-between">
         <p className="t-micro font-normal text-[var(--color-text-sub)]">
-          {properties.length} unit dari Properti Go, tidak ikut menentukan skor
+          {isFilterActive
+            ? `${filteredProperties.length} dari ${properties.length} unit (terfilter)`
+            : `${properties.length} unit dari Properti Go`}
         </p>
+        {isFilterActive && (
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="cursor-pointer text-[11px] font-semibold text-[var(--color-brand)] hover:underline"
+          >
+            Reset filter
+          </button>
+        )}
       </div>
 
-      {properties.length === 0 ? (
-        <p className="t-body text-[var(--color-text-sub)]">Belum ada properti tercatat di kawasan ini.</p>
-      ) : (
-        <ul className="grid max-h-[420px] grid-cols-2 gap-[var(--space-sm)] overflow-y-auto pr-[var(--space-xs)]">
-          {properties.map((unit) => (
-            <li
-              key={unit.id}
-              className="flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-[var(--space-sm)] shadow-[var(--shadow-card)] transition-all duration-[var(--motion-fast)] hover:-translate-y-[1px] hover:border-[var(--color-pin)] hover:shadow-[var(--shadow-float)]"
+      {filteredProperties.length === 0 ? (
+        <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-4 text-center">
+          <p className="t-body text-[var(--color-text-sub)]">
+            {isFilterActive
+              ? "Tidak ada unit yang sesuai dengan filter yang dipilih."
+              : "Belum ada properti tercatat di kawasan ini."}
+          </p>
+          {isFilterActive && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="mt-2 text-[12px] font-semibold text-[var(--color-brand)] hover:underline"
             >
-              {unit.foto_tampak_depan ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={unit.foto_tampak_depan}
-                  alt=""
-                  className="aspect-square w-full rounded-[var(--radius-card)] object-cover"
-                />
-              ) : (
-                <div
-                  aria-hidden
-                  className="flex aspect-square w-full items-center justify-center rounded-[var(--radius-card)] bg-[var(--color-pin-surface)] text-[28px] font-bold leading-none text-[var(--color-pin-hover)]"
-                >
-                  {unit.kategori_properti.charAt(0)}
-                </div>
-              )}
+              Tampilkan semua unit
+            </button>
+          )}
+        </div>
+      ) : (
+        /*
+          Grid 2 kolom. Kartu bersih: klik langsung membuka detail properti.
+        */
+        <ul className="grid grid-cols-2 gap-[var(--space-sm)]">
+          {filteredProperties.map((unit) => {
+            const inCompare = isInCompare(unit.id);
+            const occupiedSlot = getSlotFor(unit.id);
 
-              <div className="flex flex-col gap-[var(--space-xs)]">
-                <span className="t-heading-2">{unit.kategori_properti}</span>
-                <span className="t-micro text-[var(--color-pin-hover)]">{unit.jenis_properti}</span>
-                <span className="t-body text-[var(--color-text-sub)]">{unit.alamat}</span>
-              </div>
-            </li>
-          ))}
+            return (
+              <li key={unit.id}>
+                <button
+                  type="button"
+                  id={`unit-${unit.id}`}
+                  onClick={() => onSelect(unit)}
+                  aria-label={`${unit.kategori_properti} di ${unit.alamat}`}
+                  className={`group flex w-full flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border bg-[var(--color-surface)] p-[var(--space-sm)] text-left shadow-[var(--shadow-card)] transition-all duration-[var(--motion-fast)] hover:-translate-y-[1px] hover:shadow-[var(--shadow-float)] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] ${
+                    inCompare
+                      ? "border-[var(--color-brand)] ring-1 ring-[var(--color-brand)]/40"
+                      : "border-[var(--color-border)] hover:border-[var(--color-brand)]"
+                  }`}
+                >
+                  {/* Photo / placeholder */}
+                  {unit.foto_tampak_depan ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={unit.foto_tampak_depan}
+                      alt=""
+                      className="aspect-square w-full rounded-[var(--radius-card)] object-cover"
+                    />
+                  ) : (
+                    <div
+                      aria-hidden
+                      className="flex aspect-square w-full items-center justify-center rounded-[var(--radius-card)] bg-[var(--color-pin-surface)] text-[28px] font-bold leading-none text-[var(--color-pin-hover)]"
+                    >
+                      {unit.kategori_properti.charAt(0)}
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-[var(--space-xs)]">
+                    <div className="flex items-start justify-between gap-[2px]">
+                      <span className="t-heading-2 flex-1 group-hover:text-[var(--color-brand)] transition-colors">
+                        {unit.kategori_properti}
+                      </span>
+                      {/* In-compare indicator badge on card */}
+                      {inCompare && (
+                        <span className="t-micro whitespace-nowrap rounded-full bg-[var(--color-brand)] px-[6px] py-[2px] text-white font-bold text-[9px]">
+                          {getSlotLabel(occupiedSlot)}
+                        </span>
+                      )}
+                    </div>
+                    <span className="t-micro text-[var(--color-pin-hover)]">{unit.jenis_properti}</span>
+                    <span className="t-body text-[var(--color-text-sub)] line-clamp-2">{unit.alamat}</span>
+                  </div>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

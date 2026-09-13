@@ -1,43 +1,29 @@
 "use client";
 
 /**
- * components/map/layers/IsochroneLayer.tsx
- * ZONA CACA — 10-Minute Walking Isochrone Contour Layer
+ * Poligon isokron 10 menit di sekitar stasiun aktif. Gaya: dashed #1E40AF 2.4px,
+ * fill 0.12 (ARCHITECTURE.md §9).
  *
- * Sesuai spesifikasi visual & ARCHITECTURE.md §9:
- * - Border: Dashed line #1E40AF (Cobalt Metro) dengan tebal ~2.4px.
- * - Fill: rgba(30, 64, 175, 0.12).
- * - Inner Core: Konsentris halus di sekitar stasiun.
- * - Muncul dan mengikuti stasiun yang sedang aktif (`selectedStation`).
- *
- * 🔌 MAPID INJECTION READY:
- * Komponen ini dapat menerima prop `customGeoJSON` (output resmi MAPID Isochrone Tool).
- * Jika tidak ada prop, komponen otomatis menggunakan simulator parametrik dari IsochroneDevTool.
+ * Sumbernya /api/stations -> properties.isokron: keluaran MAPID Isochrone Tool apa
+ * adanya (foot, 600 detik). Generator lingkaran sintetis yang dulu dipakai sudah
+ * dihapus — bentuknya bukan kawasan yang dipakai menghitung skor.
  */
 
 import { useEffect } from "react";
 import { useMapInstance } from "@/hooks/map/useMapInstance";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
-import { useIsochroneConfig } from "@/hooks/isochrone/useIsochroneConfig";
-import { generateIsochroneGeoJSON } from "@/lib/map/isochrone-generator";
+import { useStations } from "@/hooks/station/useStations";
 import type { FeatureCollection, Polygon } from "geojson";
 
-interface IsochroneLayerProps {
-  /**
-   * 🔌 Injection Seam untuk GeoJSON resmi dari MAPID Isochrone Tool (Jalur 2).
-   * Ketika tim GIS sudah memberikan file GeoJSON isokron, cukup pass ke prop ini.
-   */
-  customGeoJSON?: FeatureCollection<Polygon>;
-}
+const KOSONG: FeatureCollection<Polygon> = { type: "FeatureCollection", features: [] };
 
-export default function IsochroneLayer({ customGeoJSON }: IsochroneLayerProps) {
+export default function IsochroneLayer() {
   const { map } = useMapInstance();
   const { selectedStation } = useSelectedStation();
-  const { options, setCalculatedAreaKm2 } = useIsochroneConfig();
+  const { stations } = useStations();
 
   const SOURCE_ID = "isochrone-source";
   const FILL_LAYER_ID = "isochrone-fill";
-  const INNER_FILL_ID = "isochrone-inner-fill";
   const OUTLINE_LAYER_ID = "isochrone-outline";
 
   useEffect(() => {
@@ -47,91 +33,73 @@ export default function IsochroneLayer({ customGeoJSON }: IsochroneLayerProps) {
     if (!map.getSource(SOURCE_ID)) {
       map.addSource(SOURCE_ID, {
         type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: [],
-        },
+        data: { type: "FeatureCollection", features: [] },
       });
 
-      // 1. Outer Isochrone Fill (Kompatibel dengan poligon MAPID standar maupun generator)
+      // 1. Fill
       map.addLayer({
         id: FILL_LAYER_ID,
         type: "fill",
         source: SOURCE_ID,
-        filter: [
-          "any",
-          ["==", ["get", "type"], "outer-isochrone"],
-          ["!", ["has", "type"]], // Jika GeoJSON MAPID tidak punya properti 'type'
-        ],
         paint: {
           "fill-color": "#1E40AF",
-          "fill-opacity": 0.12, // Sesuai spek: rgba(30, 64, 175, 0.12)
+          "fill-opacity": 0.12,
         },
       });
 
-      // 2. Inner Core Fill (Hanya aktif jika data menyediakan feature inner-core)
-      map.addLayer({
-        id: INNER_FILL_ID,
-        type: "fill",
-        source: SOURCE_ID,
-        filter: ["==", ["get", "type"], "inner-core"],
-        paint: {
-          "fill-color": "#1E40AF",
-          "fill-opacity": 0.08,
-        },
-      });
-
-      // 3. Dashed Outline (Border 2.4px dashed #1E40AF)
+      // 2. Dashed Outline
       map.addLayer({
         id: OUTLINE_LAYER_ID,
         type: "line",
         source: SOURCE_ID,
-        filter: [
-          "any",
-          ["==", ["get", "type"], "outer-isochrone"],
-          ["!", ["has", "type"]], // Tetap memberi dashed border pada poligon MAPID
-        ],
         paint: {
           "line-color": "#1E40AF",
-          "line-width": 2.4, // Sesuai spek: border: 2.4px dashed #1E40AF
-          "line-dasharray": [3, 2], // Dashed pattern Figma
+          "line-width": 2.4,
+          "line-dasharray": [3, 2],
           "line-opacity": 0.9,
         },
       });
     }
 
-    // Update GeoJSON ketika selectedStation, customGeoJSON, atau parameter dev berubah
     const source = map.getSource(SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
-    if (source) {
-      if (customGeoJSON) {
-        // ✅ FASE REAL MAPID: Gunakan GeoJSON resmi dari MAPID Isochrone Tool
-        source.setData(customGeoJSON);
-      } else if (selectedStation) {
-        // 🟡 FASE DUMMY / DEV: Gunakan generator parametrik
-        const { geojson, areaKm2 } = generateIsochroneGeoJSON(
-          selectedStation.lng,
-          selectedStation.lat,
-          options
-        );
-        source.setData(geojson);
-        setCalculatedAreaKm2(areaKm2);
-      } else {
-        // Kosongkan poligon jika tidak ada stasiun aktif
-        source.setData({
-          type: "FeatureCollection",
-          features: [],
-        });
-        setCalculatedAreaKm2(0);
-      }
+    if (!source) return;
+
+    // Cari poligon stasiun yang sedang aktif. StationLocation.area_id sama dengan
+    // properties.station_id (keduanya 'R-1'…'R-43'), jadi cocokkan langsung.
+    const fitur = selectedStation
+      ? stations?.features.find(
+          (f) => f.properties.station_id === selectedStation.area_id
+        )
+      : undefined;
+
+    const isokron = fitur?.properties.isokron;
+
+    if (!isokron) {
+      // Normal: belum ada stasiun dipilih, data belum dimuat, atau isokron NULL.
+      source.setData(KOSONG);
+      return;
     }
-  }, [map, selectedStation, customGeoJSON, options, setCalculatedAreaKm2]);
+
+    source.setData({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: isokron,
+          properties: {
+            station_id: fitur.properties.station_id,
+            is_rankable: fitur.properties.is_rankable,
+          },
+        },
+      ],
+    });
+  }, [map, selectedStation, stations]);
 
   // Cleanup layer & source saat unmount
   useEffect(() => {
     return () => {
       if (!map) return;
       if (map.getLayer(OUTLINE_LAYER_ID)) map.removeLayer(OUTLINE_LAYER_ID);
-      if (map.getLayer(INNER_FILL_ID)) map.removeLayer(INNER_FILL_ID);
       if (map.getLayer(FILL_LAYER_ID)) map.removeLayer(FILL_LAYER_ID);
       if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
     };
