@@ -2,7 +2,7 @@ name: ETL Pipeline
 
 on:
   schedule:
-    - cron: "0 20 * * *"
+    - cron: "0 2 * * 1,4"
   workflow_dispatch:
 
 permissions:
