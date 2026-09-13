@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
-import { buildScoreRequestSchema } from '@/lib/schemas/score'
+import { buildScoreRequestSchema, isRankedArea, type ScoreResponse } from '@/lib/schemas/score'
 import { scoreAreas, type ScoredAreaRow } from '@/lib/scoring'
 import { getTipe3Values } from '@/lib/tipe3'
 
@@ -45,12 +45,13 @@ export async function POST(request: Request) {
 
   // Hanya Top 5 yang keluar dari server. Pembatasan di frontend bukan batas keamanan.
   // Penanda "data belum cukup" untuk peta diambil dari /api/stations.
-  const top5 = hasil.areas.filter((a) => a.is_rankable).slice(0, 5)
+  // isRankedArea juga menyaring baris is_rankable yang skornya null (bug pipeline, sudah
+  // dilaporkan console.error oleh scoreAreas) — baris itu tidak boleh diperingkat.
+  const top5 = hasil.areas.filter(isRankedArea).slice(0, 5)
 
-  return NextResponse.json({
-    data: {
-      areas: top5,
-      catatan: { harga_sumber: harga_sumber ?? 'pengguna', ...hasil.catatan },
-    },
-  })
+  const respons: ScoreResponse = {
+    areas: top5,
+    catatan: { harga_sumber: harga_sumber ?? 'pengguna', ...hasil.catatan },
+  }
+  return NextResponse.json({ data: respons })
 }

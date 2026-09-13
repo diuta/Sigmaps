@@ -17,12 +17,11 @@ const { text } = await generateText({
 // lalu JSON.parse(text) + validasi Zod di pemanggil
 ```
 
-- `geminiFlashLite` — task terstruktur/ringan; dipakai `lib/ai/parseIntent.ts` (titik AI #3).
-- `geminiFlash` — task yang butuh narasi lebih panjang; dipakai `lib/ai/summarizeSentiment.ts`
-  (titik AI #5).
-
-Nama modelnya diambil dari env var dengan default `gemini-3.5-flash-lite` /
-`gemini-3.5-flash`.
+- `geminiFlashLite` (`gemini-3.5-flash-lite`) — satu-satunya model yang diekspor; dipakai
+  `lib/ai/parseIntent.ts` (titik AI #3) **dan** `lib/ai/summarizeSentiment.ts` (titik AI #5).
+  Ekspor `geminiFlash` lama dihapus: kuota `gemini-3.5-flash` habis (429 di semua stasiun,
+  7 Sep 2026) dan tidak ada lagi pemakainya. Tambahkan kembali di `lib/ai/gemini.ts` kalau
+  memang ada task yang membutuhkannya.
 
 ## Dependency/prasyarat
 

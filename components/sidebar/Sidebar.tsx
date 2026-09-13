@@ -86,10 +86,11 @@ export default function Sidebar() {
       }`}
     >
       {/*
-        Isi panel tetap ter-mount saat tertutup (digeser keluar layar, bukan `hidden`/unmount):
-        melepasnya membuat useCommunitySentiment memanggil Gemini lagi tiap kali sidebar
-        dibuka, padahal /api/community-sentiment belum punya cache dan kuotanya dipakai
-        bersama seluruh pengunjung (docs/api-community-sentiment.md).
+        Isi panel tetap ter-mount saat tertutup (digeser keluar layar, bukan `hidden`/unmount)
+        supaya state di dalamnya (draft, tab, kawasan aktif) tidak hilang tiap kali panel
+        dibuka-tutup. Dulu ini juga satu-satunya penahan agar useCommunitySentiment tidak
+        memanggil Gemini ulang; sekarang /api/community-sentiment sudah di-cache per stasiun
+        di server (lib/sentiment), jadi alasan itu tidak lagi menentukan bentuk komponen ini.
       */}
       <div className="flex w-[min(var(--sidebar-width),100vw)] flex-col gap-[var(--space-xl)] overflow-y-auto border-r border-[var(--color-border)] bg-[var(--color-surface-muted)] p-[var(--space-lg)]">
         <BriefSection

@@ -10,7 +10,8 @@
  * - Karakteristik: Ada foto fisik
  */
 
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
+import { useApiJson } from "@/hooks/api/useApiJson";
 
 export interface PropertySummaryItem {
   id: string;
@@ -32,34 +33,14 @@ export interface StationPropertyMeta {
   units: PropertySummaryItem[];
 }
 
+const KOSONG: PropertySummaryItem[] = [];
+
 export function useAllPropertiesSummary() {
-  const [data, setData] = useState<PropertySummaryItem[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/properties?summary=true");
-        if (!res.ok) return;
-        const json = await res.json();
-        if (!cancelled && Array.isArray(json.data)) {
-          setData(json.data);
-        }
-      } catch (err) {
-        console.error("Gagal memuat ringkasan properti:", err);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data: raw, loading } = useApiJson<PropertySummaryItem[]>(
+    "/api/properties?summary=true",
+    "Gagal memuat ringkasan properti",
+  );
+  const data = Array.isArray(raw) ? raw : KOSONG;
 
   const stationPropertyMap = useMemo(() => {
     const map = new Map<string, StationPropertyMeta>();

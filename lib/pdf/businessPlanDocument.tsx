@@ -14,18 +14,13 @@
 import { Document, Page, Text, View, StyleSheet, pdf } from "@react-pdf/renderer";
 import {
   COMPONENT_LABELS,
+  COMPONENT_ORDER,
   explainComponent,
   explainNeutralPull,
 } from "@/lib/scoring/explanations";
-import type { AreaScore, ScoreComponentKey } from "@/types/scoring";
+import type { AreaScore } from "@/types/scoring";
 import type { IntentOutput } from "@/types/prompt-request";
 import type { PropertyUnit } from "@/types/property";
-
-const COMPONENT_ORDER: readonly { key: ScoreComponentKey; weight: number }[] = [
-  { key: "demand", weight: 0.25 },
-  { key: "competitive_headroom", weight: 0.5 },
-  { key: "segment_match", weight: 0.25 },
-];
 
 /** Properti dipotong supaya PDF tidak membengkak untuk kawasan dengan ratusan unit. */
 const MAX_PROPERTIES_LISTED = 30;
@@ -320,11 +315,11 @@ export function BusinessPlanDocument({
             </Text>
           </View>
 
-          {COMPONENT_ORDER.map(({ key, weight }) => (
+          {COMPONENT_ORDER.map(({ key, bobot }) => (
             <View key={key} style={styles.componentBlock}>
               <View style={styles.componentHeader}>
                 <Text style={styles.componentLabel}>
-                  {COMPONENT_LABELS[key]} (bobot {Math.round(weight * 100)}%)
+                  {COMPONENT_LABELS[key]} (bobot {Math.round(activeArea.bobot[bobot] * 100)}%)
                 </Text>
                 <Text style={styles.componentValue}>{formatKomponen(activeArea.komponen[key])}</Text>
               </View>

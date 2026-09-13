@@ -12,14 +12,13 @@
 import { useMemo } from "react";
 import type { PropertyUnit } from "@/types/property";
 import { usePropertyFilter } from "@/hooks/property/usePropertyFilter";
+import { matchesPropertyFilter } from "@/lib/property/filter";
 import { useComparison } from "@/hooks/comparison/useComparison";
 import { getSlotLabel } from "@/hooks/comparison/useComparison.types";
 
 interface Props {
   properties: PropertyUnit[];
   loading: boolean;
-  stationId?: string;
-  stationName?: string;
   onSelect: (property: PropertyUnit) => void;
 }
 
@@ -33,39 +32,14 @@ export default function PropertyList({
 
   const isFilterActive = propertyTypes.length > 0 || transactionTypes.length > 0 || hasPhotoOnly;
 
-  const filteredProperties = useMemo(() => {
-    return properties.filter((unit) => {
-      if (propertyTypes.length > 0) {
-        const cat = (unit.kategori_properti || "").toLowerCase();
-        const matchesAny = propertyTypes.some((t) => {
-          if (t === "rumah") return cat.includes("rumah");
-          if (t === "kos") return cat.includes("kos") || cat.includes("kost");
-          if (t === "ruko") return cat.includes("ruko");
-          if (t === "kantor") return cat.includes("kantor") || cat.includes("office");
-          if (t === "tanah") return cat.includes("tanah") || cat.includes("lahan");
-          if (t === "retail") return cat.includes("retail") || cat.includes("ritel") || cat.includes("toko");
-          return cat.includes(t.toLowerCase());
-        });
-        if (!matchesAny) return false;
-      }
-
-      if (transactionTypes.length > 0) {
-        const jenis = (unit.jenis_properti || "").toLowerCase();
-        const matchesJenis = transactionTypes.some((t) => {
-          if (t === "sewa") return jenis.includes("sewa");
-          if (t === "jual") return jenis.includes("jual");
-          return false;
-        });
-        if (!matchesJenis) return false;
-      }
-
-      if (hasPhotoOnly && !unit.foto_tampak_depan && !unit.foto_spanduk) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [properties, propertyTypes, transactionTypes, hasPhotoOnly]);
+  // Predikatnya di lib/property/filter.ts — sama persis dengan PropertyLayer & StationSearchBar.
+  const filteredProperties = useMemo(
+    () =>
+      properties.filter((unit) =>
+        matchesPropertyFilter(unit, { propertyTypes, transactionTypes, hasPhotoOnly }),
+      ),
+    [properties, propertyTypes, transactionTypes, hasPhotoOnly],
+  );
 
   if (loading) {
     return (

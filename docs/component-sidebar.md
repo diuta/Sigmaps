@@ -104,10 +104,11 @@ kawasan, `RankStrip`, dan tab bar ikut hilang, sehingga tombol "Kembali" cuma pu
 Bagian rencana usaha di atasnya tetap.
 
 `OutputSection` yang memegang unit terpilih (`detail`); `ScoredPanel` dan
-`StationNoBriefPanel` hanya meneruskan `onSelectProperty(unit, stationName)` ke
-`PropertyList` dan tidak tahu ada halaman detail sama sekali. Nama kawasan ikut dioper karena
-breadcrumb detail membutuhkannya, dan `selectedStation` belum tentu terisi (kawasan #1 tampil
-tanpa pengguna pernah mengkliknya).
+`StationNoBriefPanel` hanya meneruskan `onSelectProperty(unit, stationId, stationName)` ke
+`PropertyList` dan tidak tahu ada halaman detail sama sekali. Id dan nama kawasan ikut dioper
+karena `selectedStation` belum tentu terisi (kawasan #1 tampil tanpa pengguna pernah
+mengkliknya): nama untuk breadcrumb, id untuk `CompareItem` (fitur bandingkan memanggil
+`/api/community-sentiment?station_id=` dengan id ini — jangan diturunkan dari nama).
 
 Isi halaman detail persis apa yang ada di Properti Go: kategori (judul), badge Siap
 Sewa/Siap Jual, alamat, dan dua foto (`foto_tampak_depan`, `foto_spanduk`) — plus satu kalimat
@@ -165,8 +166,8 @@ itulah user memutuskan kawasan mana yang layak ditulis rencananya — kalau tida
 pun, keputusan itu diambil tanpa dasar.
 
 - `AreaInsightBlock` di sini memakai hook yang sama dengan `ScoredPanel`
-  (`useCommunitySentiment(area_id)`), jadi **tidak ada endpoint baru**. Konsekuensinya: tiap klik
-  pin stasiun memicu satu panggilan Gemini, karena endpoint itu belum punya cache. Lihat
+  (`useCommunitySentiment(area_id)`), jadi **tidak ada endpoint baru**. Klik pertama sebuah pin
+  memicu satu panggilan Gemini; klik berikutnya dilayani cache server per stasiun. Lihat
   [api-community-sentiment.md](../context/api-community-sentiment.md).
 - Blok hanya dirender kalau `ringkasan` tidak kosong; saat `error`, panel **tidak menampilkan apa
   pun** — kegagalan AI tidak boleh menghalangi daftar properti.
@@ -296,10 +297,10 @@ mesin dan mana kalimat yang ditulis model.
   `OutputSection` menutupnya — daftar di baliknya sudah berganti kawasan, jadi "Kembali" akan
   mendarat di hasil yang lain.
 - **Isi panel tetap ter-mount saat sidebar ditutup** (digeser keluar layar dengan `transform`,
-  bukan `hidden` maupun unmount). Melepas `OutputSection` membuat `useCommunitySentiment`
-  memanggil Gemini lagi setiap sidebar dibuka; `/api/community-sentiment` belum punya cache dan
-  kuotanya dipakai bersama seluruh pengunjung. Jangan "merapikan" jadi `{open && <OutputSection />}`,
-  dan jangan pakai `hidden` — `display:none` mematikan animasi transform-nya.
+  bukan `hidden` maupun unmount), supaya draft/tab/kawasan aktif tidak hilang tiap buka-tutup.
+  (Dulu ini juga penahan panggilan Gemini ulang; sekarang `/api/community-sentiment` di-cache per
+  stasiun di server.) Jangan "merapikan" jadi `{open && <OutputSection />}`, dan jangan pakai
+  `hidden` — `display:none` mematikan animasi transform-nya.
 - **Daftar "data belum cukup" dibaca dari `/api/stations`, bukan dari selisih terhadap
   `/api/score`.** `UnrankableNotice` diisi dengan memfilter `feature.properties.is_rankable === false`
   milik `useStations()`. Perbandingan `=== false` disengaja: `null` berarti pipeline skoring

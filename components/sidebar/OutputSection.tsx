@@ -37,17 +37,18 @@ export default function OutputSection({ brief, loading, scored, stale, onEditBri
 
   // Unit yang sedang dibuka halaman detailnya. Dipegang di sini karena halaman detail
   // mengambil alih SELURUH panel hasil — panel di baliknya tidak perlu tahu apa-apa.
-  const [detail, setDetail] = useState<{ unit: PropertyUnit; stationName: string } | null>(null);
+  const [detail, setDetail] = useState<{ unit: PropertyUnit; stationId: string; stationName: string } | null>(null);
 
   // Sinkronisasi saat properti dipilih dari luar (misal dari kartu popup di peta)
   useEffect(() => {
     if (selectedProperty) {
       setDetail({
         unit: selectedProperty,
+        stationId: selectedStation?.area_id ?? "",
         stationName: selectedStation?.station_name ?? "",
       });
     }
-  }, [selectedProperty, selectedStation?.station_name]);
+  }, [selectedProperty, selectedStation?.area_id, selectedStation?.station_name]);
 
   // Reset detail & selectedProperty jika stasiun yang dipilih berganti
   const [prevStationId, setPrevStationId] = useState(selectedStation?.area_id);
@@ -104,6 +105,7 @@ export default function OutputSection({ brief, loading, scored, stale, onEditBri
       {detail && (
         <PropertyDetail
           property={detail.unit}
+          stationId={detail.stationId}
           stationName={detail.stationName}
           onBack={closeDetail}
         />
@@ -112,9 +114,9 @@ export default function OutputSection({ brief, loading, scored, stale, onEditBri
       {/*
         Panel di balik halaman detail tetap TER-MOUNT, cuma disembunyikan. Melepasnya akan
         mereset pilihan tab di ScoredPanel (kembali dari detail harus mendarat lagi di tab
-        "Unit properti") dan membuat useCommunitySentiment memanggil Gemini sekali lagi —
-        endpoint itu belum punya cache dan kuotanya per project. Pola yang sama dipakai
-        Sidebar saat panelnya ditutup.
+        "Unit properti"). (Dulu ini juga mencegah panggilan Gemini ulang; sekarang
+        /api/community-sentiment di-cache per stasiun di server — lib/sentiment.) Pola yang
+        sama dipakai Sidebar saat panelnya ditutup.
       */}
       <div
         hidden={detail !== null}
@@ -132,17 +134,17 @@ export default function OutputSection({ brief, loading, scored, stale, onEditBri
             )}
             <ScoredPanel
               brief={brief ?? ""}
-              onSelectProperty={(unit, stationName) => {
+              onSelectProperty={(unit, stationId, stationName) => {
                 setSelectedProperty({ ...unit });
-                setDetail({ unit, stationName });
+                setDetail({ unit, stationId, stationName });
               }}
             />
           </>
         ) : (
           <StationNoBriefPanel
-            onSelectProperty={(unit, stationName) => {
+            onSelectProperty={(unit, stationId, stationName) => {
               setSelectedProperty({ ...unit });
-              setDetail({ unit, stationName });
+              setDetail({ unit, stationId, stationName });
             }}
           />
         )}

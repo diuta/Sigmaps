@@ -40,7 +40,8 @@ Respons sukses:
 Tidak ada kawasan `is_rankable` → **bukan galat**, tetap `200` dengan `areas: []`.
 
 `areas` **berisi maksimal 5 kawasan** — pemotongan Top 5 dilakukan di server
-(`route.ts`), bukan di frontend. Semuanya `is_rankable: true`.
+(`route.ts`), bukan di frontend. Semuanya `is_rankable: true` **dan** `skor`/`komponen`-nya
+tidak pernah `null` — dijamin `isRankedArea()` (`lib/schemas/score.ts`), lihat gotcha di bawah.
 
 Respons gagal:
 
@@ -52,7 +53,9 @@ Respons gagal:
 
 ## Dependency/prasyarat
 
-- [lib/schemas/score.ts](../lib/schemas/score.ts) — `buildScoreRequestSchema(tipe3Values)`.
+- [lib/schemas/score.ts](../lib/schemas/score.ts) — `buildScoreRequestSchema(tipe3Values)`, tipe
+  respons `ScoreResponse`/`RankedArea`, dan penjaga `isRankedArea()`. `types/scoring/index.ts`
+  (dipakai klien) hanya mengalias tipe dari sini — jangan definisikan ulang bentuknya di sana.
 - [lib/tipe3/index.ts](../context/lib-tipe3.md) — sumber `tipe_3` yang sah, dibaca dari Supabase.
 - [lib/scoring/index.ts](lib-scoring.md) — mesin WLC.
 - [lib/supabase/server.ts](../context/lib-supabase-server.md).
@@ -74,8 +77,11 @@ Respons gagal:
   `.eq('is_rankable', true)`** dan tanpa filter kategori — normalisasi min-max pada
   `competitive_headroom` butuh nilai kepadatan terkecil & terbesar di antara semua kawasan,
   termasuk yang tidak diperingkat; menyaringnya di query menggeser `lo`/`hi` dan mengubah
-  peringkat. Penyaringan `is_rankable` + pemotongan Top 5 terjadi **setelah** skoring, di
-  JavaScript (`hasil.areas.filter((a) => a.is_rankable).slice(0, 5)`).
+  peringkat. Penyaringan + pemotongan Top 5 terjadi **setelah** skoring, di JavaScript
+  (`hasil.areas.filter(isRankedArea).slice(0, 5)`). `isRankedArea` menolak baris `is_rankable`
+  yang `skor`-nya `null` (demand/price_median kosong = bug pipeline, sudah dilaporkan
+  `console.error` oleh `scoreAreas`) — baris seperti itu tidak boleh diperingkat, dan kalau
+  lolos ke klien `area.skor.toLocaleString()` di sidebar melempar galat.
 - **Response hanya berisi Top 5.** Jangan menyimpulkan apa pun dari ketiadaan sebuah kawasan
   di `areas` — kawasan peringkat 6 ke bawah tetap dinilai, cuma tidak dikirim. Penanda
   "data belum cukup" untuk peta dan sidebar dibaca dari flag `is_rankable` milik

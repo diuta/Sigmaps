@@ -10,7 +10,7 @@ import { useCommunitySentiment } from "@/hooks/sentiment/useCommunitySentiment";
 import type { PropertyUnit } from "@/types/property";
 
 interface Props {
-  onSelectProperty: (unit: PropertyUnit, stationName: string) => void;
+  onSelectProperty: (unit: PropertyUnit, stationId: string, stationName: string) => void;
 }
 
 /**
@@ -32,8 +32,8 @@ export default function StationNoBriefPanel({ onSelectProperty }: Props) {
     selectedStation?.is_rankable ? selectedStation.area_id : null,
   );
 
-  // Tiap klik stasiun = 1 panggilan Gemini (endpoint ini belum punya cache) — batasan
-  // yang diketahui, lihat docs/api-community-sentiment.md.
+  // Klik pertama sebuah stasiun = 1 panggilan Gemini; klik berikutnya dilayani cache server
+  // (lib/sentiment). Lihat docs/api-community-sentiment.md.
   const { sentiment, loading: sentimentLoading } = useCommunitySentiment(
     selectedStation?.is_rankable ? selectedStation.area_id : null,
   );
@@ -66,9 +66,7 @@ export default function StationNoBriefPanel({ onSelectProperty }: Props) {
           <PropertyList
             properties={properties}
             loading={loading}
-            stationId={selectedStation.area_id}
-            stationName={selectedStation.station_name}
-            onSelect={(unit) => onSelectProperty(unit, selectedStation.station_name)}
+            onSelect={(unit) => onSelectProperty(unit, selectedStation.area_id, selectedStation.station_name)}
           />
         </>
       ) : (

@@ -40,9 +40,7 @@ export interface ComparisonContextValue {
   isPanelOpen: boolean;
   /** Whether the comparison panel is collapsed into a compact bottom dock */
   isPanelMinimized: boolean;
-  setIsPanelMinimized: (minimized: boolean) => void;
   minimizePanel: () => void;
-  expandPanel: () => void;
   /** Add or replace a specific slot */
   setSlot: (slot: CompareSlot, item: CompareItem) => void;
   /** Clear a specific slot */
@@ -53,9 +51,7 @@ export interface ComparisonContextValue {
   openPanel: () => void;
   /** Close the comparison panel completely */
   closePanel: () => void;
-  /** Smart add */
-  addToCompare: (item: CompareItem) => "added-A" | "added-B" | "full";
-  /** Explicitly assigns item to activeTargetSlot */
+  /** Isi activeTargetSlot; mengembalikan slot yang diisi */
   assignToActiveSlot: (item: CompareItem) => CompareSlot;
   /** Check whether a unit is already in compare queue */
   isInCompare: (unitId: string) => boolean;

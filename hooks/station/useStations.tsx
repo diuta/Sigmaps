@@ -2,56 +2,23 @@
 
 /**
  * hooks/station/useStations.tsx
- * Ambil semua stasiun (lokasi + metadata) dari /api/stations, sekali saat mount.
+ * Ambil semua stasiun (lokasi + metadata) dari /api/stations.
  * Tidak membawa skor — skor datang dari /api/score dan digabung terpisah (lihat
  * StationLayer.tsx untuk penggabungannya).
+ *
+ * Dipanggil dari beberapa komponen sekaligus (StationLayer, IsochroneLayer, StationSearchBar,
+ * ScoredPanel); semuanya berbagi SATU request dan satu objek hasil lewat cache per URL di
+ * hooks/api/useApiJson — dulu tiap pemanggil menembak /api/stations sendiri.
  */
 
-import { useEffect, useState } from "react";
+import { useApiJson } from "@/hooks/api/useApiJson";
 import type { StationFeatureCollection } from "@/lib/station";
 import type { UseStationsResult } from "./useStations.types";
 
 export function useStations(): UseStationsResult {
-  const [stations, setStations] = useState<StationFeatureCollection | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const res = await fetch("/api/stations");
-        const json = await res.json();
-
-        if (cancelled) return;
-
-        if (!res.ok || "error" in json) {
-          setError(json.error ?? "Gagal mengambil data stasiun");
-          setStations(null);
-          return;
-        }
-
-        setStations(json.data as StationFeatureCollection);
-      } catch {
-        if (!cancelled) {
-          setError("Gagal mengambil data stasiun");
-          setStations(null);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { stations, loading, error };
+  const { data, loading, error } = useApiJson<StationFeatureCollection>(
+    "/api/stations",
+    "Gagal mengambil data stasiun",
+  );
+  return { stations: data, loading, error };
 }

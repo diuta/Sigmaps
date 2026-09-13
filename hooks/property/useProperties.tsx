@@ -6,9 +6,13 @@
  * /api/properties balas GeoJSON (geometry + properties terpisah) — di sini
  * diratakan jadi PropertyUnit[] (lat/lng jadi field biasa) supaya komponen
  * yang sudah ada (PropertyLayer, PropertyList) tidak perlu tahu bentuk GeoJSON.
+ *
+ * Dipanggil PropertyLayer dan panel sidebar untuk stasiun yang sama; keduanya berbagi satu
+ * request lewat cache per URL di hooks/api/useApiJson.
  */
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useApiJson } from "@/hooks/api/useApiJson";
 import type { PropertyUnit } from "@/types/property";
 import type { UsePropertiesResult } from "./useProperties.types";
 
@@ -17,60 +21,31 @@ interface PropertyFeature {
   properties: Omit<PropertyUnit, "lat" | "lng">;
 }
 
+interface PropertyFeatureCollection {
+  features: PropertyFeature[];
+}
+
+const KOSONG: PropertyUnit[] = [];
+
 export function useProperties(stationId: string | null): UsePropertiesResult {
-  const [properties, setProperties] = useState<PropertyUnit[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error } = useApiJson<PropertyFeatureCollection>(
+    stationId ? `/api/properties?station_id=${encodeURIComponent(stationId)}` : null,
+    "Gagal mengambil data properti",
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      if (!stationId) {
-        setProperties([]);
-        setError(null);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const res = await fetch(`/api/properties?station_id=${encodeURIComponent(stationId)}`);
-        const json = await res.json();
-
-        if (cancelled) return;
-
-        if (!res.ok || "error" in json) {
-          setError(json.error ?? "Gagal mengambil data properti");
-          setProperties([]);
-          return;
-        }
-
-        const features = json.data.features as PropertyFeature[];
-        setProperties(
-          features.map((feature) => ({
+  // Referensi array dijaga stabil per `data` — PropertyLayer memakainya sebagai dependency
+  // efek yang membangun ulang seluruh marker.
+  const properties = useMemo<PropertyUnit[]>(
+    () =>
+      data
+        ? data.features.map((feature) => ({
             ...feature.properties,
             lng: feature.geometry.coordinates[0],
             lat: feature.geometry.coordinates[1],
           }))
-        );
-      } catch {
-        if (!cancelled) {
-          setError("Gagal mengambil data properti");
-          setProperties([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [stationId]);
+        : KOSONG,
+    [data],
+  );
 
   return { properties, loading, error };
 }

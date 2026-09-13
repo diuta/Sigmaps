@@ -22,6 +22,7 @@ import { usePropertyFilter } from "@/hooks/property/usePropertyFilter";
 import type { PropertyUnit } from "@/types/property";
 import { useProperties } from "@/hooks/property/useProperties";
 import { formatJalanKaki } from "@/helper/format-jalan-kaki";
+import { matchesPropertyFilter } from "@/lib/property/filter";
 
 function renderPopupHTML(prop: PropertyUnit): string {
   const photoSrc =
@@ -101,37 +102,14 @@ export default function PropertyLayer() {
   const { selectedProperty, setSelectedProperty, setPreviewProperty } = useSelectedProperty();
   const { propertyTypes, transactionTypes, hasPhotoOnly } = usePropertyFilter();
 
-  const filteredProperties = useMemo(() => {
-    return properties.filter((prop) => {
-      // 1. Tipe properti (multi-select)
-      if (propertyTypes.length > 0) {
-        const cat = (prop.kategori_properti || "").toLowerCase();
-        const matchesAny = propertyTypes.some((t) => {
-          if (t === "rumah") return cat.includes("rumah");
-          if (t === "kos") return cat.includes("kos") || cat.includes("kost");
-          if (t === "ruko") return cat.includes("ruko");
-          if (t === "retail") return cat.includes("retail") || cat.includes("ritel") || cat.includes("toko");
-          return cat.includes(t.toLowerCase());
-        });
-        if (!matchesAny) return false;
-      }
-      // 2. Jenis transaksi (multi-select)
-      if (transactionTypes.length > 0) {
-        const jenis = (prop.jenis_properti || "").toLowerCase();
-        const matchesType = transactionTypes.some((t) => {
-          if (t === "sewa") return jenis.includes("sewa");
-          if (t === "jual") return jenis.includes("jual");
-          return jenis.includes(t.toLowerCase());
-        });
-        if (!matchesType) return false;
-      }
-      // 3. Foto fisik terverifikasi
-      if (hasPhotoOnly && !prop.foto_tampak_depan && !prop.foto_spanduk) {
-        return false;
-      }
-      return true;
-    });
-  }, [properties, propertyTypes, transactionTypes, hasPhotoOnly]);
+  // Predikatnya di lib/property/filter.ts — sama persis dengan PropertyList & StationSearchBar.
+  const filteredProperties = useMemo(
+    () =>
+      properties.filter((prop) =>
+        matchesPropertyFilter(prop, { propertyTypes, transactionTypes, hasPhotoOnly }),
+      ),
+    [properties, propertyTypes, transactionTypes, hasPhotoOnly],
+  );
 
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const activePopupRef = useRef<maplibregl.Popup | null>(null);

@@ -42,7 +42,7 @@ dites tanpa server, database, maupun React.
 ## Test
 
 ```bash
-node lib/scoring/explanations.test.ts     # cetak "score-explanations: ok" bila lolos
+npm test                                  # menjalankan berkas ini + helper/memo-ttl.test.ts; cetak "score-explanations: ok" bila lolos
 ```
 
 Node 24 menjalankan berkas `.ts` langsung (peringatan `MODULE_TYPELESS_PACKAGE_JSON` normal,

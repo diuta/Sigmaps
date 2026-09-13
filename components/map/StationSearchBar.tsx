@@ -24,6 +24,12 @@ import { useSidebarOpen } from "@/hooks/sidebar/useSidebarOpen";
 import { usePropertyFilter } from "@/hooks/property/usePropertyFilter";
 import { useAllPropertiesSummary } from "@/hooks/property/useAllPropertiesSummary";
 import type { StationLocation } from "@/types/station";
+import {
+  PROPERTY_TYPES,
+  TRANSACTION_TYPES,
+  matchesPropertyType,
+  matchesTransactionType,
+} from "@/lib/property/filter";
 
 const SIDEBAR_CLOSED_PX = 24;
 const GAP_PX = 16;
@@ -34,20 +40,6 @@ interface SearchItem extends StationLocation {
   rank: number | null;
   dataBelumCukup: boolean;
 }
-
-const PROPERTY_TYPES = [
-  { id: "rumah", label: "Rumah", icon: "🏠" },
-  { id: "kos", label: "Kos", icon: "🛏️" },
-  { id: "ruko", label: "Ruko", icon: "🏬" },
-  { id: "kantor", label: "Kantor", icon: "🏢" },
-  { id: "tanah", label: "Tanah", icon: "🌱" },
-  { id: "retail", label: "Retail", icon: "🛍️" },
-];
-
-const TRANSACTION_TYPES = [
-  { id: "sewa", label: "Disewa", icon: "🏷️" },
-  { id: "jual", label: "Dijual", icon: "💰" },
-];
 
 export default function StationSearchBar() {
   const { stations } = useStations();
@@ -135,42 +127,17 @@ export default function StationSearchBar() {
     return allStations.filter((station) => {
       const propMeta = stationPropertyMap.get(station.area_id);
 
-      // A. Filter Tipe Properti (Multi-select)
-      // Jika pengguna memilih 1 atau lebih tipe properti, stasiun WAJIB mengandung properti tersebut
-      if (propertyTypes.length > 0) {
-        if (!propMeta || propMeta.count === 0) return false;
-
-        const stationCats = propMeta.categories.map((c) => c.toLowerCase());
-        const hasMatchingCategory = propertyTypes.some((selectedType) => {
-          if (selectedType === "rumah") return stationCats.some((c) => c.includes("rumah"));
-          if (selectedType === "kos") return stationCats.some((c) => c.includes("kos") || c.includes("kost"));
-          if (selectedType === "ruko") return stationCats.some((c) => c.includes("ruko"));
-          if (selectedType === "kantor") return stationCats.some((c) => c.includes("kantor") || c.includes("office"));
-          if (selectedType === "tanah") return stationCats.some((c) => c.includes("tanah") || c.includes("lahan"));
-          if (selectedType === "retail") return stationCats.some((c) => c.includes("retail") || c.includes("ritel") || c.includes("toko"));
-          return stationCats.some((c) => c.includes(selectedType.toLowerCase()));
-        });
-
-        if (!hasMatchingCategory) return false;
+      // A–C. Ketersediaan unit sesuai filter — predikatnya di lib/property/filter.ts, sama
+      // persis dengan yang dipakai PropertyLayer & PropertyList untuk unit satu per satu.
+      // Stasiun tanpa properti (propMeta undefined) gugur begitu ada filter unit yang aktif.
+      if (propertyTypes.length > 0 && !propMeta?.categories.some((c) => matchesPropertyType(c, propertyTypes))) {
+        return false;
       }
-
-      // B. Filter Jenis Transaksi (Multi-select: Disewa, Dijual)
-      if (transactionTypes.length > 0) {
-        if (!propMeta || propMeta.count === 0) return false;
-
-        const stationTypes = propMeta.types.map((t) => t.toLowerCase());
-        const hasMatchingType = transactionTypes.some((selectedTrans) => {
-          if (selectedTrans === "sewa") return stationTypes.some((t) => t.includes("sewa"));
-          if (selectedTrans === "jual") return stationTypes.some((t) => t.includes("jual"));
-          return stationTypes.some((t) => t.includes(selectedTrans.toLowerCase()));
-        });
-
-        if (!hasMatchingType) return false;
+      if (transactionTypes.length > 0 && !propMeta?.types.some((t) => matchesTransactionType(t, transactionTypes))) {
+        return false;
       }
-
-      // C. Filter Foto Fisik
-      if (hasPhotoOnly) {
-        if (!propMeta || !propMeta.hasPhoto) return false;
+      if (hasPhotoOnly && !(propMeta && propMeta.hasPhoto)) {
+        return false;
       }
 
       // D. Filter Kategori Stasiun KRL (Data Lengkap, Data Minim, Top Rekomendasi)

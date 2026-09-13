@@ -10,6 +10,7 @@ import ScoreComponentBar from "@/components/sidebar/ScoreComponentBar";
 import UnrankableNotice from "@/components/sidebar/UnrankableNotice";
 import {
   COMPONENT_LABELS,
+  COMPONENT_ORDER,
   explainComponent,
   explainNeutralPull,
   observedRange,
@@ -19,21 +20,13 @@ import { useBriefResult } from "@/hooks/brief/useBriefResult";
 import { useStations } from "@/hooks/station/useStations";
 import { useProperties } from "@/hooks/property/useProperties";
 import { useCommunitySentiment } from "@/hooks/sentiment/useCommunitySentiment";
-import type { ScoreComponentKey } from "@/types/scoring";
 import type { PropertyUnit } from "@/types/property";
-
-const COMPONENT_ORDER: readonly { key: ScoreComponentKey; weight: number }[] = [
-  { key: "demand", weight: 0.25 },
-  { key: "competitive_headroom", weight: 0.5 },
-  { key: "segment_match", weight: 0.25 },
-];
-
 
 interface Props {
   /** Teks rencana usaha yang sedang dinilai — dibutuhkan ExportPdfButton, tidak dipakai render lain di sini. */
   brief: string;
   /** Buka halaman detail satu unit. Panel ini tidak tahu bentuk halamannya — cuma meneruskan. */
-  onSelectProperty: (unit: PropertyUnit, stationName: string) => void;
+  onSelectProperty: (unit: PropertyUnit, stationId: string, stationName: string) => void;
 }
 
 export default function ScoredPanel({ brief, onSelectProperty }: Props) {
@@ -190,12 +183,12 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
           aria-labelledby="tab-skor"
           className="flex flex-col gap-[var(--space-xl)]"
         >
-          {COMPONENT_ORDER.map(({ key, weight }) => (
+          {COMPONENT_ORDER.map(({ key, bobot }) => (
             <ScoreComponentBar
               key={key}
               label={COMPONENT_LABELS[key]}
               value={area.komponen[key]}
-              weight={weight}
+              weight={area.bobot[bobot]}
               explanation={explainComponent(key, area.komponen[key])}
               caveat={key === "demand" ? explainNeutralPull(area.n_observations) : null}
               range={key === "demand" ? demandObservedRange : null}
@@ -218,9 +211,7 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
           <PropertyList
             properties={properties}
             loading={propertiesLoading}
-            stationId={area.station_id}
-            stationName={area.station_name}
-            onSelect={(unit) => onSelectProperty(unit, area.station_name)}
+            onSelect={(unit) => onSelectProperty(unit, area.station_id, area.station_name)}
           />
         </div>
       )}

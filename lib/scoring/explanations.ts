@@ -87,6 +87,18 @@ export const COMPONENT_LABELS: Record<ScoreComponentKey, string> = {
   segment_match: "Kecocokan segmen harga",
 };
 
+/**
+ * Urutan tampil komponen + nama field bobotnya di `area.bobot`. Angka bobotnya sendiri TIDAK
+ * ditulis di sini: satu-satunya sumbernya `WEIGHTS` di lib/scoring/index.ts, yang dikirim
+ * server bersama tiap kawasan (`bobot: { wD, wC, wS }`). Dulu ScoredPanel dan dokumen PDF
+ * masing-masing menyalin 0,25/0,50/0,25 — tiga tempat yang bisa saling geser.
+ */
+export const COMPONENT_ORDER: readonly { key: ScoreComponentKey; bobot: "wD" | "wC" | "wS" }[] = [
+  { key: "demand", bobot: "wD" },
+  { key: "competitive_headroom", bobot: "wC" },
+  { key: "segment_match", bobot: "wS" },
+];
+
 /** Kekuatan tarikan ke nilai netral pada rumus D — context-mvp.md §6.2. */
 const NEUTRAL_PULL_K = 8;
 
