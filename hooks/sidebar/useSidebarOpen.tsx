@@ -1,13 +1,5 @@
 "use client";
 
-/**
- * hooks/sidebar/useSidebarOpen.tsx
- *
- * Shared state untuk status buka/tutup sidebar.
- * Dibaca oleh MapLegend agar bisa menggeser posisinya mengikuti sidebar
- * dengan animasi yang sinkron.
- */
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface SidebarOpenContextValue {
@@ -18,7 +10,7 @@ interface SidebarOpenContextValue {
 const SidebarOpenContext = createContext<SidebarOpenContextValue | undefined>(undefined);
 
 export function SidebarOpenProvider({ children }: { children: ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true); // default: desktop open
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <SidebarOpenContext.Provider value={{ sidebarOpen, setSidebarOpen }}>

@@ -8,14 +8,11 @@ import type { CompareItem } from "@/hooks/comparison/useComparison.types";
 
 interface Props {
   property: PropertyUnit;
-  /** Kawasan asal unit ini: id untuk CompareItem (→ /api/community-sentiment), nama untuk breadcrumb. */
   stationId: string;
   stationName: string;
   onBack: () => void;
 }
 
-/** Satu foto + labelnya. Ruang gambar dipesan lewat aspect-ratio supaya layout tidak
- *  melompat saat foto termuat (CLS). */
 function Foto({ src, label, alt }: { src: string | null; label: string; alt: string }) {
   return (
     <figure className="flex flex-col gap-[var(--space-xs)]">
@@ -36,31 +33,16 @@ function Foto({ src, label, alt }: { src: string | null; label: string; alt: str
   );
 }
 
-/**
- * Halaman detail satu unit properti. Mengambil alih seluruh panel hasil (header kawasan,
- * RankStrip, dan tab bar ikut hilang) supaya tombol "Kembali" cuma punya satu arti.
- *
- * Isinya persis apa yang ada di Properti Go: kategori, jenis penawaran, alamat, dua foto.
- * Tidak ada harga, luas, maupun kontak — kolomnya memang tidak ada di dataset
- * (context/dokumentasi-erd-mvp.md §5). Ketiadaan itu dinyatakan terbuka di bawah, karena
- * itu pertanyaan pertama yang muncul di halaman detail properti; tanpa kalimat itu pengguna
- * mengira datanya gagal dimuat.
- */
 export default function PropertyDetail({ property, stationId, stationName, onBack }: Props) {
   const headingRef = useRef<HTMLHeadingElement>(null);
 
-  // Fokus dipindahkan ke judul unit saat halaman ini terbuka: daftar asalnya sudah
-  // tersembunyi, jadi membiarkan fokus di sana membuat pengguna keyboard & pembaca layar
-  // tertinggal di elemen yang tidak terlihat.
   useEffect(() => {
     headingRef.current?.focus();
   }, [property.id]);
 
-  // Nilai di DB: "Disewa" / "Dijual" / "Sudah Tersewa" (aset KAI yang sudah terisi)
   const jenis = (property.jenis_properti || "").toLowerCase();
   const sewa = jenis.includes("sewa");
   const tersewa = jenis.includes("tersewa");
-  // null kalau rute belum dihitung (etl/hitung_rute.py) — baris jarak disembunyikan saja
   const jalanKaki = formatJalanKaki(property.jarak_jalan_m, property.waktu_jalan_s);
 
   const compareItem: CompareItem = { unit: property, stationId, stationName };
@@ -110,7 +92,6 @@ export default function PropertyDetail({ property, stationId, stationName, onBac
           </p>
         )}
 
-        {/* 1-Click Compare Action in Detail */}
         <div className="pt-1">
           <CompareToggleButton item={compareItem} />
         </div>

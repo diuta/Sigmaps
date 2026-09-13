@@ -1,21 +1,5 @@
 "use client";
 
-/**
- * components/map/StationSearchBar.tsx
- *
- * Floating Station & Property Search Bar di atas kanvas peta:
- * - Pencarian cepat (fuzzy match) 43 stasiun KRL Jabodetabek & properti terkait.
- * - Multi-select filter tipe properti: Rumah, Kos, Ruko, Kantor, Tanah, Retail.
- * - Multi-select filter jenis transaksi: Disewa, Dijual, serta foto fisik terverifikasi.
- * - Filter kawasan stasiun: Data Lengkap, Data Minim, Top AI Rekomendasi.
- * - Akurat & Intuitif:
- *   1. Memfilter stasiun yang benar-benar memiliki properti sesuai filter yang dipilih.
- *   2. Daftar stasiun langsung terlihat dan ter-update seketika di bawah filter tanpa harus menutup panel filter.
- *   3. Default: Filter tertutup saat awal load, dan terbuka saat tombol [Filter] diklik.
- * - Posisi responsif & tersinkronisasi mulus dengan pergerakan sidebar.
- * - Aksesibilitas: Keyboard shortcut (⌘K / Ctrl+K), panah (Arrow Up/Down), Enter, dan Escape.
- */
-
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useStations } from "@/hooks/station/useStations";
 import { useBriefResult } from "@/hooks/brief/useBriefResult";
@@ -33,8 +17,8 @@ import {
 
 const SIDEBAR_CLOSED_PX = 24;
 const GAP_PX = 16;
-const BASE_LEFT_PX = SIDEBAR_CLOSED_PX + GAP_PX; // 40px
-const TRANSLATE_OPEN_PX = 380 - SIDEBAR_CLOSED_PX; // 356px
+const BASE_LEFT_PX = SIDEBAR_CLOSED_PX + GAP_PX;
+const TRANSLATE_OPEN_PX = 380 - SIDEBAR_CLOSED_PX;
 
 interface SearchItem extends StationLocation {
   rank: number | null;
@@ -47,7 +31,6 @@ export default function StationSearchBar() {
   const { selectedStation, setSelectedStation } = useSelectedStation();
   const { sidebarOpen } = useSidebarOpen();
 
-  // Data ringkasan properti per stasiun dari database Supabase
   const { stationPropertyMap } = useAllPropertiesSummary();
 
   const {
@@ -66,17 +49,14 @@ export default function StationSearchBar() {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  // Default: Filter drawer tertutup saat awal halaman dimuat
   const [showFilters, setShowFilters] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
-  // Posisi bergeser sinkron dengan Sidebar (persis MapLegend)
   const translateX = sidebarOpen ? TRANSLATE_OPEN_PX : 0;
 
-  // Siapkan daftar seluruh stasiun dengan info ranking terkini
   const allStations: SearchItem[] = useMemo(() => {
     return (stations?.features ?? [])
       .filter((f) => f.geometry !== null)
@@ -106,7 +86,6 @@ export default function StationSearchBar() {
       });
   }, [stations, scoreResult]);
 
-  // Hitung jumlah stasiun per kategori data stasiun
   const stationTierCounts = useMemo(() => {
     const recommended = allStations.filter((s) => s.rank !== null).length;
     const ready = allStations.filter((s) => s.is_rankable).length;
@@ -119,17 +98,10 @@ export default function StationSearchBar() {
     };
   }, [allStations]);
 
-  // Filter stasiun berdasarkan:
-  // 1. Ketersediaan unit properti yang sesuai (multi-select tipe & transaksi & foto)
-  // 2. Tingkatan stasiun (ready/minimal/recommended)
-  // 3. Kata kunci teks pencarian
   const filteredStations = useMemo(() => {
     return allStations.filter((station) => {
       const propMeta = stationPropertyMap.get(station.area_id);
 
-      // A–C. Ketersediaan unit sesuai filter — predikatnya di lib/property/filter.ts, sama
-      // persis dengan yang dipakai PropertyLayer & PropertyList untuk unit satu per satu.
-      // Stasiun tanpa properti (propMeta undefined) gugur begitu ada filter unit yang aktif.
       if (propertyTypes.length > 0 && !propMeta?.categories.some((c) => matchesPropertyType(c, propertyTypes))) {
         return false;
       }
@@ -140,7 +112,6 @@ export default function StationSearchBar() {
         return false;
       }
 
-      // D. Filter Kategori Stasiun KRL (Data Lengkap, Data Minim, Top Rekomendasi)
       if (stationTier === "recommended") {
         if (station.rank === null) return false;
       } else if (stationTier === "ready") {
@@ -149,7 +120,6 @@ export default function StationSearchBar() {
         if (!station.dataBelumCukup) return false;
       }
 
-      // E. Filter Kata Kunci Pencarian (Nama Stasiun atau Kategori Properti)
       const q = query.trim().toLowerCase();
       if (!q) return true;
 
@@ -170,7 +140,6 @@ export default function StationSearchBar() {
     query,
   ]);
 
-  // Global shortcut ⌘K / Ctrl+K untuk langsung fokus ke search bar
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -183,7 +152,6 @@ export default function StationSearchBar() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Tutup dropdown saat klik di luar container
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -194,7 +162,6 @@ export default function StationSearchBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Update query saat stasiun terpilih diubah dari peta atau sidebar
   useEffect(() => {
     if (selectedStation) {
       setQuery(selectedStation.station_name);
@@ -252,7 +219,6 @@ export default function StationSearchBar() {
     }
   }
 
-  // Auto-scroll item yang di-highlight via panah keyboard
   useEffect(() => {
     if (highlightedIndex >= 0 && listRef.current) {
       const activeEl = listRef.current.children[highlightedIndex] as HTMLElement;
@@ -260,7 +226,6 @@ export default function StationSearchBar() {
     }
   }, [highlightedIndex]);
 
-  // Apakah panel dropdown harus terbuka (karena user mengetik, fokus input, atau membuka filter)
   const isDropdownOpen = isOpen || showFilters;
 
   return (
@@ -272,9 +237,7 @@ export default function StationSearchBar() {
         transform: `translateX(${translateX}px)`,
       }}
     >
-      {/* ── Search Input Capsule ────────────────────────────────────────── */}
       <div className="relative flex items-center h-11 sm:h-12 w-[340px] sm:w-[440px] md:w-[500px] max-w-[calc(100vw-32px)] rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-float)] backdrop-blur-md transition-all duration-[var(--motion-fast)] focus-within:border-[var(--color-brand)] focus-within:ring-2 focus-within:ring-[var(--color-brand)]/20">
-        {/* Search Icon */}
         <div className="flex items-center justify-center pl-4 pr-1 text-[var(--color-muted)] pointer-events-none">
           <svg
             width="17"
@@ -292,7 +255,6 @@ export default function StationSearchBar() {
           </svg>
         </div>
 
-        {/* Text Input */}
         <input
           ref={inputRef}
           type="text"
@@ -314,7 +276,6 @@ export default function StationSearchBar() {
           aria-autocomplete="list"
         />
 
-        {/* Filter Toggle Button inside input */}
         <button
           type="button"
           onClick={() => {
@@ -349,7 +310,6 @@ export default function StationSearchBar() {
           )}
         </button>
 
-        {/* Clear Button or Cmd+K Hint */}
         <div className="flex items-center pr-3">
           {query ? (
             <button
@@ -371,10 +331,8 @@ export default function StationSearchBar() {
         </div>
       </div>
 
-      {/* ── Unified Dropdown: Filter Controls + Real-Time Station List ───── */}
       {isDropdownOpen && (
         <div className="absolute left-0 top-full mt-2 w-[340px] sm:w-[440px] md:w-[500px] max-w-[calc(100vw-32px)] rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl backdrop-blur-xl overflow-hidden z-[91] transition-all animate-in fade-in duration-150">
-          {/* ── A. Filter Drawer Panel (Bila showFilters true) ───────────── */}
           {showFilters && (
             <div className="p-3 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50">
               <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--color-border)]/60">
@@ -399,7 +357,6 @@ export default function StationSearchBar() {
                 )}
               </div>
 
-              {/* 1. Multi-Select Tipe Properti */}
               <div className="flex flex-col gap-1.5 mb-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-semibold text-[var(--color-muted)] uppercase tracking-wider">
@@ -448,7 +405,6 @@ export default function StationSearchBar() {
                 </div>
               </div>
 
-              {/* 2. Multi-Select Karakteristik & Jenis Transaksi */}
               <div className="flex flex-col gap-1.5 mb-2.5">
                 <span className="text-[10px] font-semibold text-[var(--color-muted)] uppercase tracking-wider">
                   Transaksi & Karakteristik
@@ -494,7 +450,6 @@ export default function StationSearchBar() {
                 </div>
               </div>
 
-              {/* 3. Filter Kawasan Stasiun (Data Lengkap & Data Minim) */}
               <div className="flex flex-col gap-1.5">
                 <span className="text-[10px] font-semibold text-[var(--color-muted)] uppercase tracking-wider">
                   Kawasan Stasiun
@@ -558,7 +513,6 @@ export default function StationSearchBar() {
             </div>
           )}
 
-          {/* ── B. Header Hasil Pencarian Stasiun ────────────────────────── */}
           <div className="flex items-center justify-between px-3.5 py-2 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]">
             <div className="flex items-center gap-1.5 overflow-hidden">
               <span className="text-[10px] font-bold tracking-wider text-[var(--color-text-sub)] uppercase truncate">
@@ -585,7 +539,6 @@ export default function StationSearchBar() {
             </span>
           </div>
 
-          {/* ── C. Real-Time Matching Stations List ──────────────────────── */}
           <ul
             ref={listRef}
             className="max-h-72 overflow-y-auto list-none m-0 p-0 divide-y divide-[var(--color-border)]/60"
@@ -624,7 +577,6 @@ export default function StationSearchBar() {
                     } ${isSelected ? "bg-[var(--color-brand)]/5" : ""}`}
                   >
                     <div className="flex items-center gap-2.5 overflow-hidden">
-                      {/* Train Icon Marker */}
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand)]/10 text-[var(--color-brand)]">
                         <svg
                           width="12"
@@ -652,7 +604,6 @@ export default function StationSearchBar() {
                           {station.station_name}
                         </span>
 
-                        {/* Properti yang tersedia di stasiun ini */}
                         {propMeta && propMeta.count > 0 ? (
                           <span className="text-[10px] text-[var(--color-text-sub)] truncate flex items-center gap-1">
                             <span className="font-semibold text-[var(--color-brand)]">
@@ -671,7 +622,6 @@ export default function StationSearchBar() {
                       </div>
                     </div>
 
-                    {/* Rank / Status Badge */}
                     <div className="shrink-0 flex items-center gap-1">
                       {station.rank !== null ? (
                         <span className="rounded-full bg-[var(--color-brand)] px-2 py-0.5 text-[9px] font-extrabold text-white shadow-xs">

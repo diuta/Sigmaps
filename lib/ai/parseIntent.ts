@@ -3,16 +3,11 @@ import { geminiFlashLite } from '@/lib/ai/gemini'
 import { buildGeminiRawSchema, type Intent } from '@/lib/schemas/prompt-request'
 import { daftarUntukPrompt, HARGA_DEFAULT } from '@/lib/tipe3/padanan'
 
-// Dipetakan ke 400/422/503 oleh route lewat instanceof (§6.8b).
 export class NonCulinaryError extends Error {}
 export class IntentValidationError extends Error {}
 export class GeminiUnavailableError extends Error {}
 
 function buildSystemPrompt(tipe3Values: string[]): string {
-  // generateObject sengaja tidak dipakai (instruksi tim) — struktur dipaksa lewat
-  // prompt lalu divalidasi Zod. Sinonim + harga dari lib/tipe3/padanan.ts wajib
-  // ikut: tanpa sinonim AI mengarang nama kategori, tanpa harga tebakannya berubah
-  // tiap pemanggilan dan peringkat ikut berubah.
   return `Kamu mengubah kalimat bebas rencana usaha jadi JSON.
 Balas HANYA dengan JSON valid, tanpa markdown/backtick, persis mengikuti bentuk ini:
 {
@@ -56,8 +51,6 @@ export async function parseIntent(prompt: string, tipe3Values: string[]): Promis
     throw new NonCulinaryError('Usaha yang disebut bukan usaha kuliner')
   }
 
-  // Pilih field secara eksplisit (bukan destructure-and-discard) — `is_kuliner` tidak boleh
-  // ikut ke response publik, dan daftar field di sini harus persis cocok `Intent`.
   return {
     tipe_3: raw.tipe_3,
     harga_target: raw.harga_target,

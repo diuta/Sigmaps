@@ -1,19 +1,8 @@
 "use client";
 
-/**
- * components/map/MapLegend.tsx
- *
- * Legenda peta statis, mengikuti prinsip desain GIS:
- * - Posisi sudut kiri bawah, di atas ScaleControl MapLibre
- * - Bergeser mengikuti sidebar (open → offset by sidebar width, closed → offset by 0)
- * - Animasi `left` sinkron dengan transisi translate sidebar (--motion-base + --ease-out)
- * - Collapsible agar tidak menutupi konten saat tidak dibutuhkan
- */
-
 import { useState } from "react";
 import { useSidebarOpen } from "@/hooks/sidebar/useSidebarOpen";
 
-// Simbol: stasiun aktif — pin biru dengan ikon kereta (vektor tajam persis marker peta)
 function StationActiveSymbol() {
   return (
     <svg
@@ -43,7 +32,6 @@ function StationActiveSymbol() {
   );
 }
 
-// Simbol: stasiun lain — pin abu-abu dengan ikon kereta (vektor tajam persis marker peta)
 function StationInactiveSymbol() {
   return (
     <svg
@@ -76,7 +64,6 @@ function StationInactiveSymbol() {
   );
 }
 
-// Simbol: properti — teardrop oranye
 function PropertySymbol() {
   return (
     <svg width="12" height="16" viewBox="0 0 12 16" fill="none" aria-hidden="true">
@@ -89,7 +76,6 @@ function PropertySymbol() {
   );
 }
 
-// Simbol: isochrone — area dengan border dashed biru
 function IsochroneSymbol() {
   return (
     <svg width="20" height="12" viewBox="0 0 20 12" fill="none" aria-hidden="true">
@@ -111,13 +97,9 @@ const LEGEND_ITEMS: LegendItem[] = [
   { symbol: <IsochroneSymbol />, label: "Zona jalan kaki 10 mnt", sub: "Dari stasiun aktif" },
 ];
 
-/** px of the toggle tab that sticks out when sidebar is closed */
 const SIDEBAR_CLOSED_PX = 24;
-/** gap between sidebar edge and legend */
 const GAP_PX = 16;
-/** Base left offset when sidebar is closed (24 + 16 = 40px) */
 const BASE_LEFT_PX = SIDEBAR_CLOSED_PX + GAP_PX;
-/** Horizontal translate distance when sidebar is open (380 - 24 = 356px) */
 const TRANSLATE_OPEN_PX = 380 - SIDEBAR_CLOSED_PX;
 
 export default function MapLegend() {
@@ -140,7 +122,6 @@ export default function MapLegend() {
         className="flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-[var(--shadow-float)] backdrop-blur-sm"
         style={{ minWidth: 200 }}
       >
-        {/* Header / Toggle */}
         <button
           type="button"
           onClick={() => setCollapsed((v) => !v)}
@@ -174,7 +155,6 @@ export default function MapLegend() {
           </svg>
         </button>
 
-        {/* Items: collapsible with smooth transition matching sidebar motion tokens */}
         <div
           className={`grid transition-[grid-template-rows,opacity] duration-[var(--motion-base)] ease-[var(--ease-out)] ${
             collapsed ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100"

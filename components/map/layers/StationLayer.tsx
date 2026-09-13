@@ -1,13 +1,5 @@
 "use client";
 
-/**
- * Pin stasiun, tiga state: idle / hover / active.
- *
- * Lokasi + penanda is_rankable dari /api/stations (semua 43). Nomor peringkat dari
- * /api/score, yang hanya berisi Top 5 — jadi ketiadaan sebuah kawasan di sana
- * tidak berarti datanya kurang.
- */
-
 import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import { useMapInstance } from "@/hooks/map/useMapInstance";
@@ -47,12 +39,10 @@ export default function StationLayer() {
         lng: feature.geometry!.coordinates[0],
         lat: feature.geometry!.coordinates[1],
         rank: found ? areaIndex! + 1 : null,
-        // `=== false` disengaja: null berarti pipeline belum jalan, bukan kurang data.
         dataBelumCukup: feature.properties.is_rankable === false,
       };
     });
 
-  // 1. Render markers setiap kali daftar stasiun/skor berubah
   useEffect(() => {
     if (!map) return;
 
@@ -148,7 +138,6 @@ export default function StationLayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, stations, scoreResult]);
 
-  // 2. React to selectedStation changes (Update visual State A / State C)
   useEffect(() => {
     markersRef.current.forEach(({ el }, stationId) => {
       const isSelected = selectedStation?.area_id === stationId;

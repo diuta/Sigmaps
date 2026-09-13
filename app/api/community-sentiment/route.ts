@@ -14,15 +14,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'station_id wajib diisi' }, { status: 400 })
   }
 
-  // Query Supabase + Gemini + cache per stasiun ada di lib/sentiment, bukan di sini.
   try {
     const summary = await getCommunitySentiment(parsed.data.station_id)
     return NextResponse.json({ data: summary })
   } catch (err) {
     console.error(err)
 
-    // Dibedakan instanceof supaya pesannya benar (§6.8b) — kuota Gemini habis itu
-    // sementara, dan sisa aplikasi tetap jalan tanpa endpoint ini.
     if (err instanceof SentimentSourceError) {
       return NextResponse.json({ error: 'Gagal mengambil data community activity' }, { status: 503 })
     }

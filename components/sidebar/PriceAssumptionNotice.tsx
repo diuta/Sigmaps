@@ -1,13 +1,8 @@
 interface Props {
-  /** Harga yang diperkirakan AI dari jenis usaha, dalam rupiah. */
   hargaTarget: number;
   onEdit: () => void;
 }
 
-/**
- * Wajib tampil saat harga_sumber = 'perkiraan' — context-mvp.md §2, ARCHITECTURE.md §11.
- * Inferensi yang terlihat dan bisa disunting itu sah; yang diam-diam masuk rumus tidak.
- */
 export default function PriceAssumptionNotice({ hargaTarget, onEdit }: Props) {
   return (
     <div className="flex flex-col items-start gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-[var(--space-md)]">

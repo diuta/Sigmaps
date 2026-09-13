@@ -1,12 +1,5 @@
 "use client";
 
-/**
- * components/comparison/CompareBar.tsx
- *
- * Clean comparison activation button in the sidebar.
- * Kept minimal and focused: simply activates / opens the bottom comparison tray.
- */
-
 import { useComparison } from "@/hooks/comparison/useComparison";
 
 export default function CompareBar() {

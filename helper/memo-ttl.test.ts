@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { memoTtl } from "./memo-ttl.ts";
 
-// Pemanggilan bersamaan berbagi satu eksekusi; hasil sukses bertahan; yang gagal dibuang.
 let calls = 0;
 const fn = memoTtl(async (k: string) => { calls++; if (k === "bad") throw new Error("x"); return { k, ok: k !== "soft" }; }, 60_000, (v) => !v.ok);
 

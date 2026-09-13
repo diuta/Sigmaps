@@ -1,18 +1,9 @@
-/**
- * TODO: `kategori` masih diisi DUMMY_KATEGORI_JARANG di bawah.
- * Sumber aslinya nanti: field `kategori_jarang` dari /api/community-sentiment — menumpang
- * panggilan Gemini yang sudah ada di endpoint itu (bukan endpoint/titik sentuh AI baru),
- * divalidasi ke daftar tipe3_values supaya kosakatanya sama dengan yang dimengerti /api/score.
- * Perubahannya ada di app/api/, lib/ai/, dan types/sentiment/ — sengaja belum dikerjakan
- * karena di luar zona sidebar.
- */
 export const DUMMY_KATEGORI_JARANG = ["Kedai kopi", "Bakery", "Minuman kekinian"];
 
 interface Props {
   kategori: string[];
 }
 
-/** Keluaran AI — warna accent, bukan warna skor. Sejajar dengan AreaInsightBlock. */
 export default function AreaGapBlock({ kategori }: Props) {
   return (
     <section className="flex flex-col gap-[var(--space-sm)] border-l-2 border-[var(--color-accent)] bg-[var(--color-accent-surface)] p-[var(--space-md)]">

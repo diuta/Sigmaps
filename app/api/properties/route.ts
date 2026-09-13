@@ -7,7 +7,6 @@ export async function GET(request: Request) {
   const stationId = url.searchParams.get('station_id')
   const summary = url.searchParams.get('summary')
 
-  // Mode ringkasan untuk filter lintas stasiun (e.g. cari stasiun yang punya Kos / Rumah / Ruko)
   if (summary === 'true' || stationId === 'all' || !stationId) {
     const { data, error } = await supabaseServer
       .from('properti_go_by_station')

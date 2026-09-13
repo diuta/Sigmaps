@@ -1,9 +1,3 @@
-// Bentuk baris hasil query view properti_go_by_station (lihat supabase/views.sql) — geom
-// dan rute sudah dikonversi ke GeoJSON oleh ST_AsGeoJSON di sisi database.
-// Kolom sengaja tidak memuat luas/harga/kontak pemilik — Properti Go tidak punya kolom itu
-// (CLAUDE.md/context-mvp.md §2 Langkah 4), jangan ditambahkan "jaga-jaga".
-// jarak_jalan_m / waktu_jalan_s / rute datang dari LEFT JOIN rute_properti: NULL berarti
-// etl/hitung_rute.py belum dijalankan untuk pasangan itu — kondisi normal, diteruskan apa adanya.
 export type PropertyRow = {
   id: string
   kategori_properti: string | null

@@ -1,16 +1,3 @@
-/**
- * lib/pdf/businessPlanDocument.tsx
- * Susun & render dokumen PDF "Ringkasan Rencana Usaha" — dipanggil oleh
- * components/sidebar/ExportPdfButton.tsx setelah brief dinilai (/api/prompt-request
- * + /api/score). Domain-specific (tahu bentuk AreaScore/IntentOutput SIGMAPS), jadi
- * di lib/, bukan helper/ (CLAUDE.md §2b).
- *
- * Dirender 100% di browser lewat @react-pdf/renderer (vektor, teks bisa di-select) —
- * sengaja TIDAK lewat app/api/*: generate PDF di route.ts akan kena batas waktu
- * function Vercel Hobby (CLAUDE.md §8) untuk sesuatu yang sebenarnya tidak perlu
- * server sama sekali.
- */
-
 import { Document, Page, Text, View, StyleSheet, pdf } from "@react-pdf/renderer";
 import {
   COMPONENT_LABELS,
@@ -22,18 +9,13 @@ import type { AreaScore } from "@/types/scoring";
 import type { IntentOutput } from "@/types/prompt-request";
 import type { PropertyUnit } from "@/types/property";
 
-/** Properti dipotong supaya PDF tidak membengkak untuk kawasan dengan ratusan unit. */
 const MAX_PROPERTIES_LISTED = 30;
 
 export interface BusinessPlanPdfData {
-  /** Teks rencana usaha mentah dari user (state `submitted` di Sidebar.tsx). */
   brief: string;
   intent: IntentOutput;
-  /** Top 5 kawasan is_rankable, sudah terurut skor desc — ambil dari ScoreResponse.areas. */
   areas: readonly AreaScore[];
-  /** Kawasan yang sedang dibuka user di ScoredPanel. */
   activeArea: AreaScore;
-  /** Unit properti kawasan aktif (dari useProperties), belum difilter UI. */
   properties: readonly PropertyUnit[];
 }
 
@@ -209,11 +191,6 @@ function formatTanggal(date: Date): string {
   });
 }
 
-/**
- * Dokumen PDF "Ringkasan Rencana Usaha". Diekspor terpisah dari
- * `generateBusinessPlanPdfBlob` (di bawah) supaya kalau nanti ada kebutuhan preview
- * langsung di layar (`<PDFViewer>`), komponennya sudah siap dipakai ulang.
- */
 export function BusinessPlanDocument({
   brief,
   intent,
@@ -379,7 +356,6 @@ export function BusinessPlanDocument({
   );
 }
 
-/** Render dokumen di atas jadi Blob PDF, siap diunduh browser (lihat ExportPdfButton). */
 export async function generateBusinessPlanPdfBlob(data: BusinessPlanPdfData): Promise<Blob> {
   return pdf(<BusinessPlanDocument {...data} />).toBlob();
 }

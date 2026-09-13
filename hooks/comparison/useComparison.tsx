@@ -1,15 +1,5 @@
 "use client";
 
-/**
- * hooks/comparison/useComparison.tsx
- *
- * Global state for the property comparison feature.
- * - Slot A and Slot B hold a CompareItem each (unit + stationId + stationName)
- * - activeTargetSlot tracks which slot the user is currently targeting ("A" or "B")
- * - isPanelOpen: whether the comparison feature is active
- * - isPanelMinimized: whether the panel is collapsed to a compact dock allowing full map interaction
- */
-
 import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import type {
   CompareItem,
@@ -26,8 +16,6 @@ export function ComparisonProvider({ children }: { children: ReactNode }) {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isPanelMinimized, setIsPanelMinimized] = useState(false);
 
-  // Mengisi satu slot: kalau slot satunya masih kosong, target berpindah ke sana; kalau
-  // sudah terisi, kedua slot lengkap → panel dibuka dalam keadaan terbentang.
   const setSlot = useCallback((slot: CompareSlot, item: CompareItem) => {
     const other = slot === "A" ? slotB : slotA;
     if (slot === "A") setSlotA(item); else setSlotB(item);

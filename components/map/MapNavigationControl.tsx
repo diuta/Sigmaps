@@ -1,23 +1,9 @@
 "use client";
 
-/**
- * components/map/MapNavigationControl.tsx
- *
- * Kontrol navigasi peta minimalis & rapi:
- * - Zoom In (+)
- * - Zoom Out (−)
- * - Recenter (Pusatkan kembali saat pengguna tersesat)
- *
- * Prinsip Desain GIS:
- * - Penempatan di sudut kanan atas (Top-Right): standar industri GIS (Google Maps, Mapbox, ArcGIS)
- *   menyeimbangkan visual dengan sidebar di sisi kiri dan legenda di kiri-bawah.
- * - Glassmorphism, border halus, bayangan float, dan token tema (--radius-card, --color-surface).
- */
-
 import { useMapInstance } from "@/hooks/map/useMapInstance";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
 
-const DEFAULT_CENTER: [number, number] = [106.8271129, -6.1754398]; // Monas / Jakarta Pusat
+const DEFAULT_CENTER: [number, number] = [106.8271129, -6.1754398];
 const DEFAULT_ZOOM = 13;
 
 export default function MapNavigationControl() {
@@ -66,7 +52,6 @@ export default function MapNavigationControl() {
       role="group"
       aria-label="Kontrol navigasi peta"
     >
-      {/* Zoom In */}
       <button
         type="button"
         onClick={handleZoomIn}
@@ -80,10 +65,8 @@ export default function MapNavigationControl() {
         </svg>
       </button>
 
-      {/* Divider */}
       <div className="h-[1px] w-full bg-[var(--color-border)]" />
 
-      {/* Zoom Out */}
       <button
         type="button"
         onClick={handleZoomOut}
@@ -96,10 +79,8 @@ export default function MapNavigationControl() {
         </svg>
       </button>
 
-      {/* Divider */}
       <div className="h-[1px] w-full bg-[var(--color-border)]" />
 
-      {/* Recenter */}
       <button
         type="button"
         onClick={handleRecenter}
@@ -111,7 +92,6 @@ export default function MapNavigationControl() {
         }
         className="flex h-9 w-9 items-center justify-center text-[var(--color-text-sub)] transition-all duration-[var(--motion-fast)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-brand)] active:scale-95 active:bg-[var(--color-border)]"
       >
-        {/* Reticle / Crosshair Icon */}
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
           <circle cx="8" cy="8" r="4.5" />
           <line x1="8" y1="1" x2="8" y2="3" />

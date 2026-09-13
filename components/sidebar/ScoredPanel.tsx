@@ -23,9 +23,7 @@ import { useCommunitySentiment } from "@/hooks/sentiment/useCommunitySentiment";
 import type { PropertyUnit } from "@/types/property";
 
 interface Props {
-  /** Teks rencana usaha yang sedang dinilai — dibutuhkan ExportPdfButton, tidak dipakai render lain di sini. */
   brief: string;
-  /** Buka halaman detail satu unit. Panel ini tidak tahu bentuk halamannya — cuma meneruskan. */
   onSelectProperty: (unit: PropertyUnit, stationId: string, stationName: string) => void;
 }
 
@@ -34,24 +32,16 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
   const { intent, scoreResult } = useBriefResult();
   const { stations } = useStations();
 
-  // Terurut dan dipotong Top 5 di server. Jangan menyimpulkan apa pun dari
-  // ketiadaan sebuah kawasan di sini — penandanya dibaca dari /api/stations.
   const rankedAreas = scoreResult?.areas ?? [];
 
   const [activeAreaId, setActiveAreaId] = useState<string | null>(rankedAreas[0]?.area_id ?? null);
 
-  // rankedAreas berubah tiap kali brief baru disubmit — reset area aktif ke #1 supaya panel
-  // tidak diam-diam menunjuk kawasan dari hasil brief sebelumnya. Disesuaikan LANGSUNG saat
-  // render (pola resmi React untuk "adjusting state when a prop changes"), bukan lewat
-  // useEffect — tidak ada efek samping ke luar React di sini, cuma turunan dari scoreResult.
   const [prevScoreResult, setPrevScoreResult] = useState(scoreResult);
   if (scoreResult !== prevScoreResult) {
     setPrevScoreResult(scoreResult);
     setActiveAreaId(rankedAreas[0]?.area_id ?? null);
   }
 
-  // Dari penanda asli /api/stations. `=== false` karena null berarti pipeline
-  // belum jalan, bukan datanya kurang.
   const unrankableStations = (stations?.features ?? [])
     .filter((feature) => feature.properties.is_rankable === false)
     .map((feature) => ({
@@ -64,15 +54,8 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
   const area = rankedAreas.find((a) => a.area_id === activeAreaId) ?? rankedAreas[0] ?? null;
   const { sentiment, loading: sentimentLoading } = useCommunitySentiment(area?.station_id ?? null);
 
-  // Diambil DI SINI, bukan di dalam PropertyList: jumlahnya dipakai label tab, dan memanggil
-  // hook yang sama dua kali berarti dua permintaan /api/properties untuk stasiun yang sama.
-  // Efek sampingnya bagus — angka (0) sudah terlihat sebelum tabnya dibuka, jadi kawasan
-  // berskor tinggi tanpa properti tidak tersembunyi di balik satu klik.
   const { properties, loading: propertiesLoading } = useProperties(area?.station_id ?? null);
 
-  // Pilihan tab sengaja TIDAK direset saat pengguna berpindah peringkat maupun saat brief baru
-  // dinilai: kalau ia sedang membandingkan unit antar peringkat, dilempar balik ke tab skor
-  // tiap kali berpindah lebih buruk daripada tidak punya tab sama sekali.
   const [tab, setTab] = useState<"skor" | "unit">("skor");
 
   if (!area) {
@@ -88,10 +71,6 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
 
   const peringkat = rankedAreas.findIndex((a) => a.area_id === area.area_id) + 1;
 
-  /**
-   * Pilih peringkat lain. Kamera peta digeser dengan mengubah stasiun aktif, bukan dengan
-   * memanggil map.flyTo() dari sini — docs/fe/ARCHITECTURE.md §4.1.
-   */
   function selectArea(areaId: string) {
     setActiveAreaId(areaId);
     const target = rankedAreas.find((a) => a.area_id === areaId);
@@ -131,8 +110,6 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
           </span>
         </div>
 
-        {/* intent selalu terisi begitu ada scoreResult (satu alur submitBrief) — dijaga
-            lewat guard ini saja karena tipenya tetap `| null` di context. */}
         {intent && (
           <ExportPdfButton
             brief={brief}
@@ -144,12 +121,6 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
         )}
       </div>
 
-      {/*
-        Dua pertanyaan yang berbeda dipisah jadi dua tab: "kawasan ini bagus atau tidak?"
-        (skor) dan "apa yang bisa saya sewa di sini?" (unit). Selain memisahkan isi, ini
-        menghapus scroll bersarang — sebelumnya daftar properti punya kontainer scroll sendiri
-        di dalam kolom sidebar yang juga bisa di-scroll.
-      */}
       <div role="tablist" aria-label="Tampilan kawasan" className="flex gap-[var(--space-xs)] border-b border-[var(--color-border)]">
         {(
           [
@@ -195,15 +166,12 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
             />
           ))}
 
-          {/* Gagal ambil ringkasan tidak merender apa pun — jangan halangi isi tab lainnya. */}
           {sentimentLoading ? (
             <AiLoadingBlock judul="Gambaran kawasan" />
           ) : (
             sentiment?.ringkasan && <AreaInsightBlock paragraf={sentiment.ringkasan} />
           )}
 
-          {/* Paling bawah dan tertutup: menjawab "kenapa kawasan lain tidak ada di peringkat",
-              pertanyaan yang sama dengan tab ini — bukan bagian dari katalog unit. */}
           <UnrankableNotice stations={unrankableStations} />
         </div>
       ) : (

@@ -1,19 +1,5 @@
 "use client";
 
-/**
- * hooks/property/useSelectedProperty.tsx
- * Jembatan Komunikasi Sidebar → Map untuk properti yang dipilih
- *
- * Sesuai pola ARCHITECTURE.md §4.1:
- * - Sidebar (PropertyList) menulis: setSelectedProperty(unit) saat user klik property card.
- * - Map (BaseMap) membaca: untuk trigger flyTo() ke koordinat properti.
- * - Map (PropertyLayer) membaca: untuk auto-open popup pin properti yang bersangkutan.
- * - Map (PropertyLayer) menulis previewProperty saat popup pin dibuka/ditutup;
- *   Map (RouteLayer) membaca previewProperty ?? selectedProperty untuk menggambar rute.
- *
- * ⛔ PENTING: Sidebar TIDAK boleh import useMapInstance atau memanggil map.flyTo() langsung.
- */
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import type { PropertyUnit } from "@/types/property";
 import type { SelectedPropertyContextValue } from "./useSelectedProperty.types";

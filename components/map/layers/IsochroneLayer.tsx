@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * Poligon isokron 10 menit di sekitar stasiun aktif. Gaya: dashed #1E40AF 2.4px,
- * fill 0.12 (ARCHITECTURE.md §9).
- *
- * Sumbernya /api/stations -> properties.isokron: keluaran MAPID Isochrone Tool apa
- * adanya (foot, 600 detik). Generator lingkaran sintetis yang dulu dipakai sudah
- * dihapus — bentuknya bukan kawasan yang dipakai menghitung skor.
- */
-
 import { useEffect } from "react";
 import { useMapInstance } from "@/hooks/map/useMapInstance";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
@@ -29,14 +20,12 @@ export default function IsochroneLayer() {
   useEffect(() => {
     if (!map) return;
 
-    // Inisialisasi Source & Layers jika belum terdaftar
     if (!map.getSource(SOURCE_ID)) {
       map.addSource(SOURCE_ID, {
         type: "geojson",
         data: { type: "FeatureCollection", features: [] },
       });
 
-      // 1. Fill
       map.addLayer({
         id: FILL_LAYER_ID,
         type: "fill",
@@ -47,7 +36,6 @@ export default function IsochroneLayer() {
         },
       });
 
-      // 2. Dashed Outline
       map.addLayer({
         id: OUTLINE_LAYER_ID,
         type: "line",
@@ -64,8 +52,6 @@ export default function IsochroneLayer() {
     const source = map.getSource(SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
     if (!source) return;
 
-    // Cari poligon stasiun yang sedang aktif. StationLocation.area_id sama dengan
-    // properties.station_id (keduanya 'R-1'…'R-43'), jadi cocokkan langsung.
     const fitur = selectedStation
       ? stations?.features.find(
           (f) => f.properties.station_id === selectedStation.area_id
@@ -75,7 +61,6 @@ export default function IsochroneLayer() {
     const isokron = fitur?.properties.isokron;
 
     if (!isokron) {
-      // Normal: belum ada stasiun dipilih, data belum dimuat, atau isokron NULL.
       source.setData(KOSONG);
       return;
     }
@@ -95,7 +80,6 @@ export default function IsochroneLayer() {
     });
   }, [map, selectedStation, stations]);
 
-  // Cleanup layer & source saat unmount
   useEffect(() => {
     return () => {
       if (!map) return;

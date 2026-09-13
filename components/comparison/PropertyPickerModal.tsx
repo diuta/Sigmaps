@@ -32,7 +32,6 @@ export default function PropertyPickerModal({
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
     function handleKeyDown(e: KeyboardEvent) {
@@ -42,7 +41,6 @@ export default function PropertyPickerModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Unique sorted stations
   const stationList = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const p of allProperties) {
@@ -57,7 +55,6 @@ export default function PropertyPickerModal({
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [allProperties, stationNames]);
 
-  // Unique sorted categories
   const categoryList = useMemo(() => {
     const cats = new Set<string>();
     for (const p of allProperties) {
@@ -66,7 +63,6 @@ export default function PropertyPickerModal({
     return Array.from(cats).sort();
   }, [allProperties]);
 
-  // Filtered properties
   const filteredProperties = useMemo(() => {
     return allProperties.filter((p) => {
       if (selectedStationId !== "all" && p.station_id !== selectedStationId) return false;
@@ -113,12 +109,9 @@ export default function PropertyPickerModal({
       aria-label={`Pilih ${getSlotLabel(slot)}`}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
     >
-      {/* Click outside backdrop */}
       <div className="absolute inset-0" onClick={onClose} aria-hidden />
 
-      {/* Modal dialog box */}
       <div className="relative flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl">
-        {/* Header */}
         <div className="flex items-start justify-between border-b border-[var(--color-border)] px-5 py-4">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
@@ -147,9 +140,7 @@ export default function PropertyPickerModal({
           </button>
         </div>
 
-        {/* Filter Section (1-Click selection) */}
         <div className="flex flex-col gap-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-5 py-3">
-          {/* Station Filter Pills */}
           <div className="flex flex-col gap-1">
             <span className="text-[11px] font-semibold text-[var(--color-text-sub)]">
               Filter Stasiun:
@@ -183,7 +174,6 @@ export default function PropertyPickerModal({
             </div>
           </div>
 
-          {/* Category Filter Pills & Optional Search */}
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-1.5">
               <button
@@ -213,7 +203,6 @@ export default function PropertyPickerModal({
               ))}
             </div>
 
-            {/* Optional search input */}
             <div className="relative flex min-w-[140px] max-w-[200px] items-center">
               <input
                 type="text"
@@ -235,7 +224,6 @@ export default function PropertyPickerModal({
           </div>
         </div>
 
-        {/* Options List */}
         <div className="flex flex-1 flex-col overflow-y-auto p-4 scrollbar-thin">
           {loading ? (
             <div className="flex flex-col gap-2.5 py-4">
@@ -276,7 +264,6 @@ export default function PropertyPickerModal({
                         : "cursor-pointer border-[var(--color-border)] bg-[var(--color-surface)] hover:-translate-y-[1px] hover:border-[var(--color-brand)] hover:bg-[var(--color-accent-surface)]/20 hover:shadow-[var(--shadow-card)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
                     }`}
                   >
-                    {/* Thumbnail */}
                     {p.foto_tampak_depan ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -290,7 +277,6 @@ export default function PropertyPickerModal({
                       </div>
                     )}
 
-                    {/* Content */}
                     <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <div className="flex items-center justify-between gap-1">
                         <span className="t-heading-2 truncate text-[13px] font-bold text-[var(--color-text)]">
@@ -337,7 +323,6 @@ export default function PropertyPickerModal({
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-surface-muted)] px-5 py-3">
           <p className="t-micro font-normal text-[var(--color-muted)]">
             Menampilkan {filteredProperties.length} unit properti

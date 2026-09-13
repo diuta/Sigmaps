@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * components/comparison/ComparisonPanel.tsx
- *
- * Bottom comparison workspace overlay:
- * - Collapsible into a compact dock allowing user to tap pinpoints directly on the map
- * - Allows picking via Map Pin ("Pilih dari Peta") OR visual list ("Pilih dari Daftar")
- * - 100% scrollable down to the bottom with generous pb-28 buffer
- */
-
 import { useRef, useEffect, useState } from "react";
 import { useComparison } from "@/hooks/comparison/useComparison";
 import { useCommunitySentiment } from "@/hooks/sentiment/useCommunitySentiment";
@@ -20,10 +11,6 @@ import type { CompareItem, CompareSlot } from "@/hooks/comparison/useComparison.
 import { getSlotLabel, getSlotNumber } from "@/hooks/comparison/useComparison.types";
 import type { CommunitySentimentResponse } from "@/types/sentiment";
 import PropertyPickerModal from "@/components/comparison/PropertyPickerModal";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Sub-components
-// ─────────────────────────────────────────────────────────────────────────────
 
 function PhotoBlock({ src, label, alt }: { src: string | null; label: string; alt: string }) {
   return (
@@ -91,7 +78,6 @@ function PropertyColumn({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Top Header Row with Ganti (Map/List) & Remove */}
       <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-2.5">
         <div className="flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-brand)] text-xs font-bold text-white shadow-xs">
@@ -128,7 +114,6 @@ function PropertyColumn({
         </div>
       </div>
 
-      {/* Property Title & Type */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-col gap-1 min-w-0">
           <h3 className="t-heading-1 text-base font-bold text-[var(--color-text)] truncate">
@@ -149,14 +134,12 @@ function PropertyColumn({
         </span>
       </div>
 
-      {/* Alamat */}
       {item.unit.alamat ? (
         <p className="t-body text-xs text-[var(--color-text-sub)] leading-relaxed">{item.unit.alamat}</p>
       ) : (
         <p className="t-body text-xs text-[var(--color-muted)] italic">Alamat tidak tersedia</p>
       )}
 
-      {/* Jarak jalan kaki */}
       {jalanKaki && (
         <p className="t-micro flex items-center gap-1.5 font-bold text-[var(--color-brand)]">
           <span aria-hidden>🚶</span>
@@ -164,7 +147,6 @@ function PropertyColumn({
         </p>
       )}
 
-      {/* Photos */}
       <PhotoBlock
         src={item.unit.foto_tampak_depan}
         label="Foto tampak depan"
@@ -176,7 +158,6 @@ function PropertyColumn({
         alt={`Spanduk ${item.unit.kategori_properti}`}
       />
 
-      {/* AI Insight */}
       <InsightBlock
         sentiment={sentiment}
         loading={loading}
@@ -231,10 +212,6 @@ function EmptySlotCard({
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Main panel
-// ─────────────────────────────────────────────────────────────────────────────
-
 export default function ComparisonPanel() {
   const {
     slotA,
@@ -257,7 +234,6 @@ export default function ComparisonPanel() {
 
   const [activePickerSlot, setActivePickerSlot] = useState<CompareSlot | null>(null);
 
-  // Build a stationId → stationName map
   const stationNames: Record<string, string> = {};
   for (const area of scoreResult?.areas ?? []) {
     stationNames[area.station_id] = area.station_name;
@@ -270,7 +246,6 @@ export default function ComparisonPanel() {
     }
   }
 
-  // Move focus to close button when panel opens in expanded state
   useEffect(() => {
     if (isPanelOpen && !isPanelMinimized) {
       closeButtonRef.current?.focus();
@@ -287,7 +262,6 @@ export default function ComparisonPanel() {
     minimizePanel();
   }
 
-  // ── MODE 1: MINIMIZED (Collapsed Bottom Dock allowing full map tapping) ──
   if (isPanelMinimized) {
     return (
       <div
@@ -299,7 +273,6 @@ export default function ComparisonPanel() {
           right: "16px",
         }}
       >
-        {/* Left: Indicator & Guide */}
         <div className="flex items-center gap-3 min-w-0">
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-brand)] text-sm font-bold text-white shadow-xs">
             ⚖️
@@ -319,9 +292,7 @@ export default function ComparisonPanel() {
           </div>
         </div>
 
-        {/* Center: Property Chips */}
         <div className="hidden md:flex items-center gap-2">
-          {/* Properti 1 Pill */}
           <div
             onClick={() => setActiveTargetSlot("A")}
             className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold cursor-pointer transition-all ${
@@ -350,7 +321,6 @@ export default function ComparisonPanel() {
 
           <span className="text-[10px] font-bold text-[var(--color-muted)]">VS</span>
 
-          {/* Properti 2 Pill */}
           <div
             onClick={() => setActiveTargetSlot("B")}
             className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold cursor-pointer transition-all ${
@@ -378,7 +348,6 @@ export default function ComparisonPanel() {
           </div>
         </div>
 
-        {/* Right: Actions */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             type="button"
@@ -401,10 +370,8 @@ export default function ComparisonPanel() {
     );
   }
 
-  // ── MODE 2: EXPANDED (Full Side-by-Side Comparison Workspace) ──
   return (
     <>
-      {/* Backdrop */}
       <div
         aria-hidden
         onClick={minimizePanel}
@@ -415,7 +382,6 @@ export default function ComparisonPanel() {
         }}
       />
 
-      {/* Main Panel Dialog */}
       <div
         role="dialog"
         aria-modal="true"
@@ -426,7 +392,6 @@ export default function ComparisonPanel() {
           right: 0,
         }}
       >
-        {/* ── Panel header ── */}
         <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-3.5">
           <div className="flex items-center gap-2.5">
             <span aria-hidden className="text-xl">⚖️</span>
@@ -459,7 +424,6 @@ export default function ComparisonPanel() {
               </button>
             )}
 
-            {/* Collapse button: direct answer to user request */}
             <button
               type="button"
               onClick={minimizePanel}
@@ -496,9 +460,7 @@ export default function ComparisonPanel() {
           </div>
         </div>
 
-        {/* ── 2-Column Area with smooth full scrolling all the way to the bottom ── */}
         <div className="grid flex-1 min-h-0 grid-cols-2 divide-x divide-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
-          {/* Col A */}
           <div className="h-full overflow-y-auto px-6 py-5 pb-28 scrollbar-thin">
             {slotA ? (
               <PropertyColumn
@@ -517,9 +479,7 @@ export default function ComparisonPanel() {
             )}
           </div>
 
-          {/* Col B */}
           <div className="relative h-full overflow-y-auto px-6 py-5 pb-28 scrollbar-thin">
-            {/* VS divider badge in center */}
             <span className="pointer-events-none absolute left-0 top-12 z-10 -translate-x-1/2 rounded-full bg-[var(--color-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-muted)] shadow-xs ring-1 ring-[var(--color-border)]">
               VS
             </span>
@@ -542,7 +502,6 @@ export default function ComparisonPanel() {
         </div>
       </div>
 
-      {/* In-Panel Interactive Property Picker Modal */}
       {activePickerSlot && (
         <PropertyPickerModal
           slot={activePickerSlot}
