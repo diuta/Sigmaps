@@ -1,7 +1,6 @@
 // Bentuk baris hasil query view properti_go_by_station (lihat supabase/views.sql) — geom
 // dan rute sudah dikonversi ke GeoJSON oleh ST_AsGeoJSON di sisi database.
 // contact_number sekarang ada di properti_go (lihat supabase/views.sql) — aman disertakan.
-
 // jarak_jalan_m / waktu_jalan_s / rute datang dari LEFT JOIN rute_properti: NULL berarti
 // etl/hitung_rute.py belum dijalankan untuk pasangan itu — kondisi normal, diteruskan apa adanya.
 export type PropertyRow = {
@@ -10,9 +9,9 @@ export type PropertyRow = {
   kategori_properti: string | null
   jenis_properti: string | null
   alamat: string | null
+  contact_number: string | null
   foto_tampak_depan: string | null
   foto_spanduk: string | null
-  contact_number?: string | null
   geom: GeoJSONGeometry
   jarak_jalan_m: number | null
   waktu_jalan_s: number | null

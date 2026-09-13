@@ -210,6 +210,13 @@ body {
   filter: grayscale(0) drop-shadow(0 6px 12px rgba(148, 163, 184, 0.35));
 }
 
+/* Saat zoom out (lihat StationLayer.tsx LABEL_MIN_ZOOM), sembunyikan label nama stasiun —
+   tersisa cuma pin — supaya tidak menumpuk jadi dinding teks saat lihat seluruh jaringan. */
+.map-labels-hidden .station-label {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Pulsing radar ring on Active State */
 @keyframes marker-pulse {
   0% {
