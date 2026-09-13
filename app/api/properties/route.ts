@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   if (summary === 'true' || stationId === 'all' || !stationId) {
     const { data, error } = await supabaseServer
       .from('properti_go_by_station')
-      .select('id, station_id, kategori_properti, jenis_properti, foto_tampak_depan, foto_spanduk')
+      .select('id, station_id, kategori_properti, jenis_properti, alamat, foto_tampak_depan, foto_spanduk, jarak_jalan_m, waktu_jalan_s')
 
     if (error) {
       console.error(error)

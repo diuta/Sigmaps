@@ -22,15 +22,19 @@ import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
 import { usePropertyFilter } from "@/hooks/property/usePropertyFilter";
 import type { PropertyUnit } from "@/types/property";
 import { useProperties } from "@/hooks/property/useProperties";
+import { useComparison } from "@/hooks/comparison/useComparison";
 import { formatJalanKaki } from "@/helper/format-jalan-kaki";
 
-function renderPopupHTML(prop: PropertyUnit): string {
+function renderPopupHTML(
+  prop: PropertyUnit,
+  inCompare: boolean,
+  slot: "A" | "B" | null,
+  targetSlot: "A" | "B"
+): string {
   const photoSrc =
     prop.foto_tampak_depan ||
     "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&auto=format&fit=crop&q=80";
 
-  // Design #4: Clean light card with full-bleed photo & gradient scrim
-  // Nilai di DB: "Disewa" / "Dijual" / "Sudah Tersewa" — cocokkan substring, sama seperti filter
   const sewa = (prop.jenis_properti || "").toLowerCase().includes("sewa");
   const badgeColor = sewa
     ? "background:#F59E0B;color:#431407"
@@ -41,35 +45,35 @@ function renderPopupHTML(prop: PropertyUnit): string {
     ? `<p style="margin:5px 0 0;font-size:11px;font-weight:600;color:#1e40af;line-height:1.4">🚶 ${jalanKaki}</p>`
     : "";
 
+  const btnHtml = inCompare && slot
+    ? `<button data-compare-btn type="button" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:4px;background:#2563eb;color:#ffffff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer">✓ Di Slot ${slot} <span style="font-weight:400;font-size:10px;opacity:0.85">(Hapus)</span></button>`
+    : `<button data-compare-btn type="button" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:4px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer">⚖️ Masukkan ke Slot ${targetSlot}</button>`;
+
   return `
     <div style="width:252px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.18),0 2px 8px rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.06);font-family:system-ui,-apple-system,sans-serif;cursor:pointer">
       <div style="position:relative;width:100%;height:144px;overflow:hidden;background:#f1f5f9">
         <img src="${photoSrc}" alt="${prop.kategori_properti}" style="width:100%;height:100%;object-fit:cover;display:block" />
-        <!-- Very light bottom scrim so category text stays readable -->
         <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 40%,rgba(0,0,0,0.28) 100%)"></div>
-        <!-- Badge top-left -->
         <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:0.07em;${badgeColor}">${badgeLabel}</span>
-        <!-- Category title over scrim at bottom -->
         <div style="position:absolute;bottom:9px;left:11px;right:11px;font-size:15px;font-weight:700;color:#fff;line-height:1.25;letter-spacing:-0.01em;text-shadow:0 1px 6px rgba(0,0,0,0.5)">${prop.kategori_properti}</div>
       </div>
-      <!-- Body: address & call-to-action hint -->
       <div style="padding:9px 12px 11px">
         <p style="margin:0;font-size:11px;color:#64748b;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${prop.alamat}</p>
         ${barisJarak}
-        <div style="margin-top:6px;padding-top:6px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600;color:#2563eb">
-          <span>Lihat detail properti</span>
-          <span style="font-size:13px;line-height:1">›</span>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div data-compare-container style="flex:1">
+            ${btnHtml}
+          </div>
+          <div style="font-size:11px;font-weight:600;color:#64748b;display:flex;align-items:center;gap:2px">
+            <span>Detail</span>
+            <span style="font-size:13px;line-height:1">›</span>
+          </div>
         </div>
       </div>
     </div>
   `;
 }
 
-/**
- * Anti-overlap: properti dengan koordinat identik / sangat berdekatan (≤ ~3m)
- * dikelompokkan, lalu masing-masing digeser ke titik berbeda dalam lingkaran kecil
- * (radius ≈ 13m) sehingga pin tidak menumpuk satu sama lain.
- */
 function resolveOverlaps(
   props: PropertyUnit[],
   spreadDeg = 0.00015
@@ -112,6 +116,56 @@ export default function PropertyLayer() {
   const { selectedStation } = useSelectedStation();
   const { selectedProperty, setSelectedProperty, setPreviewProperty } = useSelectedProperty();
   const { properties } = useProperties(selectedStation?.area_id ?? null);
+  const {
+    slotA,
+    slotB,
+    activeTargetSlot,
+    assignToActiveSlot,
+    clearSlot,
+    getSlotFor,
+    isInCompare,
+  } = useComparison();
+
+  const activePopupElRef = useRef<HTMLElement | null>(null);
+  const activePopupPropRef = useRef<PropertyUnit | null>(null);
+
+  const compStateRef = useRef({
+    slotA,
+    slotB,
+    activeTargetSlot,
+    assignToActiveSlot,
+    clearSlot,
+    getSlotFor,
+    isInCompare,
+    selectedStation,
+  });
+  compStateRef.current = {
+    slotA,
+    slotB,
+    activeTargetSlot,
+    assignToActiveSlot,
+    clearSlot,
+    getSlotFor,
+    isInCompare,
+    selectedStation,
+  };
+
+  // Synchronize button in open map popup whenever comparison state changes
+  useEffect(() => {
+    if (activePopupElRef.current && activePopupPropRef.current) {
+      const propId = activePopupPropRef.current.id;
+      const inComp = isInCompare(propId);
+      const slot = getSlotFor(propId);
+      const container = activePopupElRef.current.querySelector("[data-compare-container]");
+      if (container) {
+        if (inComp && slot) {
+          container.innerHTML = `<button data-compare-btn type="button" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:4px;background:#2563eb;color:#ffffff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer">✓ Di Slot ${slot} <span style="font-weight:400;font-size:10px;opacity:0.85">(Hapus)</span></button>`;
+        } else {
+          container.innerHTML = `<button data-compare-btn type="button" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:4px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer">⚖️ Masukkan ke Slot ${activeTargetSlot}</button>`;
+        }
+      }
+    }
+  }, [slotA, slotB, activeTargetSlot, isInCompare, getSlotFor]);
   const { propertyTypes, transactionTypes, hasPhotoOnly } = usePropertyFilter();
 
   const filteredProperties = useMemo(() => {
@@ -187,13 +241,30 @@ export default function PropertyLayer() {
         </div>
       `;
 
-      // Buat container DOM untuk kartu popup agar interaktif dan bisa diklik
+      const inComp = compStateRef.current.isInCompare(prop.id);
+      const curSlot = compStateRef.current.getSlotFor(prop.id);
       const popupEl = document.createElement("div");
       popupEl.className = "property-popup-interactive select-none";
-      popupEl.innerHTML = renderPopupHTML(prop);
+      popupEl.innerHTML = renderPopupHTML(prop, inComp, curSlot, compStateRef.current.activeTargetSlot);
 
-      // Saat kartu properti di popup diklik, buka halaman detail properti di sidebar
       popupEl.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+        const compareBtn = target.closest("[data-compare-btn]");
+        if (compareBtn) {
+          e.stopPropagation();
+          const state = compStateRef.current;
+          const isIn = state.isInCompare(prop.id);
+          const occupied = state.getSlotFor(prop.id);
+          if (isIn && occupied) {
+            state.clearSlot(occupied);
+          } else {
+            const stId = state.selectedStation?.area_id ?? "";
+            const stName = state.selectedStation?.station_name ?? "";
+            state.assignToActiveSlot({ unit: { ...prop }, stationId: stId, stationName: stName });
+          }
+          setSelectedProperty({ ...prop });
+          return;
+        }
         e.stopPropagation();
         setSelectedProperty({ ...prop });
       });
@@ -209,9 +280,30 @@ export default function PropertyLayer() {
 
       // Popup terbuka = properti "dipratinjau": RouteLayer langsung menggambar rutenya.
       // Ditutup (tombol X / klik peta / popup lain dibuka) = pratinjau selesai.
-      popup.on("open", () => setPreviewProperty({ ...prop, lng, lat }));
+      popup.on("open", () => {
+        activePopupElRef.current = popupEl;
+        activePopupPropRef.current = prop;
+        setPreviewProperty({ ...prop, lng, lat });
+
+        // Update popup compare button to latest state
+        const state = compStateRef.current;
+        const inC = state.isInCompare(prop.id);
+        const s = state.getSlotFor(prop.id);
+        const container = popupEl.querySelector("[data-compare-container]");
+        if (container) {
+          if (inC && s) {
+            container.innerHTML = `<button data-compare-btn type="button" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:4px;background:#2563eb;color:#ffffff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer">✓ Di Slot ${s} <span style="font-weight:400;font-size:10px;opacity:0.85">(Hapus)</span></button>`;
+          } else {
+            container.innerHTML = `<button data-compare-btn type="button" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:4px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer">⚖️ Masukkan ke Slot ${state.activeTargetSlot}</button>`;
+          }
+        }
+      });
       popup.on("close", () => {
-        if (activePopupRef.current === popup) activePopupRef.current = null;
+        if (activePopupRef.current === popup) {
+          activePopupRef.current = null;
+          activePopupElRef.current = null;
+          activePopupPropRef.current = null;
+        }
         setPreviewProperty((current) => (current?.id === prop.id ? null : current));
       });
 

@@ -66,6 +66,8 @@ export default function StationNoBriefPanel({ onSelectProperty }: Props) {
           <PropertyList
             properties={properties}
             loading={loading}
+            stationId={selectedStation.area_id}
+            stationName={selectedStation.station_name}
             onSelect={(unit) => onSelectProperty(unit, selectedStation.station_name)}
           />
         </>
