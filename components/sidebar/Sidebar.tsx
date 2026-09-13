@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useSyncExternalStore } from "react";
 import BriefSection from "@/components/sidebar/BriefSection";
+import CompareBar from "@/components/comparison/CompareBar";
 import OutputSection from "@/components/sidebar/OutputSection";
 import { useBriefResult } from "@/hooks/brief/useBriefResult";
 import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
@@ -75,6 +76,8 @@ export default function Sidebar() {
           onSubmit={submit}
           loading={loading}
         />
+
+        <CompareBar />
 
         {error && (
           <p className="t-body rounded-[var(--radius-card)] border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-[var(--space-md)] text-[var(--color-warning-tx)]">

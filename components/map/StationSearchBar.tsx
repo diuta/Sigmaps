@@ -17,8 +17,10 @@ import {
 
 const SIDEBAR_CLOSED_PX = 24;
 const GAP_PX = 16;
-const BASE_LEFT_PX = SIDEBAR_CLOSED_PX + GAP_PX;
-const TRANSLATE_OPEN_PX = 380 - SIDEBAR_CLOSED_PX;
+const BASE_LEFT_PX = SIDEBAR_CLOSED_PX + GAP_PX; // 40px
+const TRANSLATE_OPEN_PX = 380 - SIDEBAR_CLOSED_PX; // 356px
+/** Ruang yang disisakan di kanan untuk MapNavigationControl (zoom +/- & recenter). */
+const RIGHT_GUTTER_PX = 64;
 
 interface SearchItem extends StationLocation {
   rank: number | null;
@@ -231,13 +233,16 @@ export default function StationSearchBar() {
   return (
     <div
       ref={containerRef}
-      className="absolute top-[var(--space-md)] z-[90] transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)]"
+      className="absolute top-[var(--space-md)] z-[90] w-[340px] sm:w-[440px] md:w-[500px] transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)]"
       style={{
         left: BASE_LEFT_PX,
         transform: `translateX(${translateX}px)`,
+        maxWidth: `calc(100vw - ${BASE_LEFT_PX + translateX + RIGHT_GUTTER_PX}px)`,
       }}
     >
-      <div className="relative flex items-center h-11 sm:h-12 w-[340px] sm:w-[440px] md:w-[500px] max-w-[calc(100vw-32px)] rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-float)] backdrop-blur-md transition-all duration-[var(--motion-fast)] focus-within:border-[var(--color-brand)] focus-within:ring-2 focus-within:ring-[var(--color-brand)]/20">
+      {/* ── Search Input Capsule ────────────────────────────────────────── */}
+      <div className="relative flex items-center h-11 sm:h-12 w-full rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-float)] backdrop-blur-md transition-all duration-[var(--motion-fast)] focus-within:border-[var(--color-brand)] focus-within:ring-2 focus-within:ring-[var(--color-brand)]/20">
+        {/* Search Icon */}
         <div className="flex items-center justify-center pl-4 pr-1 text-[var(--color-muted)] pointer-events-none">
           <svg
             width="17"
@@ -332,7 +337,8 @@ export default function StationSearchBar() {
       </div>
 
       {isDropdownOpen && (
-        <div className="absolute left-0 top-full mt-2 w-[340px] sm:w-[440px] md:w-[500px] max-w-[calc(100vw-32px)] rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl backdrop-blur-xl overflow-hidden z-[91] transition-all animate-in fade-in duration-150">
+        <div className="absolute left-0 top-full mt-2 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl backdrop-blur-xl overflow-hidden z-[91] transition-all animate-in fade-in duration-150">
+          {/* ── A. Filter Drawer Panel (Bila showFilters true) ───────────── */}
           {showFilters && (
             <div className="p-3 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50">
               <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--color-border)]/60">

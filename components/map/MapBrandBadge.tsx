@@ -1,13 +1,22 @@
 "use client";
 
+import { useComparison } from "@/hooks/comparison/useComparison";
+
 interface MapBrandBadgeProps {
   sigmapsLogoSrc?: string;
 }
 
-export default function MapBrandBadge({ sigmapsLogoSrc }: MapBrandBadgeProps) {
+export default function MapBrandBadge({ sigmapsLogoSrc = "/assets/logos/sigmaps-logo.png" }: MapBrandBadgeProps) {
+  const { isPanelOpen, isPanelMinimized } = useComparison();
+  const isDockVisible = isPanelOpen && isPanelMinimized;
+  const translateY = isDockVisible ? -68 : 0;
+
   return (
     <div
-      className="absolute bottom-3 right-3 z-30 flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/90 px-3 py-1.5 shadow-[var(--shadow-card)] backdrop-blur-md transition-all duration-[var(--motion-fast)] select-none hover:bg-[var(--color-surface)]"
+      className="absolute bottom-3 right-3 z-30 flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/90 px-3 py-1.5 shadow-[var(--shadow-card)] backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] select-none hover:bg-[var(--color-surface)]"
+      style={{
+        transform: `translateY(${translateY}px)`,
+      }}
       role="region"
       aria-label="Atribusi dan kemitraan platform"
     >
@@ -15,7 +24,7 @@ export default function MapBrandBadge({ sigmapsLogoSrc }: MapBrandBadgeProps) {
         <img
           src={sigmapsLogoSrc}
           alt="SIGMAPS"
-          className="h-[16px] w-auto object-contain"
+          className="h-[18px] w-auto object-contain"
           draggable={false}
         />
       ) : (

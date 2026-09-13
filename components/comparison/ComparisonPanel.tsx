@@ -24,7 +24,7 @@ function PhotoBlock({ src, label, alt }: { src: string | null; label: string; al
           className="aspect-[4/3] w-full rounded-[10px] border border-[var(--color-border)] object-cover shadow-xs"
         />
       ) : (
-        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-[10px] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-muted)]">
+        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-muted)]">
           <span className="t-body text-xs text-[var(--color-muted)]">Tidak ada foto</span>
         </div>
       )}
@@ -78,7 +78,7 @@ function PropertyColumn({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-y-1 border-b border-[var(--color-border)] pb-2.5">
         <div className="flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-brand)] text-xs font-bold text-white shadow-xs">
             {getSlotNumber(slot)}
@@ -92,9 +92,9 @@ function PropertyColumn({
             type="button"
             onClick={onChangeMap}
             title="Kecilkan panel dan pilih pin di peta"
-            className="cursor-pointer rounded px-2 py-1 text-[11px] font-bold text-[var(--color-brand)] bg-[var(--color-accent-surface)] hover:bg-[var(--color-brand)] hover:text-white transition-colors"
+            className="cursor-pointer whitespace-nowrap rounded px-2 py-1 text-[11px] font-bold text-[var(--color-brand)] bg-[var(--color-accent-surface)] hover:bg-[var(--color-brand)] hover:text-white transition-colors"
           >
-            📍 Ganti via Peta
+            📍 Ganti<span className="hidden xl:inline"> via Peta</span>
           </button>
           <button
             type="button"
@@ -179,22 +179,24 @@ function EmptySlotCard({
   const slotLabel = getSlotLabel(slot);
   const slotNumber = getSlotNumber(slot);
   return (
-    <div className="flex h-full min-h-[380px] flex-col items-center justify-center rounded-[16px] border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface-muted)]/40 p-8 text-center transition-all hover:border-[var(--color-brand)]">
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-brand)]/10 text-lg font-bold text-[var(--color-brand)]">
+    <div className="flex h-full min-h-[380px] flex-col items-center justify-center p-8 text-center">
+      {/* Slot number badge */}
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-brand)]/10 text-2xl font-black text-[var(--color-brand)]">
         {slotNumber}
       </div>
-      <h3 className="t-heading-1 mb-1 text-sm font-bold text-[var(--color-text)]">
+
+      <h3 className="t-heading-1 mb-2 text-sm font-bold text-[var(--color-text)]">
         {slotLabel} Belum Dipilih
       </h3>
-      <p className="t-body mb-5 max-w-xs text-xs text-[var(--color-muted)]">
-        Pilih {slotLabel.toLowerCase()} dengan tap langsung di peta atau pilih dari daftar
+      <p className="t-body mb-6 max-w-[240px] text-xs text-[var(--color-muted)] leading-relaxed">
+        Tap langsung pin di peta atau pilih dari daftar unit untuk membandingkan.
       </p>
-      
-      <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full max-w-xs">
+
+      <div className="flex flex-col sm:flex-row items-center gap-2 w-full max-w-[260px]">
         <button
           type="button"
           onClick={onPickFromMap}
-          className="t-button flex-1 w-full flex items-center justify-center gap-1.5 cursor-pointer rounded-[var(--radius-card)] bg-[var(--color-brand)] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[var(--color-brand-hover)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
+          className="t-button flex-1 w-full h-10 flex items-center justify-center gap-1.5 cursor-pointer rounded-[var(--radius-card)] bg-[var(--color-brand)] px-4 text-xs font-bold text-white shadow-xs transition-all hover:bg-[var(--color-brand-hover)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
         >
           <span>📍</span>
           <span>Pilih di Peta</span>
@@ -202,7 +204,7 @@ function EmptySlotCard({
         <button
           type="button"
           onClick={onPickFromList}
-          className="t-button flex-1 w-full flex items-center justify-center gap-1.5 cursor-pointer rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-xs font-semibold text-[var(--color-text)] shadow-xs transition-all hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+          className="t-button flex-1 w-full h-10 flex items-center justify-center gap-1.5 cursor-pointer rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-xs font-semibold text-[var(--color-text)] shadow-xs transition-all hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
         >
           <span>📋</span>
           <span>Daftar Unit</span>
@@ -254,7 +256,7 @@ export default function ComparisonPanel() {
 
   if (!isPanelOpen) return null;
 
-  const sidebarWidth = "var(--sidebar-width)";
+  const sidebarWidth = "min(var(--sidebar-width), 100vw)";
   const filledCount = (slotA ? 1 : 0) + (slotB ? 1 : 0);
 
   function handlePickFromMap(slot: CompareSlot) {
@@ -269,7 +271,7 @@ export default function ComparisonPanel() {
         aria-label="Toolbar perbandingan properti"
         className="fixed bottom-3 z-[85] flex items-center justify-between gap-3 rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)]/95 px-5 py-2.5 shadow-2xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-2 duration-200"
         style={{
-          left: sidebarOpen ? "calc(var(--sidebar-width) + 16px)" : "16px",
+          left: sidebarOpen ? `calc(${sidebarWidth} + 16px)` : "16px",
           right: "16px",
         }}
       >
@@ -281,9 +283,6 @@ export default function ComparisonPanel() {
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-[var(--color-text)]">
                 Bandingkan Properti
-              </span>
-              <span className="rounded-full bg-[var(--color-brand)]/15 px-2 py-0.2 text-[10px] font-bold text-[var(--color-brand)]">
-                📍 Target: {getSlotLabel(activeTargetSlot)}
               </span>
             </div>
             <p className="t-micro text-[var(--color-muted)] truncate">
@@ -300,7 +299,7 @@ export default function ComparisonPanel() {
                 ? "border-2 border-[var(--color-brand)] bg-[var(--color-accent-surface)] text-[var(--color-brand)] shadow-xs"
                 : slotA
                 ? "border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)]"
-                : "border border-dashed border-[var(--color-border)] text-[var(--color-muted)]"
+                : "border border-[var(--color-border)] bg-[var(--color-surface-muted)]/60 text-[var(--color-muted)] hover:border-[var(--color-brand)]/40"
             }`}
           >
             <span>Properti 1: {slotA ? slotA.unit.kategori_properti : "Kosong"}</span>
@@ -328,7 +327,7 @@ export default function ComparisonPanel() {
                 ? "border-2 border-[var(--color-brand)] bg-[var(--color-accent-surface)] text-[var(--color-brand)] shadow-xs"
                 : slotB
                 ? "border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)]"
-                : "border border-dashed border-[var(--color-border)] text-[var(--color-muted)]"
+                : "border border-[var(--color-border)] bg-[var(--color-surface-muted)]/60 text-[var(--color-muted)] hover:border-[var(--color-brand)]/40"
             }`}
           >
             <span>Properti 2: {slotB ? slotB.unit.kategori_properti : "Kosong"}</span>
@@ -386,13 +385,13 @@ export default function ComparisonPanel() {
         role="dialog"
         aria-modal="true"
         aria-label="Perbandingan properti"
-        className="fixed bottom-0 z-[95] flex h-[78vh] max-h-[85vh] flex-col overflow-hidden rounded-t-[16px] border border-b-0 border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)]"
+        className="fixed bottom-0 z-[95] flex h-[92vh] max-h-[92vh] flex-col overflow-hidden rounded-t-[16px] border border-b-0 border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)] sm:h-[78vh] sm:max-h-[85vh]"
         style={{
           left: sidebarOpen ? sidebarWidth : 0,
           right: 0,
         }}
       >
-        <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-3.5">
+        <div className="flex flex-shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 sm:px-6 sm:py-3.5">
           <div className="flex items-center gap-2.5">
             <span aria-hidden className="text-xl">⚖️</span>
             <div className="flex items-center gap-2">
@@ -413,7 +412,7 @@ export default function ComparisonPanel() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             {filledCount > 0 && (
               <button
                 type="button"
@@ -431,7 +430,7 @@ export default function ComparisonPanel() {
               className="t-button flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-card)] border border-[var(--color-brand)]/40 bg-[var(--color-accent-surface)] px-3 py-1.5 text-xs font-bold text-[var(--color-brand)] transition-colors hover:bg-[var(--color-brand)] hover:text-white"
             >
               <span>▾</span>
-              <span>Kecilkan (Pilih di Peta)</span>
+              <span>Kecilkan<span className="hidden sm:inline"> (Pilih di Peta)</span></span>
             </button>
 
             <button
@@ -460,8 +459,8 @@ export default function ComparisonPanel() {
           </div>
         </div>
 
-        <div className="grid flex-1 min-h-0 grid-cols-2 divide-x divide-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
-          <div className="h-full overflow-y-auto px-6 py-5 pb-28 scrollbar-thin">
+        <div className="grid flex-1 min-h-0 grid-cols-1 grid-rows-2 divide-y lg:grid-cols-2 lg:grid-rows-1 lg:divide-x lg:divide-y-0 divide-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
+          <div className="h-full overflow-y-auto px-4 py-5 pb-28 scrollbar-thin sm:px-6">
             {slotA ? (
               <PropertyColumn
                 item={slotA}
@@ -479,8 +478,8 @@ export default function ComparisonPanel() {
             )}
           </div>
 
-          <div className="relative h-full overflow-y-auto px-6 py-5 pb-28 scrollbar-thin">
-            <span className="pointer-events-none absolute left-0 top-12 z-10 -translate-x-1/2 rounded-full bg-[var(--color-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-muted)] shadow-xs ring-1 ring-[var(--color-border)]">
+          <div className="relative h-full overflow-y-auto px-4 py-5 pb-28 scrollbar-thin sm:px-6">
+            <span className="pointer-events-none absolute left-0 top-12 z-10 hidden -translate-x-1/2 rounded-full bg-[var(--color-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-muted)] shadow-xs ring-1 ring-[var(--color-border)] lg:block">
               VS
             </span>
             {slotB ? (

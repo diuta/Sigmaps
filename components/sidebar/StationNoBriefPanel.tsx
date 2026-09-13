@@ -55,10 +55,10 @@ export default function StationNoBriefPanel({ onSelectProperty }: Props) {
           />
         </>
       ) : (
-        <section className="flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-[var(--space-md)]">
-          <h2 className="t-heading-2 text-[var(--color-warning-tx)]">Data belum cukup</h2>
-          <p className="t-body text-[var(--color-warning-tx)]">
-            Kawasan ini tidak dinilai dan tidak masuk peringkat karena pengamatannya terlalu sedikit.
+        <section className="flex flex-col gap-[var(--space-sm)] rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-[var(--space-md)]">
+          <h2 className="t-heading-2 text-[var(--color-text)]">Luar Cakupan Evaluasi</h2>
+          <p className="t-body text-[var(--color-muted)]">
+            Kawasan stasiun ini berfungsi sebagai titik transit referensi jaringan transportasi dan belum masuk dalam pemodelan pemeringkatan properti.
           </p>
         </section>
       )}
