@@ -10,6 +10,11 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "SIGMAPS",
   description: "Penilaian kawasan usaha kuliner di sekitar stasiun KRL Jakarta",
+  icons: {
+    icon: "/logos/sigmap-logo-icon_only.png",
+    shortcut: "/logos/sigmap-logo-icon_only.png",
+    apple: "/logos/sigmap-logo-icon_only.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

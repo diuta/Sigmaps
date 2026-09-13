@@ -20,6 +20,11 @@ export interface PropertyUnit {
   foto_tampak_depan: string | null;
   /** URL foto spanduk — bisa null jika tidak ada */
   foto_spanduk: string | null;
+  /**
+   * Nomor WhatsApp pemilik/pengelola properti, diambil via OCR dari foto_spanduk.
+   * Format DB: +62xxxxxxxxxx (sudah ber-kode negara). null = foto tidak ada / OCR di bawah threshold.
+   */
+  contact_number?: string | null;
   /** WGS-84, dibutuhkan PropertyLayer untuk render marker */
   lat: number;
   lng: number;
@@ -38,7 +43,9 @@ export interface PropertyUnit {
  * ⛔ KOLOM YANG DILARANG DITAMPILKAN:
  *    - Harga sewa / jual         (tidak ada di properti_go)
  *    - Luas bangunan / tanah     (tidak ada di properti_go)
- *    - Kontak pemilik / agen     (tidak ada di properti_go)
+ *    - Harga sewa / jual         (tidak ada, jangan tambah)
+ *    - Luas bangunan / tanah     (tidak ada, jangan tambah)
+ *    - contact_number             SUDAH ADA di kolom properti_go.contact_number — aman ditampilkan
  *
  * Properti Go tidak menyimpan kolom-kolom itu.
  * Jangan buat field baru untuk menampungnya.

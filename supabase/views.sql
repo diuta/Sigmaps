@@ -72,6 +72,7 @@ select
   p.alamat,
   p.foto_tampak_depan,
   p.foto_spanduk,
+  p.contact_number,
   ST_AsGeoJSON(p.geom)::json as geom,
   r.jarak_m  as jarak_jalan_m,
   r.waktu_s  as waktu_jalan_s,

@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   if (summary === 'true') {
     const { data, error } = await supabaseServer
       .from('properti_go_by_station')
-      .select('id, station_id, kategori_properti, jenis_properti, alamat, foto_tampak_depan, foto_spanduk, jarak_jalan_m, waktu_jalan_s')
+      .select('id, station_id, kategori_properti, jenis_properti, alamat, foto_tampak_depan, foto_spanduk, contact_number, jarak_jalan_m, waktu_jalan_s')
 
     if (error) {
       console.error(error)
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   let query = supabaseServer
     .from('properti_go_by_station')
     .select(
-      'id, station_id, kategori_properti, jenis_properti, alamat, foto_tampak_depan, foto_spanduk, geom, jarak_jalan_m, waktu_jalan_s, rute'
+      'id, station_id, kategori_properti, jenis_properti, alamat, foto_tampak_depan, foto_spanduk, contact_number, geom, jarak_jalan_m, waktu_jalan_s, rute'
     )
 
   if (stationId && stationId !== 'all') {
