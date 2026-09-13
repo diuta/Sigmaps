@@ -7,8 +7,8 @@ export async function GET(request: Request) {
   const stationId = url.searchParams.get('station_id')
   const summary = url.searchParams.get('summary')
 
-  // Mode ringkasan untuk filter lintas stasiun (e.g. cari stasiun yang punya Kos / Rumah / Ruko)
-  if (summary === 'true' || stationId === 'all' || !stationId) {
+  // Mode ringkasan untuk filter lintas stasiun (StationSearchBar: useAllPropertiesSummary)
+  if (summary === 'true') {
     const { data, error } = await supabaseServer
       .from('properti_go_by_station')
       .select('id, station_id, kategori_properti, jenis_properti, alamat, foto_tampak_depan, foto_spanduk, jarak_jalan_m, waktu_jalan_s')
@@ -21,12 +21,17 @@ export async function GET(request: Request) {
     return NextResponse.json({ data: data ?? [] })
   }
 
-  const { data, error } = await supabaseServer
+  let query = supabaseServer
     .from('properti_go_by_station')
     .select(
-      'id, kategori_properti, jenis_properti, alamat, foto_tampak_depan, foto_spanduk, geom, jarak_jalan_m, waktu_jalan_s, rute'
+      'id, station_id, kategori_properti, jenis_properti, alamat, foto_tampak_depan, foto_spanduk, geom, jarak_jalan_m, waktu_jalan_s, rute'
     )
-    .eq('station_id', stationId)
+
+  if (stationId && stationId !== 'all') {
+    query = query.eq('station_id', stationId)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     console.error(error)

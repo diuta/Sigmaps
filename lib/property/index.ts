@@ -6,6 +6,7 @@
 // etl/hitung_rute.py belum dijalankan untuk pasangan itu — kondisi normal, diteruskan apa adanya.
 export type PropertyRow = {
   id: string
+  station_id?: string | null
   kategori_properti: string | null
   jenis_properti: string | null
   alamat: string | null
@@ -27,6 +28,7 @@ export type PropertyFeatureCollection = {
     geometry: GeoJSONGeometry
     properties: {
       id: string
+      station_id: string | null
       kategori_properti: string | null
       jenis_properti: string | null
       alamat: string | null
@@ -47,6 +49,7 @@ export function toPropertiesFeatureCollection(rows: PropertyRow[]): PropertyFeat
       geometry: row.geom,
       properties: {
         id: row.id,
+        station_id: row.station_id ?? null,
         kategori_properti: row.kategori_properti,
         jenis_properti: row.jenis_properti,
         alamat: row.alamat,

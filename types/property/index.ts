@@ -10,6 +10,7 @@
 
 export interface PropertyUnit {
   id: string;
+  station_id?: string | null;
   /** e.g. "Kuliner", "Ritel", "Jasa" */
   kategori_properti: string;
   /** "Sewa" | "Jual" */

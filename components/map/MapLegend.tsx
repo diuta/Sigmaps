@@ -77,16 +77,25 @@ function StationInactiveSymbol() {
   );
 }
 
-// Simbol: properti — teardrop oranye
+// Simbol: properti — oranye (aktif) dan peach (stasiun lainnya)
 function PropertySymbol() {
   return (
-    <svg width="12" height="16" viewBox="0 0 12 16" fill="none" aria-hidden="true">
-      <path
-        d="M6 0C2.686 0 0 2.686 0 6c0 1.427.506 2.734 1.346 3.756L6 16l4.654-6.244A5.974 5.974 0 0 0 12 6C12 2.686 9.314 0 6 0Z"
-        fill="#EA580C"
-      />
-      <circle cx="6" cy="6" r="2.2" fill="white" />
-    </svg>
+    <div className="flex items-center gap-1 shrink-0">
+      <svg width="10" height="14" viewBox="0 0 12 16" fill="none" aria-hidden="true" aria-label="Stasiun terpilih">
+        <path
+          d="M6 0C2.686 0 0 2.686 0 6c0 1.427.506 2.734 1.346 3.756L6 16l4.654-6.244A5.974 5.974 0 0 0 12 6C12 2.686 9.314 0 6 0Z"
+          fill="#EA580C"
+        />
+        <circle cx="6" cy="6" r="2.2" fill="white" />
+      </svg>
+      <svg width="10" height="14" viewBox="0 0 12 16" fill="none" aria-hidden="true" aria-label="Stasiun lainnya">
+        <path
+          d="M6 0C2.686 0 0 2.686 0 6c0 1.427.506 2.734 1.346 3.756L6 16l4.654-6.244A5.974 5.974 0 0 0 12 6C12 2.686 9.314 0 6 0Z"
+          fill="#F0AC89"
+        />
+        <circle cx="6" cy="6" r="2.2" fill="white" />
+      </svg>
+    </div>
   );
 }
 
@@ -108,7 +117,7 @@ interface LegendItem {
 const LEGEND_ITEMS: LegendItem[] = [
   { symbol: <StationActiveSymbol />, label: "Stasiun Teranalisis", sub: "Tercakup dalam evaluasi & ranking" },
   { symbol: <StationInactiveSymbol />, label: "Jaringan Sekunder", sub: "Titik transit tanpa penilaian" },
-  { symbol: <PropertySymbol />, label: "Listing Properti", sub: "Tersedia di sekitar stasiun" },
+  { symbol: <PropertySymbol />, label: "Listing Properti", sub: "Oranye: aktif · Peach: lainnya" },
   { symbol: <IsochroneSymbol />, label: "Zona Jalan Kaki 10 Mnt", sub: "Jangkauan dari stasiun terpilih" },
 ];
 

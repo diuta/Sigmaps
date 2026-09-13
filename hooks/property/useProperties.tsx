@@ -40,6 +40,7 @@ export function useProperties(stationId: string | null): UsePropertiesResult {
       data
         ? data.features.map((feature) => ({
             ...feature.properties,
+            station_id: feature.properties.station_id ?? null,
             lng: feature.geometry.coordinates[0],
             lat: feature.geometry.coordinates[1],
           }))
