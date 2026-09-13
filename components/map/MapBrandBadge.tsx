@@ -20,9 +20,13 @@ export default function MapBrandBadge({ sigmapsLogoSrc }: MapBrandBadgeProps) {
         />
       ) : (
         <div className="flex items-center gap-1.5">
-          <span className="flex h-[18px] w-[18px] items-center justify-center rounded-[4px] bg-[var(--color-brand)] text-[11px] font-black text-white shadow-xs">
-            Σ
-          </span>
+          <img
+            src="/assets/logos/sigmaps_logo.svg"
+            alt=""
+            aria-hidden="true"
+            className="h-[18px] w-[18px] object-contain"
+            draggable={false}
+          />
           <span className="text-[12px] font-bold tracking-tight text-[var(--color-text)]">
             SIGMAPS
           </span>
