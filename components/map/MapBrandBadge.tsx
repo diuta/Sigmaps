@@ -20,7 +20,7 @@ interface MapBrandBadgeProps {
   sigmapsLogoSrc?: string;
 }
 
-export default function MapBrandBadge({ sigmapsLogoSrc }: MapBrandBadgeProps) {
+export default function MapBrandBadge({ sigmapsLogoSrc = "/assets/logos/sigmaps-logo.png" }: MapBrandBadgeProps) {
   const { isPanelOpen, isPanelMinimized } = useComparison();
   const isDockVisible = isPanelOpen && isPanelMinimized;
   const translateY = isDockVisible ? -68 : 0;
@@ -39,7 +39,7 @@ export default function MapBrandBadge({ sigmapsLogoSrc }: MapBrandBadgeProps) {
         <img
           src={sigmapsLogoSrc}
           alt="SIGMAPS"
-          className="h-[16px] w-auto object-contain"
+          className="h-[18px] w-auto object-contain"
           draggable={false}
         />
       ) : (
