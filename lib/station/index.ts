@@ -1,4 +1,3 @@
-/** Baris view `stasiun_kawasan` (supabase/views.sql). */
 export type StationRow = {
   station_id: string
   nama: string
@@ -8,7 +7,6 @@ export type StationRow = {
   longitude: number | null
   latitude: number | null
 
-  // Dari scored_areas lewat LEFT JOIN. null = pipeline batch belum jalan.
   area_id: string | null
   area_km2: number | null
   is_rankable: boolean | null
@@ -30,13 +28,9 @@ export type StationFeatureCollection = {
       kecamatan: string | null
       kabkot: string | null
 
-      /** Sifat kawasan, bukan hasil pencarian. null != false. */
       is_rankable: boolean | null
       area_km2: number | null
 
-      // Poligon MAPID (foot, 600 detik). Dititipkan di properties karena
-      // `geometry` sudah dipakai titik stasiun — MapLibre tidak bisa memakainya
-      // langsung sebagai sumber, IsochroneLayer merakit sendiri.
       isokron: GeoJSONPolygon | null
     }
   }>

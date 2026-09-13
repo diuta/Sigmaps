@@ -53,8 +53,6 @@ def main():
         )
         print(f"community_activity : {len(rows)} baris")
 
-        # Berapa yang benar-benar bisa diringkas per kawasan? Ini yang menentukan
-        # apakah /api/community-sentiment punya bahan atau tidak.
         cur.execute("""
             select count(*) filter (where a.area_id is not null) as di_dalam,
                    count(distinct a.area_id)                     as kawasan

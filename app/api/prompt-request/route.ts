@@ -8,8 +8,6 @@ import {
   GeminiUnavailableError,
 } from '@/lib/ai/parseIntent'
 
-// Titik sentuh AI #3 — kalimat bebas -> parameter terstruktur (§2 Langkah 2, §6.6).
-// AI hanya menyiapkan masukan; skor tetap deterministik di lib/scoring.
 export async function POST(request: Request) {
   let body: unknown
   try {
@@ -34,8 +32,6 @@ export async function POST(request: Request) {
   try {
     return NextResponse.json({ data: await parseIntent(parsed.data.teks, tipe3Values) })
   } catch (error) {
-    // Tiga kelas galat WAJIB dibedakan instanceof — kode statusnya berbeda dan UI
-    // menanganinya berbeda (§6.8b).
     if (error instanceof NonCulinaryError) {
       return NextResponse.json({ error: 'Hanya usaha kuliner yang didukung' }, { status: 400 })
     }

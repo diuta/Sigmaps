@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useSyncExternalStore } from "react";
 import BriefSection from "@/components/sidebar/BriefSection";
+import CompareBar from "@/components/comparison/CompareBar";
 import OutputSection from "@/components/sidebar/OutputSection";
 import { useBriefResult } from "@/hooks/brief/useBriefResult";
 import { useSelectedProperty } from "@/hooks/property/useSelectedProperty";
 import { useSidebarOpen } from "@/hooks/sidebar/useSidebarOpen";
 
-/** Di bawah lebar ini halaman dibuka dengan panel tertutup supaya peta terlihat lebih dulu. */
 const DESKTOP_QUERY = "(min-width: 768px)";
 
 function subscribeToDesktop(onChange: () => void) {
@@ -16,11 +16,6 @@ function subscribeToDesktop(onChange: () => void) {
   return () => mql.removeEventListener("change", onChange);
 }
 
-/**
- * Layar cukup lebar untuk membuka panel sejak awal. Dibaca lewat useSyncExternalStore, bukan
- * useState + useEffect: nilainya milik peramban, dan ini satu-satunya cara membacanya tanpa
- * render server & klien berbeda. Snapshot server `true` — desktop adalah tampilan bawaan.
- */
 function useIsDesktop(): boolean {
   return useSyncExternalStore(
     subscribeToDesktop,
@@ -36,19 +31,15 @@ export default function Sidebar() {
   const { scoreResult, loading, error, submitBrief } = useBriefResult();
   const { selectedProperty } = useSelectedProperty();
 
-  // Terbuka mengikuti ukuran layar sampai pengguna memutuskan sendiri; sejak tombolnya
-  // ditekan, `override` yang menang.
   const isDesktop = useIsDesktop();
   const [override, setOverride] = useState<boolean | null>(null);
   const open = override ?? isDesktop;
 
-  // Sync open state into shared context so MapLegend can follow the sidebar
   const { setSidebarOpen } = useSidebarOpen();
   useEffect(() => {
     setSidebarOpen(open);
   }, [open, setSidebarOpen]);
 
-  // Jika user klik properti di peta saat sidebar tertutup, buka sidebar otomatis
   useEffect(() => {
     if (selectedProperty) {
       setOverride(true);
@@ -70,28 +61,11 @@ export default function Sidebar() {
   }
 
   return (
-    /*
-      Sidebar MELAYANG di atas peta (`fixed`), bukan kolom di sebelahnya — ini yang membuat
-      peta berhenti flicker saat panel dibuka/ditutup. Alasannya: `components/map/BaseMap.tsx`
-      memasang ResizeObserver yang memanggil map.resize() pada SETIAP perubahan ukuran
-      kontainer, jadi selama sidebar menganimasikan lebarnya, canvas MapLibre di-resize dan
-      digambar ulang belasan kali berturut-turut. Dengan `fixed`, sidebar keluar dari flex row
-      di app/page.tsx: pembungkus peta selalu selebar layar, ResizeObserver tidak pernah
-      terpanggil, dan yang beranimasi cuma transform sidebar ini (murni compositor).
-      Jangan kembalikan ke lebar yang dianimasikan.
-    */
     <aside
       className={`fixed inset-y-0 left-0 z-[100] flex transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)] ${
         open ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      {/*
-        Isi panel tetap ter-mount saat tertutup (digeser keluar layar, bukan `hidden`/unmount)
-        supaya state di dalamnya (draft, tab, kawasan aktif) tidak hilang tiap kali panel
-        dibuka-tutup. Dulu ini juga satu-satunya penahan agar useCommunitySentiment tidak
-        memanggil Gemini ulang; sekarang /api/community-sentiment sudah di-cache per stasiun
-        di server (lib/sentiment), jadi alasan itu tidak lagi menentukan bentuk komponen ini.
-      */}
       <div className="flex w-[min(var(--sidebar-width),100vw)] flex-col gap-[var(--space-xl)] overflow-y-auto border-r border-[var(--color-border)] bg-[var(--color-surface-muted)] p-[var(--space-lg)]">
         <BriefSection
           draft={draft}
@@ -102,6 +76,8 @@ export default function Sidebar() {
           onSubmit={submit}
           loading={loading}
         />
+
+        <CompareBar />
 
         {error && (
           <p className="t-body rounded-[var(--radius-card)] border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-[var(--space-md)] text-[var(--color-warning-tx)]">
@@ -118,11 +94,6 @@ export default function Sidebar() {
         />
       </div>
 
-      {/*
-        Tab menempel di tepi kanan panel. Dipasang `left-full` supaya ia ikut tergeser oleh
-        transform induknya: saat panel keluar layar, tombolnya berhenti persis di tepi kiri
-        layar tanpa perhitungan posisi kedua.
-      */}
       <button
         type="button"
         onClick={() => setOverride(!open)}

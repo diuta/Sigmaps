@@ -1,20 +1,5 @@
 "use client";
 
-/**
- * hooks/property/usePropertyFilter.tsx
- *
- * State management global untuk filter properti dan karakteristik stasiun:
- * - Multi-select tipe properti: Rumah, Kos, Ruko, Kantor, Tanah, Retail
- * - Multi-select jenis transaksi: Disewa, Dijual
- * - Karakteristik khusus: Ada foto fisik
- * - Tingkatan stasiun KRL: Top AI Rekomendasi, Data Lengkap, Data Minim
- *
- * Terhubung langsung dengan:
- * - StationSearchBar (kontrol UI filter & filter stasiun yang memiliki properti tsb)
- * - PropertyLayer (filter pinpoint di atas kanvas peta)
- * - PropertyList (filter daftar unit di sidebar)
- */
-
 import React, { createContext, useContext, useState, useMemo, useCallback, ReactNode } from "react";
 import type {
   StationTierFilter,

@@ -18,8 +18,8 @@ from pathlib import Path
 
 from db import DATA_DIR, butuh_berkas, connect
 
-PROFIL_WAJIB = "foot"   # pejalan kaki
-WAKTU_WAJIB = 600       # 10 menit dalam detik
+PROFIL_WAJIB = "foot"
+WAKTU_WAJIB = 600
 
 
 def main():
@@ -42,7 +42,6 @@ def main():
                      f"{p.get('time_limit')} detik. MVP hanya menerima "
                      f"'{PROFIL_WAJIB}' / {WAKTU_WAJIB} detik.")
 
-        # Geometri dikirim apa adanya sebagai teks JSON; PostGIS yang mengurai.
         rows.append((sid, sid, json.dumps(f["geometry"]), sid))
 
     ids = [r[0] for r in rows]
@@ -65,8 +64,6 @@ def main():
 
         cur.execute("delete from scored_areas;")
 
-        # station_name diambil dari tabel stasiun, bukan dari properti GeoJSON,
-        # supaya nama yang tampil di /api/score selalu sama dengan yang di peta.
         cur.executemany(
             """
             insert into scored_areas (area_id, station_id, station_name, geom, area_km2)
@@ -82,7 +79,6 @@ def main():
         if n != len(rows):
             sys.exit(f"Hanya {n} dari {len(rows)} baris tersimpan — dibatalkan.")
 
-        # Luas dihitung PostGIS setelah geometri masuk, bukan di Python.
         cur.execute("update scored_areas set area_km2 = ST_Area(geom::geography) / 1000000;")
 
         cur.execute("""

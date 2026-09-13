@@ -8,7 +8,6 @@ interface Props {
   onSelect: (areaId: string) => void;
 }
 
-/** Hanya kawasan is_rankable yang boleh masuk strip ini. */
 export default function RankStrip({ areas, activeAreaId, onSelect }: Props) {
   return (
     <div role="group" aria-label="Peringkat kawasan" className="flex gap-[var(--space-xs)]">

@@ -40,10 +40,6 @@ from paddleocr import PaddleOCR
 
 from db import connect
 
-# Ambang konservatif: string angka tidak seperti kalimat, satu salah baca merusak
-# seluruh nomor, dan nomor ini dipakai kontak langsung ke orang asing — bukan
-# label yang salahnya cuma kelihatan aneh. Turunkan ke ~0.85 kalau setelah dites
-# di foto asli ternyata kebanyakan nomor sah malah tertolak.
 AMBANG_KEPERCAYAAN = 0.90
 
 POLA_NOMOR = re.compile(r"(?:\+?62|0)8[0-9]{8,11}")
@@ -52,11 +48,6 @@ _ocr = None
 
 
 def ocr_engine() -> PaddleOCR:
-    # Lazy: supaya "python extract_phone_spanduk.py --help" atau import untuk test
-    # tidak wajib mengunduh model (~ratusan MB) lebih dulu.
-    # PaddleOCR 3.x: constructor tidak lagi menerima use_angle_cls/show_log (API 2.x
-    # lama), dan pemanggilannya lewat .predict() bukan .ocr(..., cls=True) — dicek
-    # langsung terhadap paddleocr terpasang (3.7.0) sebelum menulis ini.
     global _ocr
     if _ocr is None:
         _ocr = PaddleOCR(lang="en")
@@ -75,9 +66,6 @@ def baca_teks(gambar_bytes: bytes) -> list[tuple[str, float]]:
     if img is None:
         raise ValueError("gagal decode gambar (format tidak dikenali/rusak)")
 
-    # .predict() menerima array BGR langsung (dites terhadap paddleocr 3.7.0 asli,
-    # bukan diasumsikan dari dokumentasi versi lama). Tiap elemen hasil adalah
-    # OCRResult dict-like dengan rec_texts/rec_scores sejajar index.
     hasil = ocr_engine().predict(img)
     baris = []
     for halaman in hasil:

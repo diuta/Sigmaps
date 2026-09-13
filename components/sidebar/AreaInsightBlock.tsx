@@ -2,7 +2,6 @@ interface Props {
   paragraf: string;
 }
 
-/** Keluaran AI. Dipisahkan dengan garis kiri warna accent — bukan warna skor. */
 export default function AreaInsightBlock({ paragraf }: Props) {
   return (
     <section className="flex flex-col gap-[var(--space-sm)] border-l-2 border-[var(--color-accent)] bg-[var(--color-accent-surface)] p-[var(--space-md)]">

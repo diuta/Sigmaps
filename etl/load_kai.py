@@ -49,7 +49,7 @@ def layak(a):
 
 
 def main():
-    berkas = butuh_berkas(DATA_DIR / "kai_space.json")  # hasil tarik_kai.py
+    berkas = butuh_berkas(DATA_DIR / "kai_space.json")
     aset = json.loads(berkas.read_text())
 
     rows = [
@@ -60,7 +60,6 @@ def main():
     ]
 
     with connect() as conn, conn.cursor() as cur:
-        # Tampung semua kandidat dulu, lalu ambil hanya yang jatuh di dalam isokron.
         cur.execute(
             """create temp table kai_kandidat (
                  id text, kategori_properti text, jenis_properti text, alamat text,

@@ -1,13 +1,5 @@
 "use client";
 
-/**
- * components/comparison/CompareToggleButton.tsx
- *
- * Synchronized compare button used in PropertyDetail.
- * Reflects exact slot status and currently active target slot.
- * Professional naming (Properti 1 / Properti 2) and clean states.
- */
-
 import { useComparison } from "@/hooks/comparison/useComparison";
 import { getSlotLabel } from "@/hooks/comparison/useComparison.types";
 import type { CompareItem } from "@/hooks/comparison/useComparison.types";
@@ -32,18 +24,15 @@ export default function CompareToggleButton({ item }: Props) {
 
   function handleClick() {
     if (inCompare && currentSlot) {
-      // Toggle off / remove from comparison
       clearSlot(currentSlot);
       return;
     }
-    // Add to active target slot and open panel if closed
     assignToActiveSlot(item);
     if (!isPanelOpen) {
       openPanel();
     }
   }
 
-  // State 1: Already in comparison
   if (inCompare && currentSlot) {
     const slotLabel = getSlotLabel(currentSlot);
     return (
@@ -59,7 +48,6 @@ export default function CompareToggleButton({ item }: Props) {
     );
   }
 
-  // State 2: Comparison panel is active/open
   if (isPanelOpen) {
     const targetLabel = getSlotLabel(activeTargetSlot);
     return (
@@ -75,7 +63,6 @@ export default function CompareToggleButton({ item }: Props) {
     );
   }
 
-  // State 3: Comparison panel is NOT active/open
   return (
     <button
       type="button"

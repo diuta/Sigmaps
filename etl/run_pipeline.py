@@ -45,10 +45,6 @@ def jalankan(label: str, skrip: str) -> None:
     print(f"  ({skrip})")
     print("=" * 70)
 
-    # Wajib flush sebelum anak proses mulai menulis ke fd yang sama. Saat stdout
-    # bukan terminal (GitHub Actions, cron, `> log.txt`), print() di sini block-buffered
-    # sementara anak proses menulis langsung — tanpa flush, semua header tahap
-    # muncul MENUMPUK di akhir log, setelah seluruh output anak-anaknya.
     sys.stdout.flush()
     mulai = time.monotonic()
     hasil = subprocess.run([sys.executable, str(ETL_DIR / skrip)], cwd=ETL_DIR)

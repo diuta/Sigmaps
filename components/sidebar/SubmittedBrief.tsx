@@ -5,11 +5,6 @@ interface Props {
   onEdit: () => void;
 }
 
-/**
- * Brief yang sudah dikirim. Tetap terbaca penuh, tapi sengaja tampak nonaktif —
- * latar redup, teks sekunder, tidak dapat difokus — supaya jelas bahwa mengubahnya
- * harus lewat tombol "Edit rencana", bukan dengan mengetik di kotaknya.
- */
 export default function SubmittedBrief({ value, onEdit }: Props) {
   return (
     <section className="flex flex-col gap-[var(--space-md)]">

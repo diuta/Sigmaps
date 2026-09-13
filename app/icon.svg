@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="SIGMAPS">
+  <!-- Logo SIGMAPS: rute berbentuk S dengan dua titik ujung (asal → tujuan).
+       Garis rute berhenti 9 unit sebelum pusat tiap cincin supaya lubang cincin
+       tetap transparan (bukan putih) — aman di latar gelap maupun terang. -->
+  <path d="M62 18H35a16 16 0 0 0 0 32h30a16 16 0 0 1 0 32H37"
+        fill="none" stroke="#2646B8" stroke-width="13"/>
+  <circle cx="71" cy="18" r="8" fill="none" stroke="#0E1A3A" stroke-width="7"/>
+  <circle cx="28" cy="82" r="8" fill="none" stroke="#0E1A3A" stroke-width="7"/>
+</svg>

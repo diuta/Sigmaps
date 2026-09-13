@@ -1,19 +1,15 @@
 "use client";
 
-/**
- * Pin stasiun, tiga state: idle / hover / active.
- *
- * Lokasi + penanda is_rankable dari /api/stations (semua 43). Nomor peringkat dari
- * /api/score, yang hanya berisi Top 5 — jadi ketiadaan sebuah kawasan di sana
- * tidak berarti datanya kurang.
- */
-
 import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import { useMapInstance } from "@/hooks/map/useMapInstance";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
 import { useStations } from "@/hooks/station/useStations";
 import { useBriefResult } from "@/hooks/brief/useBriefResult";
+
+/** Di bawah zoom ini label nama stasiun disembunyikan — kalau tidak, saat zoom out untuk
+ * lihat seluruh jaringan, puluhan label bertumpuk jadi tidak terbaca (cuma pin yang tersisa). */
+const LABEL_MIN_ZOOM = 12;
 
 interface StationMarkerData {
   station_id: string;
@@ -47,12 +43,10 @@ export default function StationLayer() {
         lng: feature.geometry!.coordinates[0],
         lat: feature.geometry!.coordinates[1],
         rank: found ? areaIndex! + 1 : null,
-        // `=== false` disengaja: null berarti pipeline belum jalan, bukan kurang data.
         dataBelumCukup: feature.properties.is_rankable === false,
       };
     });
 
-  // 1. Render markers setiap kali daftar stasiun/skor berubah
   useEffect(() => {
     if (!map) return;
 
@@ -88,7 +82,6 @@ export default function StationLayer() {
                 : ""
             }
             <span>${station.station_name}</span>
-            ${station.dataBelumCukup ? ' <span class="text-[9px] text-amber-300 font-normal">· Data belum cukup</span>' : ""}
           </div>
 
           <div class="relative flex items-center justify-center">
@@ -148,7 +141,23 @@ export default function StationLayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, stations, scoreResult]);
 
-  // 2. React to selectedStation changes (Update visual State A / State C)
+
+  // 2. Sembunyikan label nama stasiun saat zoom out (lihat LABEL_MIN_ZOOM)
+  useEffect(() => {
+    if (!map) return;
+
+    function syncLabelVisibility() {
+      map!.getContainer().classList.toggle("map-labels-hidden", map!.getZoom() < LABEL_MIN_ZOOM);
+    }
+
+    syncLabelVisibility();
+    map.on("zoom", syncLabelVisibility);
+    return () => {
+      map.off("zoom", syncLabelVisibility);
+    };
+  }, [map]);
+
+  // 3. React to selectedStation changes (Update visual State A / State C)
   useEffect(() => {
     markersRef.current.forEach(({ el }, stationId) => {
       const isSelected = selectedStation?.area_id === stationId;

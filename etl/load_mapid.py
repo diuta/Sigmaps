@@ -45,7 +45,6 @@ def baca(berkas):
     buang = len(fc["features"]) - len(fitur)
     if buang:
         print(f"  {berkas}: {buang} fitur tanpa geometri Point dilewati")
-    # Urutan dikunci supaya id-nya stabil antar-jalan.
     fitur.sort(key=lambda f: (f["geometry"]["coordinates"][0],
                               f["geometry"]["coordinates"][1],
                               str((f.get("properties") or {}).get("nama_tempat", ""))))
@@ -89,7 +88,6 @@ def muat_properti_go(cur):
                      p.get("alamat"), p.get("foto_tampak_depan"), p.get("foto_spanduk"),
                      json.dumps(f["geometry"])))
 
-    # Hanya hapus baris milik sumber ini — properti_go juga diisi load_kai.py.
     cur.execute("delete from properti_go where sumber = 'propertigo';")
     cur.executemany(
         """insert into properti_go (id, kategori_properti, jenis_properti, alamat,

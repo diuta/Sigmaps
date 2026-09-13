@@ -1,17 +1,5 @@
 "use client";
 
-/**
- * hooks/brief/useBriefResult.tsx
- * Jalankan alur Business Brief: POST /api/prompt-request lalu POST /api/score,
- * simpan hasilnya di satu tempat yang bisa dibaca sidebar (ScoredPanel) MAUPUN
- * peta (StationLayer) — makanya ini Context, bukan hook lokal biasa.
- *
- * Sengaja SATU hook untuk dua endpoint (bukan usePromptRequest + useScore terpisah):
- * keduanya selalu dipanggil berurutan sebagai satu aksi user ("nilai kawasan"),
- * jadi memisahkannya jadi dua hook + dua context cuma menambah tempat untuk
- * menyambungkan ulang sesuatu yang sebenarnya satu alur.
- */
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import type { BriefResultContextValue } from "./useBriefResult.types";
 
@@ -31,8 +19,6 @@ export function BriefResultProvider({ children }: { children: ReactNode }) {
       const intentRes = await fetch("/api/prompt-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Nama fieldnya `teks`, bukan `prompt` — mengikuti context-mvp.md §2
-        // (`POST /api/parse-intent { teks: "..." }`) dan PromptRequestSchema.
         body: JSON.stringify({ teks: prompt }),
       });
       const intentJson = await intentRes.json();

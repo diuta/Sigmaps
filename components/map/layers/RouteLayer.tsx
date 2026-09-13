@@ -1,21 +1,5 @@
 "use client";
 
-/**
- * components/map/layers/RouteLayer.tsx
- * Garis rute jalan kaki dari properti ke stasiun aktif. Muncul begitu pin properti
- * diklik (popup terbuka = previewProperty), dan tetap ada saat halaman detailnya dibuka
- * (selectedProperty). Popup ditutup tanpa buka detail = rute hilang.
- *
- * Datanya BUKAN dihitung di sini: `selectedProperty.rute` sudah datang dari
- * /api/properties (kolom `rute` view properti_go_by_station, diisi batch
- * etl/hitung_rute.py). Layer ini cuma menggambar. Kalau `rute` null (belum dihitung),
- * tidak menggambar apa-apa — kondisi normal.
- *
- * Source + layer dibuat sekali; ganti properti = setData (CLAUDE.md §11).
- * Dua layer garis: casing putih lebar di bawah, garis biru di atas, supaya
- * tetap terbaca di atas jalan/bangunan basemap.
- */
-
 import { useEffect } from "react";
 import type maplibregl from "maplibre-gl";
 import { useMapInstance } from "@/hooks/map/useMapInstance";
@@ -57,8 +41,6 @@ export default function RouteLayer() {
     const source = map.getSource(SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
     if (!source) return;
 
-    // Popup yang sedang terbuka menang; kalau tidak ada, pakai properti yang detailnya
-    // dibuka. Rute hanya relevan untuk pasangan (properti, stasiun aktif).
     const aktif = previewProperty ?? selectedProperty;
     const rute = selectedStation && aktif?.rute;
     if (!aktif || !rute || rute.coordinates.length < 2) {

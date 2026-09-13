@@ -1,13 +1,3 @@
-/**
- * Padanan filter properti — SATU-SATUNYA tempat kosakata filter (Rumah/Kos/Ruko/…, Disewa/Dijual)
- * diterjemahkan ke substring yang dicocokkan ke kolom `kategori_properti` / `jenis_properti`
- * Properti Go. Fungsi murni, aman dipakai di Client Component. Dipakai PropertyLayer (pin),
- * PropertyList (daftar), StationSearchBar (saring stasiun) — ketiganya harus selalu sepakat.
- *
- * Nilai di DB dicocokkan sebagai substring huruf kecil, bukan sama persis: `jenis_properti`
- * berisi "Disewa" / "Dijual" / "Sudah Tersewa", `kategori_properti` bisa "Rumah Kos", dst.
- */
-
 import type { PropertyUnit } from "@/types/property";
 
 export const PROPERTY_TYPES = [
@@ -24,7 +14,6 @@ export const TRANSACTION_TYPES = [
   { id: "jual", label: "Dijual", icon: "💰" },
 ] as const;
 
-/** `types` kosong = tidak menyaring. Id di luar kamus dicocokkan apa adanya (huruf kecil). */
 const matcher =
   (kamus: Record<string, readonly string[]>) =>
   (nilai: string | null | undefined, types: readonly string[]): boolean =>
@@ -48,11 +37,9 @@ export const matchesTransactionType = matcher({
 interface PropertyUnitFilter {
   propertyTypes: readonly string[];
   transactionTypes: readonly string[];
-  /** Hanya unit yang punya foto tampak depan atau spanduk. */
   hasPhotoOnly: boolean;
 }
 
-/** Predikat lengkap satu unit terhadap filter aktif — dipakai PropertyLayer & PropertyList. */
 export function matchesPropertyFilter(
   unit: Pick<PropertyUnit, "kategori_properti" | "jenis_properti" | "foto_tampak_depan" | "foto_spanduk">,
   filter: PropertyUnitFilter,

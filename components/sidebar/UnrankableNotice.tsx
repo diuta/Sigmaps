@@ -7,16 +7,6 @@ interface Props {
   stations: readonly UnrankableStation[];
 }
 
-/**
- * Kawasan tanpa data cukup: tidak diberi skor dan tidak diberi nomor peringkat.
- * /api/score tidak pernah mengirim kawasan is_rankable=false (lihat docs/api-score.md),
- * jadi tidak ada n_observations untuk ditampilkan di sini — hanya nama stasiunnya.
- *
- * Sengaja tenang dan tertutup secara bawaan, ditaruh paling bawah panel: ini keterbatasan
- * data, bukan peringatan atas sesuatu yang pengguna lakukan, jadi tidak boleh bersaing
- * perhatian dengan hasil skor. Memakai <details> bawaan peramban — buka/tutup, fokus
- * keyboard, dan semantiknya sudah ada tanpa state React.
- */
 export default function UnrankableNotice({ stations }: Props) {
   if (stations.length === 0) return null;
 
