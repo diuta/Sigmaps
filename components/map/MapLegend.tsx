@@ -134,11 +134,12 @@ export default function MapLegend() {
       style={{
         left: BASE_LEFT_PX,
         transform: `translateX(${translateX}px)`,
+        maxWidth: `calc(100vw - ${BASE_LEFT_PX + translateX + GAP_PX}px)`,
       }}
     >
       <div
         className="flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-[var(--shadow-float)] backdrop-blur-sm"
-        style={{ minWidth: 200 }}
+        style={{ minWidth: 200, maxWidth: "100%" }}
       >
         {/* Header / Toggle */}
         <button

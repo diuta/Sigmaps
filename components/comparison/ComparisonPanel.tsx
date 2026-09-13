@@ -92,7 +92,7 @@ function PropertyColumn({
   return (
     <div className="flex flex-col gap-4">
       {/* Top Header Row with Ganti (Map/List) & Remove */}
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-y-1 border-b border-[var(--color-border)] pb-2.5">
         <div className="flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-brand)] text-xs font-bold text-white shadow-xs">
             {getSlotNumber(slot)}
@@ -106,9 +106,9 @@ function PropertyColumn({
             type="button"
             onClick={onChangeMap}
             title="Kecilkan panel dan pilih pin di peta"
-            className="cursor-pointer rounded px-2 py-1 text-[11px] font-bold text-[var(--color-brand)] bg-[var(--color-accent-surface)] hover:bg-[var(--color-brand)] hover:text-white transition-colors"
+            className="cursor-pointer whitespace-nowrap rounded px-2 py-1 text-[11px] font-bold text-[var(--color-brand)] bg-[var(--color-accent-surface)] hover:bg-[var(--color-brand)] hover:text-white transition-colors"
           >
-            📍 Ganti via Peta
+            📍 Ganti<span className="hidden xl:inline"> via Peta</span>
           </button>
           <button
             type="button"
@@ -279,7 +279,7 @@ export default function ComparisonPanel() {
 
   if (!isPanelOpen) return null;
 
-  const sidebarWidth = "var(--sidebar-width)";
+  const sidebarWidth = "min(var(--sidebar-width), 100vw)";
   const filledCount = (slotA ? 1 : 0) + (slotB ? 1 : 0);
 
   function handlePickFromMap(slot: CompareSlot) {
@@ -295,7 +295,7 @@ export default function ComparisonPanel() {
         aria-label="Toolbar perbandingan properti"
         className="fixed bottom-3 z-[85] flex items-center justify-between gap-3 rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)]/95 px-5 py-2.5 shadow-2xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-2 duration-200"
         style={{
-          left: sidebarOpen ? "calc(var(--sidebar-width) + 16px)" : "16px",
+          left: sidebarOpen ? `calc(${sidebarWidth} + 16px)` : "16px",
           right: "16px",
         }}
       >
@@ -420,14 +420,14 @@ export default function ComparisonPanel() {
         role="dialog"
         aria-modal="true"
         aria-label="Perbandingan properti"
-        className="fixed bottom-0 z-[95] flex h-[78vh] max-h-[85vh] flex-col overflow-hidden rounded-t-[16px] border border-b-0 border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)]"
+        className="fixed bottom-0 z-[95] flex h-[92vh] max-h-[92vh] flex-col overflow-hidden rounded-t-[16px] border border-b-0 border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)] sm:h-[78vh] sm:max-h-[85vh]"
         style={{
           left: sidebarOpen ? sidebarWidth : 0,
           right: 0,
         }}
       >
         {/* ── Panel header ── */}
-        <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-3.5">
+        <div className="flex flex-shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 sm:px-6 sm:py-3.5">
           <div className="flex items-center gap-2.5">
             <span aria-hidden className="text-xl">⚖️</span>
             <div className="flex items-center gap-2">
@@ -448,7 +448,7 @@ export default function ComparisonPanel() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             {filledCount > 0 && (
               <button
                 type="button"
@@ -467,7 +467,7 @@ export default function ComparisonPanel() {
               className="t-button flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-card)] border border-[var(--color-brand)]/40 bg-[var(--color-accent-surface)] px-3 py-1.5 text-xs font-bold text-[var(--color-brand)] transition-colors hover:bg-[var(--color-brand)] hover:text-white"
             >
               <span>▾</span>
-              <span>Kecilkan (Pilih di Peta)</span>
+              <span>Kecilkan<span className="hidden sm:inline"> (Pilih di Peta)</span></span>
             </button>
 
             <button
@@ -497,9 +497,9 @@ export default function ComparisonPanel() {
         </div>
 
         {/* ── 2-Column Area with smooth full scrolling all the way to the bottom ── */}
-        <div className="grid flex-1 min-h-0 grid-cols-2 divide-x divide-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
+        <div className="grid flex-1 min-h-0 grid-cols-1 grid-rows-2 divide-y lg:grid-cols-2 lg:grid-rows-1 lg:divide-x lg:divide-y-0 divide-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
           {/* Col A */}
-          <div className="h-full overflow-y-auto px-6 py-5 pb-28 scrollbar-thin">
+          <div className="h-full overflow-y-auto px-4 py-5 pb-28 scrollbar-thin sm:px-6">
             {slotA ? (
               <PropertyColumn
                 item={slotA}
@@ -518,9 +518,9 @@ export default function ComparisonPanel() {
           </div>
 
           {/* Col B */}
-          <div className="relative h-full overflow-y-auto px-6 py-5 pb-28 scrollbar-thin">
-            {/* VS divider badge in center */}
-            <span className="pointer-events-none absolute left-0 top-12 z-10 -translate-x-1/2 rounded-full bg-[var(--color-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-muted)] shadow-xs ring-1 ring-[var(--color-border)]">
+          <div className="relative h-full overflow-y-auto px-4 py-5 pb-28 scrollbar-thin sm:px-6">
+            {/* VS divider badge — only meaningful in the side-by-side (md+) layout */}
+            <span className="pointer-events-none absolute left-0 top-12 z-10 hidden -translate-x-1/2 rounded-full bg-[var(--color-surface)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-muted)] shadow-xs ring-1 ring-[var(--color-border)] lg:block">
               VS
             </span>
             {slotB ? (

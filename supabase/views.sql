@@ -70,6 +70,7 @@ select
   p.kategori_properti,
   p.jenis_properti,
   p.alamat,
+  p.contact_number,
   p.foto_tampak_depan,
   p.foto_spanduk,
   ST_AsGeoJSON(p.geom)::json as geom,
