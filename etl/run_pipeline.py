@@ -20,13 +20,6 @@ SENGAJA TIDAK TERMASUK DI SINI:
                        masuk akal kalau ada proses lain yang menyegarkan
                        berkas itu — sampai saat itu, jalankan manual:
                          python load_isokron.py [path/ke/isokron.geojson]
-  - load_supabase.py  Skrip lama/duplikat — pakai library `supabase` (tidak ada
-                       di requirements.txt), env var SUPABASE_KEY (bukan
-                       SUPABASE_SERVICE_ROLE_KEY yang dipakai seluruh skrip
-                       lain), dan baca dari etl/cisauk-propertigo.geojson
-                       (sisa berkas lama, bukan etl/data/). Sudah digantikan
-                       fungsinya oleh load_mapid.py. Jangan dipanggil di sini
-                       sampai dibersihkan atau dihapus.
 """
 
 import subprocess

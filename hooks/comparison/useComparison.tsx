@@ -10,7 +10,7 @@
  * - isPanelMinimized: whether the panel is collapsed to a compact dock allowing full map interaction
  */
 
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import type {
   CompareItem,
   CompareSlot,
@@ -26,21 +26,16 @@ export function ComparisonProvider({ children }: { children: ReactNode }) {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isPanelMinimized, setIsPanelMinimized] = useState(false);
 
-  // Auto-open panel when both slots are filled
-  useEffect(() => {
-    if (slotA !== null && slotB !== null) {
+  // Mengisi satu slot: kalau slot satunya masih kosong, target berpindah ke sana; kalau
+  // sudah terisi, kedua slot lengkap → panel dibuka dalam keadaan terbentang.
+  const setSlot = useCallback((slot: CompareSlot, item: CompareItem) => {
+    const other = slot === "A" ? slotB : slotA;
+    if (slot === "A") setSlotA(item); else setSlotB(item);
+    if (!other) {
+      setActiveTargetSlot(slot === "A" ? "B" : "A");
+    } else {
       setIsPanelOpen(true);
       setIsPanelMinimized(false);
-    }
-  }, [slotA, slotB]);
-
-  const setSlot = useCallback((slot: CompareSlot, item: CompareItem) => {
-    if (slot === "A") {
-      setSlotA(item);
-      if (!slotB) setActiveTargetSlot("B");
-    } else {
-      setSlotB(item);
-      if (!slotA) setActiveTargetSlot("A");
     }
   }, [slotA, slotB]);
 
@@ -76,37 +71,12 @@ export function ComparisonProvider({ children }: { children: ReactNode }) {
     setIsPanelMinimized(true);
   }, []);
 
-  const expandPanel = useCallback(() => {
-    setIsPanelOpen(true);
-    setIsPanelMinimized(false);
-  }, []);
-
   const assignToActiveSlot = useCallback(
     (item: CompareItem): CompareSlot => {
-      const target = activeTargetSlot;
-      if (target === "A") {
-        setSlotA(item);
-        if (!slotB) {
-          setActiveTargetSlot("B");
-        }
-        return "A";
-      } else {
-        setSlotB(item);
-        if (!slotA) {
-          setActiveTargetSlot("A");
-        }
-        return "B";
-      }
+      setSlot(activeTargetSlot, item);
+      return activeTargetSlot;
     },
-    [activeTargetSlot, slotA, slotB]
-  );
-
-  const addToCompare = useCallback(
-    (item: CompareItem): "added-A" | "added-B" | "full" => {
-      const chosen = assignToActiveSlot(item);
-      return chosen === "A" ? "added-A" : "added-B";
-    },
-    [assignToActiveSlot]
+    [activeTargetSlot, setSlot]
   );
 
   const isInCompare = useCallback(
@@ -133,15 +103,12 @@ export function ComparisonProvider({ children }: { children: ReactNode }) {
         setActiveTargetSlot,
         isPanelOpen,
         isPanelMinimized,
-        setIsPanelMinimized,
         minimizePanel,
-        expandPanel,
         setSlot,
         clearSlot,
         clearAll,
         openPanel,
         closePanel,
-        addToCompare,
         assignToActiveSlot,
         isInCompare,
         getSlotFor,

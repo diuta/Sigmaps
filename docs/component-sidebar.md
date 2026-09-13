@@ -104,10 +104,11 @@ kawasan, `RankStrip`, dan tab bar ikut hilang, sehingga tombol "Kembali" cuma pu
 Bagian rencana usaha di atasnya tetap.
 
 `OutputSection` yang memegang unit terpilih (`detail`); `ScoredPanel` dan
-`StationNoBriefPanel` hanya meneruskan `onSelectProperty(unit, stationName)` ke
-`PropertyList` dan tidak tahu ada halaman detail sama sekali. Nama kawasan ikut dioper karena
-breadcrumb detail membutuhkannya, dan `selectedStation` belum tentu terisi (kawasan #1 tampil
-tanpa pengguna pernah mengkliknya).
+`StationNoBriefPanel` hanya meneruskan `onSelectProperty(unit, stationId, stationName)` ke
+`PropertyList` dan tidak tahu ada halaman detail sama sekali. Id dan nama kawasan ikut dioper
+karena `selectedStation` belum tentu terisi (kawasan #1 tampil tanpa pengguna pernah
+mengkliknya): nama untuk breadcrumb, id untuk `CompareItem` (fitur bandingkan memanggil
+`/api/community-sentiment?station_id=` dengan id ini — jangan diturunkan dari nama).
 
 Isi halaman detail persis apa yang ada di Properti Go: kategori (judul), badge Siap
 Sewa/Siap Jual, alamat, dan dua foto (`foto_tampak_depan`, `foto_spanduk`) — plus satu kalimat

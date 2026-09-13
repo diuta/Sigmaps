@@ -4,12 +4,12 @@ import { useEffect, useRef } from "react";
 import type { PropertyUnit } from "@/types/property";
 import { formatJalanKaki } from "@/helper/format-jalan-kaki";
 import CompareToggleButton from "@/components/comparison/CompareToggleButton";
-import { useComparison } from "@/hooks/comparison/useComparison";
 import type { CompareItem } from "@/hooks/comparison/useComparison.types";
 
 interface Props {
   property: PropertyUnit;
-  /** Nama kawasan asal unit ini, untuk breadcrumb. */
+  /** Kawasan asal unit ini: id untuk CompareItem (→ /api/community-sentiment), nama untuk breadcrumb. */
+  stationId: string;
   stationName: string;
   onBack: () => void;
 }
@@ -46,7 +46,7 @@ function Foto({ src, label, alt }: { src: string | null; label: string; alt: str
  * itu pertanyaan pertama yang muncul di halaman detail properti; tanpa kalimat itu pengguna
  * mengira datanya gagal dimuat.
  */
-export default function PropertyDetail({ property, stationName, onBack }: Props) {
+export default function PropertyDetail({ property, stationId, stationName, onBack }: Props) {
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   // Fokus dipindahkan ke judul unit saat halaman ini terbuka: daftar asalnya sudah
@@ -63,13 +63,7 @@ export default function PropertyDetail({ property, stationName, onBack }: Props)
   // null kalau rute belum dihitung (etl/hitung_rute.py) — baris jarak disembunyikan saja
   const jalanKaki = formatJalanKaki(property.jarak_jalan_m, property.waktu_jalan_s);
 
-  // Compare
-  const { selectedStation: _ignored } = { selectedStation: null }; // not needed here
-  const compareItem: CompareItem = {
-    unit: property,
-    stationId: stationName.toLowerCase().replace(/\s+/g, "_"),  // best-effort id from name
-    stationName,
-  };
+  const compareItem: CompareItem = { unit: property, stationId, stationName };
 
   return (
     <div className="motion-rise-in flex flex-col gap-[var(--space-lg)]">

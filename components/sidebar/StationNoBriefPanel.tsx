@@ -10,7 +10,7 @@ import { useCommunitySentiment } from "@/hooks/sentiment/useCommunitySentiment";
 import type { PropertyUnit } from "@/types/property";
 
 interface Props {
-  onSelectProperty: (unit: PropertyUnit, stationName: string) => void;
+  onSelectProperty: (unit: PropertyUnit, stationId: string, stationName: string) => void;
 }
 
 /**
@@ -66,9 +66,7 @@ export default function StationNoBriefPanel({ onSelectProperty }: Props) {
           <PropertyList
             properties={properties}
             loading={loading}
-            stationId={selectedStation.area_id}
-            stationName={selectedStation.station_name}
-            onSelect={(unit) => onSelectProperty(unit, selectedStation.station_name)}
+            onSelect={(unit) => onSelectProperty(unit, selectedStation.area_id, selectedStation.station_name)}
           />
         </>
       ) : (

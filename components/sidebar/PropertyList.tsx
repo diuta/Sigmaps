@@ -19,8 +19,6 @@ import { getSlotLabel } from "@/hooks/comparison/useComparison.types";
 interface Props {
   properties: PropertyUnit[];
   loading: boolean;
-  stationId?: string;
-  stationName?: string;
   onSelect: (property: PropertyUnit) => void;
 }
 

@@ -244,7 +244,7 @@ export default function ComparisonPanel() {
     isPanelOpen,
     isPanelMinimized,
     minimizePanel,
-    expandPanel,
+    openPanel,
     closePanel,
     setSlot,
     clearSlot,
@@ -382,7 +382,7 @@ export default function ComparisonPanel() {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             type="button"
-            onClick={expandPanel}
+            onClick={openPanel}
             className="t-button flex items-center gap-1.5 cursor-pointer rounded-[var(--radius-card)] bg-[var(--color-brand)] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[var(--color-brand-hover)] transition-all"
           >
             <span>▴</span>

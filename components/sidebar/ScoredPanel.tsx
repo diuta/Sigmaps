@@ -26,7 +26,7 @@ interface Props {
   /** Teks rencana usaha yang sedang dinilai — dibutuhkan ExportPdfButton, tidak dipakai render lain di sini. */
   brief: string;
   /** Buka halaman detail satu unit. Panel ini tidak tahu bentuk halamannya — cuma meneruskan. */
-  onSelectProperty: (unit: PropertyUnit, stationName: string) => void;
+  onSelectProperty: (unit: PropertyUnit, stationId: string, stationName: string) => void;
 }
 
 export default function ScoredPanel({ brief, onSelectProperty }: Props) {
@@ -211,9 +211,7 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
           <PropertyList
             properties={properties}
             loading={propertiesLoading}
-            stationId={area.station_id}
-            stationName={area.station_name}
-            onSelect={(unit) => onSelectProperty(unit, area.station_name)}
+            onSelect={(unit) => onSelectProperty(unit, area.station_id, area.station_name)}
           />
         </div>
       )}
