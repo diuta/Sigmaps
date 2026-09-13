@@ -15,6 +15,10 @@ import { useSelectedStation } from "@/hooks/station/useSelectedStation";
 import { useStations } from "@/hooks/station/useStations";
 import { useBriefResult } from "@/hooks/brief/useBriefResult";
 
+/** Di bawah zoom ini label nama stasiun disembunyikan — kalau tidak, saat zoom out untuk
+ * lihat seluruh jaringan, puluhan label bertumpuk jadi tidak terbaca (cuma pin yang tersisa). */
+const LABEL_MIN_ZOOM = 12;
+
 interface StationMarkerData {
   station_id: string;
   station_name: string;
@@ -148,7 +152,22 @@ export default function StationLayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, stations, scoreResult]);
 
-  // 2. React to selectedStation changes (Update visual State A / State C)
+  // 2. Sembunyikan label nama stasiun saat zoom out (lihat LABEL_MIN_ZOOM)
+  useEffect(() => {
+    if (!map) return;
+
+    function syncLabelVisibility() {
+      map!.getContainer().classList.toggle("map-labels-hidden", map!.getZoom() < LABEL_MIN_ZOOM);
+    }
+
+    syncLabelVisibility();
+    map.on("zoom", syncLabelVisibility);
+    return () => {
+      map.off("zoom", syncLabelVisibility);
+    };
+  }, [map]);
+
+  // 3. React to selectedStation changes (Update visual State A / State C)
   useEffect(() => {
     markersRef.current.forEach(({ el }, stationId) => {
       const isSelected = selectedStation?.area_id === stationId;

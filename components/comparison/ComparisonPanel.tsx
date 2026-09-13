@@ -309,9 +309,6 @@ export default function ComparisonPanel() {
               <span className="text-xs font-bold text-[var(--color-text)]">
                 Bandingkan Properti
               </span>
-              <span className="rounded-full bg-[var(--color-brand)]/15 px-2 py-0.2 text-[10px] font-bold text-[var(--color-brand)]">
-                📍 Target: {getSlotLabel(activeTargetSlot)}
-              </span>
             </div>
             <p className="t-micro text-[var(--color-muted)] truncate">
               Klik pin properti di peta untuk mengisi <strong>{getSlotLabel(activeTargetSlot)}</strong>
