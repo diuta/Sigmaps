@@ -12,6 +12,7 @@
 
 import { useState } from "react";
 import { useSidebarOpen } from "@/hooks/sidebar/useSidebarOpen";
+import { useComparison } from "@/hooks/comparison/useComparison";
 
 // Simbol: stasiun aktif — pin biru dengan ikon kereta (vektor tajam persis marker peta)
 function StationActiveSymbol() {
@@ -76,16 +77,25 @@ function StationInactiveSymbol() {
   );
 }
 
-// Simbol: properti — teardrop oranye
+// Simbol: properti — oranye (aktif) dan peach (stasiun lainnya)
 function PropertySymbol() {
   return (
-    <svg width="12" height="16" viewBox="0 0 12 16" fill="none" aria-hidden="true">
-      <path
-        d="M6 0C2.686 0 0 2.686 0 6c0 1.427.506 2.734 1.346 3.756L6 16l4.654-6.244A5.974 5.974 0 0 0 12 6C12 2.686 9.314 0 6 0Z"
-        fill="#EA580C"
-      />
-      <circle cx="6" cy="6" r="2.2" fill="white" />
-    </svg>
+    <div className="flex items-center gap-1 shrink-0">
+      <svg width="10" height="14" viewBox="0 0 12 16" fill="none" aria-hidden="true" aria-label="Stasiun terpilih">
+        <path
+          d="M6 0C2.686 0 0 2.686 0 6c0 1.427.506 2.734 1.346 3.756L6 16l4.654-6.244A5.974 5.974 0 0 0 12 6C12 2.686 9.314 0 6 0Z"
+          fill="#EA580C"
+        />
+        <circle cx="6" cy="6" r="2.2" fill="white" />
+      </svg>
+      <svg width="10" height="14" viewBox="0 0 12 16" fill="none" aria-hidden="true" aria-label="Stasiun lainnya">
+        <path
+          d="M6 0C2.686 0 0 2.686 0 6c0 1.427.506 2.734 1.346 3.756L6 16l4.654-6.244A5.974 5.974 0 0 0 12 6C12 2.686 9.314 0 6 0Z"
+          fill="#F0AC89"
+        />
+        <circle cx="6" cy="6" r="2.2" fill="white" />
+      </svg>
+    </div>
   );
 }
 
@@ -105,10 +115,10 @@ interface LegendItem {
 }
 
 const LEGEND_ITEMS: LegendItem[] = [
-  { symbol: <StationActiveSymbol />, label: "Stasiun aktif", sub: "Stasiun yang dipilih" },
-  { symbol: <StationInactiveSymbol />, label: "Stasiun lainnya", sub: "Jaringan KRL Jabodetabek" },
-  { symbol: <PropertySymbol />, label: "Properti tersedia", sub: "Dalam zona jalan kaki" },
-  { symbol: <IsochroneSymbol />, label: "Zona jalan kaki 10 mnt", sub: "Dari stasiun aktif" },
+  { symbol: <StationActiveSymbol />, label: "Stasiun Teranalisis", sub: "Tercakup dalam evaluasi & ranking" },
+  { symbol: <StationInactiveSymbol />, label: "Jaringan Sekunder", sub: "Titik transit tanpa penilaian" },
+  { symbol: <PropertySymbol />, label: "Listing Properti", sub: "Oranye: aktif · Peach: lainnya" },
+  { symbol: <IsochroneSymbol />, label: "Zona Jalan Kaki 10 Mnt", sub: "Jangkauan dari stasiun terpilih" },
 ];
 
 /** px of the toggle tab that sticks out when sidebar is closed */
@@ -122,18 +132,23 @@ const TRANSLATE_OPEN_PX = 380 - SIDEBAR_CLOSED_PX;
 
 export default function MapLegend() {
   const { sidebarOpen } = useSidebarOpen();
+  const { isPanelOpen, isPanelMinimized } = useComparison();
   const [collapsed, setCollapsed] = useState(false);
 
+  const isDockVisible = isPanelOpen && isPanelMinimized;
+
   const translateX = sidebarOpen ? TRANSLATE_OPEN_PX : 0;
+  // When comparison dock is active at the bottom, animate legend up by 68px to avoid collision
+  const translateY = isDockVisible ? -68 : 0;
 
   return (
     <div
-      className="absolute bottom-[52px] z-40 transition-transform duration-[var(--motion-base)] ease-[var(--ease-out)]"
+      className="absolute bottom-[52px] z-40 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
       role="region"
       aria-label="Legenda peta"
       style={{
         left: BASE_LEFT_PX,
-        transform: `translateX(${translateX}px)`,
+        transform: `translate(${translateX}px, ${translateY}px)`,
         maxWidth: `calc(100vw - ${BASE_LEFT_PX + translateX + GAP_PX}px)`,
       }}
     >
@@ -146,7 +161,7 @@ export default function MapLegend() {
           type="button"
           onClick={() => setCollapsed((v) => !v)}
           aria-expanded={!collapsed}
-          className={`flex w-full items-center justify-between gap-[var(--space-md)] px-[var(--space-md)] py-[var(--space-sm)] bg-[var(--color-surface-muted)] transition-colors duration-[var(--motion-fast)] hover:bg-[var(--color-border)] ${
+          className={`flex h-11 w-full items-center justify-between gap-[var(--space-md)] px-3.5 bg-[var(--color-surface-muted)] transition-colors duration-[var(--motion-fast)] hover:bg-[var(--color-border)] ${
             collapsed ? "" : "border-b border-[var(--color-border)]"
           }`}
         >
