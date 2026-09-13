@@ -22,8 +22,6 @@ export async function POST(request: Request) {
 
   const { tipe_3, harga_target, harga_sumber } = parsed.data
 
-  // SENGAJA tanpa .eq('is_rankable', true) — normalisasi C butuh kepadatan seluruh
-  // kawasan. Menyaring di sini menggeser lo/hi dan mengubah peringkat (§6.8).
   const { data, error } = await supabaseServer
     .from('scored_areas')
     .select(
@@ -43,10 +41,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Kategori usaha tidak dikenali' }, { status: 400 })
   }
 
-  // Hanya Top 5 yang keluar dari server. Pembatasan di frontend bukan batas keamanan.
-  // Penanda "data belum cukup" untuk peta diambil dari /api/stations.
-  // isRankedArea juga menyaring baris is_rankable yang skornya null (bug pipeline, sudah
-  // dilaporkan console.error oleh scoreAreas) — baris itu tidak boleh diperingkat.
   const top5 = hasil.areas.filter(isRankedArea).slice(0, 5)
 
   const respons: ScoreResponse = {

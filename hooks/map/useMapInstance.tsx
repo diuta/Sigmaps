@@ -1,15 +1,5 @@
 "use client";
 
-/**
- * hooks/map/useMapInstance.tsx
- * Context internal untuk zona Map (ZONA CACA)
- *
- * Sesuai ARCHITECTURE.md §4.2:
- * ⛔ INTERNAL MAP ONLY: Hook ini hanya untuk dipakai oleh sub-komponen
- * di dalam components/map/ (seperti StationLayer, PropertyLayer, IsochroneLayer).
- * Komponen Sidebar TIDAK boleh mengimpor atau memakai hook ini!
- */
-
 import React, { createContext, useContext, ReactNode } from "react";
 import type { MapInstanceContextValue } from "./useMapInstance.types";
 

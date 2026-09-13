@@ -29,7 +29,6 @@ export default function BusinessBriefInput({ value, onChange, onSubmit, submitLa
         className="t-body w-full resize-none rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-[var(--space-md)] text-[var(--color-text)] transition-colors duration-[var(--motion-base)] placeholder:text-[var(--color-muted)] focus:border-[var(--color-brand)] focus:outline-none"
       />
 
-      {/* Saran kategori = keluaran AI → warna accent, bukan warna skor */}
       <div className="flex flex-col gap-[var(--space-sm)]">
         <p className="t-micro font-normal text-[var(--color-text-sub)]">
           Atau mulai dari salah satu contoh ini

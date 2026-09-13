@@ -1,33 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand — Cobalt Metro */
   --color-brand: #1E40AF;
   --color-brand-hover: #1D4ED8;
   --color-brand-active: #172554;
 
-  /* AI / Intelligence accent — Electric Ultramarine.
-     RESERVED: konten hasil generasi AI saja. */
   --color-accent: #4F46E5;
   --color-accent-surface: #EEF2FF;
 
-  /* Deterministic scoring — Neon Emerald.
-     RESERVED: output skor deterministik saja (bar D/C/S, angka skor). */
   --color-opportunity: #10B981;
   --color-opportunity-bg: #ECFDF5;
   --color-opportunity-tx: #065F46;
 
-  /* Property pin — Warm Tangerine */
   --color-pin: #F97316;
   --color-pin-hover: #EA580C;
   --color-pin-surface: #FFF7ED;
 
-  /* Warning — Amber Orange */
   --color-warning: #F59E0B;
   --color-warning-bg: #FEF3C7;
   --color-warning-tx: #92400E;
 
-  /* Neutrals */
   --color-surface: #FFFFFF;
   --color-surface-muted: #F8FAFC;
   --color-border: #E2E8F0;
@@ -35,25 +27,20 @@
   --color-text: #0F172A;
   --color-text-sub: #64748B;
 
-  /* Spacing (4px base) */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
   --space-lg: 16px;
   --space-xl: 24px;
 
-  /* Radius */
   --radius-card: 8px;
   --radius-pill: 9999px;
 
-  /* Elevation */
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, .05), 0 1px 2px 0 rgba(0, 0, 0, .03);
   --shadow-float: 0 10px 15px -3px rgba(0, 0, 0, .08), 0 4px 6px -2px rgba(0, 0, 0, .03);
 
-  /* Layout */
   --sidebar-width: 380px;
 
-  /* Motion — tidak ada di DESIGN.md, tambahan pass 3. Semua transisi memakai token ini. */
   --motion-fast: 120ms;
   --motion-base: 200ms;
   --motion-slow: 320ms;
@@ -67,7 +54,6 @@ body {
   background: var(--color-surface);
 }
 
-/* Typography tokens — DESIGN.md §3 */
 .t-display-score {
   font-size: 28px;
   line-height: 36px;
@@ -159,10 +145,6 @@ body {
   }
 }
 
-/* =========================================================================
-   STATION MARKER INTERACTIVE STATES (ZONA CACA) - HIG REFINED
-   ========================================================================= */
-
 .station-marker-container {
   position: relative;
   cursor: pointer;
@@ -174,14 +156,12 @@ body {
   z-index: 30;
 }
 
-/* State A: Idle (Clean, elegant, non-intrusive) */
 .station-marker-container.state-idle {
   opacity: 0.95;
   transform: scale(0.95);
   filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.18));
 }
 
-/* State B: Hover (Lifted, focused, premium glow) */
 .station-marker-container.state-hover,
 .station-marker-container:hover {
   opacity: 1;
@@ -190,7 +170,6 @@ body {
   z-index: 35 !important;
 }
 
-/* State C: Active (The undisputed hero element on the map) */
 .station-marker-container.state-active {
   opacity: 1;
   transform: scale(1.2) translateY(-10px);
@@ -198,7 +177,6 @@ body {
   z-index: 40 !important;
 }
 
-/* Inactive station marker (is_rankable = false) */
 .station-marker-container.is-inactive {
   opacity: 0.75;
   filter: grayscale(0.3) drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15));
@@ -210,14 +188,11 @@ body {
   filter: grayscale(0) drop-shadow(0 6px 12px rgba(148, 163, 184, 0.35));
 }
 
-/* Saat zoom out (lihat StationLayer.tsx LABEL_MIN_ZOOM), sembunyikan label nama stasiun —
-   tersisa cuma pin — supaya tidak menumpuk jadi dinding teks saat lihat seluruh jaringan. */
 .map-labels-hidden .station-label {
   opacity: 0;
   pointer-events: none;
 }
 
-/* Pulsing radar ring on Active State */
 @keyframes marker-pulse {
   0% {
     transform: translate(-50%, -50%) scale(0.5);
@@ -244,10 +219,6 @@ body {
   z-index: -1;
 }
 
-/* =========================================================================
-   PROPERTY PIN INTERACTIVE STATES (ZONA CACA) - SUBORDINATE & CLEAN
-   ========================================================================= */
-
 .property-marker-container {
   position: relative;
   cursor: pointer;
@@ -270,7 +241,6 @@ body {
   z-index: 45 !important;
 }
 
-/* MapLibre custom popup styling override */
 .maplibregl-popup,
 .property-card-popup {
   z-index: 60 !important;

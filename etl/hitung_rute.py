@@ -22,9 +22,6 @@ import requests
 
 from db import connect
 
-# Python bawaan macOS (3.9, LibreSSL 2.8.3) tidak bisa TLS-handshake ke server routing
-# modern — gejalanya SSLV3_ALERT_HANDSHAKE_FAILURE padahal curl bisa. pyOpenSSL membawa
-# OpenSSL-nya sendiri; disuntikkan ke urllib3 hanya kalau memang LibreSSL yang terpasang.
 if "LibreSSL" in ssl.OPENSSL_VERSION:
     import urllib3.contrib.pyopenssl as _po
     _po.inject_into_urllib3()
@@ -54,8 +51,6 @@ def main():
     ulang = "--ulang" in sys.argv
 
     with connect() as conn, conn.cursor() as cur:
-        # Bersihkan rute yatim: pasangannya sudah tidak ada di view (properti dimuat ulang,
-        # isokron berubah, stasiun dihapus).
         cur.execute(
             """delete from rute_properti r
                where not exists (select 1 from properti_go_by_station v

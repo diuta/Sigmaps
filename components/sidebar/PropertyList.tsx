@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * components/sidebar/PropertyList.tsx
- *
- * Daftar properti Properti Go di sekitar stasiun aktif.
- * - Menampilkan grid kartu properti bersih & elegan
- * - Klik kartu langsung membuka halaman detail properti
- * - Filter multi-select kategori, transaksi, dan foto fisik
- */
-
 import { useMemo } from "react";
 import type { PropertyUnit } from "@/types/property";
 import { usePropertyFilter } from "@/hooks/property/usePropertyFilter";
@@ -32,7 +23,6 @@ export default function PropertyList({
 
   const isFilterActive = propertyTypes.length > 0 || transactionTypes.length > 0 || hasPhotoOnly;
 
-  // Predikatnya di lib/property/filter.ts — sama persis dengan PropertyLayer & StationSearchBar.
   const filteredProperties = useMemo(
     () =>
       properties.filter((unit) =>
@@ -94,9 +84,6 @@ export default function PropertyList({
           )}
         </div>
       ) : (
-        /*
-          Grid 2 kolom. Kartu bersih: klik langsung membuka detail properti.
-        */
         <ul className="grid grid-cols-2 gap-[var(--space-sm)]">
           {filteredProperties.map((unit) => {
             const inCompare = isInCompare(unit.id);
@@ -115,7 +102,6 @@ export default function PropertyList({
                       : "border-[var(--color-border)] hover:border-[var(--color-brand)]"
                   }`}
                 >
-                  {/* Photo / placeholder */}
                   {unit.foto_tampak_depan ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -137,7 +123,6 @@ export default function PropertyList({
                       <span className="t-heading-2 flex-1 group-hover:text-[var(--color-brand)] transition-colors">
                         {unit.kategori_properti}
                       </span>
-                      {/* In-compare indicator badge on card */}
                       {inCompare && (
                         <span className="t-micro whitespace-nowrap rounded-full bg-[var(--color-brand)] px-[6px] py-[2px] text-white font-bold text-[9px]">
                           {getSlotLabel(occupiedSlot)}

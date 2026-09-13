@@ -19,7 +19,6 @@ from dotenv import load_dotenv
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
-# .env.local dulu (yang dipakai sehari-hari), .env sebagai cadangan.
 load_dotenv(ROOT / ".env.local")
 load_dotenv(ROOT / ".env")
 

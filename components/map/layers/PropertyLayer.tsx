@@ -1,18 +1,5 @@
 "use client";
 
-/**
- * components/map/layers/PropertyLayer.tsx
- * ZONA CACA — Property Units Pin Layer
- *
- * Clean & focused map pin layer:
- * - Shows pins for properties around selected station
- * - Pin click displays a clean property preview popup with "Lihat Detail ›"
- * - Clicking the popup opens the full Property Detail view in the sidebar
- * - Compare actions are intentionally kept exclusively inside Property Detail
- *
- * Anti-overlap: resolveOverlaps() spreads closely positioned pins onto a small spiral.
- */
-
 import { useEffect, useRef, useMemo } from "react";
 import maplibregl from "maplibre-gl";
 import { useMapInstance } from "@/hooks/map/useMapInstance";
@@ -66,7 +53,7 @@ function resolveOverlaps(
   props: PropertyUnit[],
   spreadDeg = 0.00015
 ): Array<{ prop: PropertyUnit; lng: number; lat: number }> {
-  const BUCKET = 0.00003; // ~3m
+  const BUCKET = 0.00003;
   const snap = (v: number) => Math.round(v / BUCKET) * BUCKET;
 
   const groups = new Map<string, PropertyUnit[]>();
@@ -83,7 +70,6 @@ function resolveOverlaps(
       result.push({ prop: group[0], lng: group[0].lng, lat: group[0].lat });
       continue;
     }
-    // Sebarkan ke posisi-posisi sekeliling titik pusat (mulai dari atas, searah jam)
     const angleStep = (2 * Math.PI) / group.length;
     group.forEach((prop, i) => {
       const angle = i * angleStep - Math.PI / 2;
@@ -107,7 +93,6 @@ export default function PropertyLayer() {
   const { propertyTypes, transactionTypes, hasPhotoOnly } = usePropertyFilter();
   const { isPanelOpen, assignToActiveSlot, openPanel } = useComparison();
 
-  // Predikatnya di lib/property/filter.ts — sama persis dengan PropertyList & StationSearchBar.
   const filteredProperties = useMemo(
     () =>
       properties.filter((prop) =>
@@ -118,7 +103,6 @@ export default function PropertyLayer() {
 
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const activePopupRef = useRef<maplibregl.Popup | null>(null);
-  // Map property id → its Popup instance for programmatic open from sidebar
   const popupMapRef = useRef<Map<string, { popup: maplibregl.Popup; prop: PropertyUnit }>>(new Map());
 
   function resolveStationForProp(prop: PropertyUnit) {
@@ -166,7 +150,6 @@ export default function PropertyLayer() {
   useEffect(() => {
     if (!map) return;
 
-    // Bersihkan marker dan popup sebelumnya
     if (activePopupRef.current) {
       activePopupRef.current.remove();
       activePopupRef.current = null;
@@ -220,8 +203,6 @@ export default function PropertyLayer() {
         maxWidth: "300px",
       }).setDOMContent(popupEl);
 
-      // Popup terbuka = properti "dipratinjau": RouteLayer langsung menggambar rutenya.
-      // Ditutup (tombol X / klik peta / popup lain dibuka) = pratinjau selesai.
       popup.on("open", () => {
         setPreviewProperty({ ...prop, lng, lat });
       });
@@ -232,7 +213,6 @@ export default function PropertyLayer() {
         setPreviewProperty((current) => (current?.id === prop.id ? null : current));
       });
 
-      // Simpan dengan koordinat offset agar sidebar-click bisa buka di posisi yang benar
       popupMapRef.current.set(prop.id, { popup, prop: { ...prop, lng, lat } });
 
       el.addEventListener("click", (e) => {
@@ -279,12 +259,11 @@ export default function PropertyLayer() {
     };
   }, [map, selectedStation, filteredProperties, stations, isPanelOpen, assignToActiveSlot, setSelectedStation, setSelectedProperty, setPreviewProperty]);
 
-  // 2. React to selectedProperty (klik dari sidebar atau peta) → buka popup pin yang sesuai
   useEffect(() => {
     if (!map || !selectedProperty) return;
 
     const entry = popupMapRef.current.get(selectedProperty.id);
-    if (!entry) return; // properti mungkin belum di-render (stasiun berbeda)
+    if (!entry) return;
 
     if (activePopupRef.current !== entry.popup) {
       if (activePopupRef.current) {

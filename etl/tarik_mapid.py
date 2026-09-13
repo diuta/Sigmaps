@@ -36,9 +36,6 @@ SUMBER = {
     "activities": "activities.geojson",
 }
 
-# JANGAN DIHAPUS. Tanpa start_date/end_date, /activities diam-diam memotong ke
-# jendela terbaru DAN meta.total ikut terpotong, jadi tidak terlihat sebagai galat:
-# tanpa filter 60, dengan rentang penuh 1.542 — 96% data hilang.
 RENTANG_TANGGAL = {"start_date": "2015-01-01", "end_date": "2030-12-31"}
 
 BATAS_HALAMAN = 100
@@ -67,7 +64,6 @@ def tarik(nama: str, kunci: str) -> dict:
 
         hasil = r.json()
 
-        # Dua bentuk respons yang diketahui dari script.py lama.
         if "features" in hasil:
             batch = hasil["features"]
             fitur.extend(batch)

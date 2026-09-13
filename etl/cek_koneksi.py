@@ -45,15 +45,11 @@ def main():
             if h is not None and n != h:
                 tanda = "  <-"
                 belum.append(t)
-            # RLS aktif tanpa policy = tabel mengembalikan NOL BARIS lewat anon
-            # key, tanpa pesan galat sama sekali. Paling sulit dilacak.
             if ada[t] and policy.get(t, 0) == 0:
                 tanda += "  RLS aktif tanpa policy"
             print(f"{t:20} {'ya' if ada[t] else 'TIDAK':>5} {policy.get(t, 0):>7} "
                   f"{n:>8} {str(h) if h else '-':>9}{tanda}")
 
-        # Geometri wajib benar sebelum apa pun dihitung: area_km2 adalah
-        # penyebut rumus C, dan spatial join bergantung pada geom yang sah.
         if "katalog_restoran" in ada:
             cur.execute("select count(*) from katalog_restoran where geom is null;")
             kosong = cur.fetchone()[0]

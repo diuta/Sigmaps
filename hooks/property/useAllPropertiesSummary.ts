@@ -1,15 +1,5 @@
 "use client";
 
-/**
- * hooks/property/useAllPropertiesSummary.ts
- *
- * Mengambil ringkasan properti seluruh stasiun dari /api/properties?summary=true
- * Digunakan oleh StationSearchBar untuk memfilter stasiun berdasarkan ketersediaan unit properti:
- * - Tipe properti: Rumah, Kos, Ruko, Kantor, Tanah, Retail
- * - Transaksi: Disewa, Dijual
- * - Karakteristik: Ada foto fisik
- */
-
 import { useMemo } from "react";
 import { useApiJson } from "@/hooks/api/useApiJson";
 

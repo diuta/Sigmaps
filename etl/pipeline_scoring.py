@@ -28,14 +28,9 @@ memindahkan ribuan baris bolak-balik tanpa alasan.
 
 from db import connect
 
-# Dari sebaran nyata, bukan tebakan: 79 dari 176 pengamatan jatuh di dalam isokron,
-# tersebar di 19 dari 43 kawasan. Ambang 10 meloloskan 3 kawasan, ambang 5
-# meloloskan tepat 5 (Top 5 jadi tidak menyaring apa pun), ambang 3 meloloskan 11.
 AMBANG_OBSERVASI = 3
 AMBANG_HARGA = 3
 
-# Tarikan ke netral pada rumus D (§6.2). Tanpa ini, kawasan dengan 3 pengamatan
-# yang kebetulan semuanya "Ramai" dapat D = 1,00 dan langsung juara.
 K = 8
 NETRAL = 0.5
 
@@ -127,7 +122,6 @@ def main():
             print(f"  {r[0]:6} {r[1][:30]:30} {r[2]:4} {r[3]:4} "
                   f"{r[4]:>6} {r[5]:>8} {r[6]:>8}")
 
-        # Sanity check: n_price tidak mungkin melebihi n_observations.
         cur.execute("select count(*) from scored_areas where n_price > n_observations;")
         salah = cur.fetchone()[0]
         if salah:

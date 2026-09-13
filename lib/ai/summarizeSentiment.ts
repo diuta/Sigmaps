@@ -2,13 +2,9 @@ import { generateText } from 'ai'
 import { geminiFlashLite } from '@/lib/ai/gemini'
 import { CommunitySentimentSchema } from '@/lib/schemas/community-sentiment'
 
-// Dibedakan instanceof oleh route: "AI penuh" sementara, "tidak tertafsir" tidak.
 export class SentimentUnavailableError extends Error {}
 export class SentimentValidationError extends Error {}
 
-// Titik sentuh AI #5 (context/context-final.md §7.2, context/context-mvp.md §2 Langkah 3a).
-// Sama seperti parseIntent.ts: generateText + JSON.parse manual + validasi Zod, bukan
-// generateObject (keputusan tim, lihat lib/ai/parseIntent.ts).
 const SYSTEM_PROMPT = `Kamu meringkas laporan warga (Community Activity) di kawasan sebuah stasiun transit jadi satu ringkasan singkat.
 Balas HANYA dengan JSON valid, tanpa markdown/backtick, persis mengikuti bentuk ini:
 { "ringkasan": "ringkasan 2-4 kalimat tentang kondisi kawasan berdasarkan laporan yang diberikan" }
@@ -26,7 +22,6 @@ export async function summarizeSentiment(reports: SentimentReport[]) {
     .map((r) => `- ${r.title}: ${r.description} (komentar: ${r.total_comment}, suka: ${r.likes})`)
     .join('\n')
 
-  // flash-lite, bukan flash: kuota flash habis (429 di semua stasiun, 7 Sep 2026).
   let text: string
   try {
     ;({ text } = await generateText({

@@ -1,13 +1,9 @@
 export type StationTierFilter = "all" | "recommended" | "ready" | "minimal";
 
 export interface PropertyFilterValues {
-  /** Daftar tipe properti yang dipilih (multi-select, e.g. ["rumah", "kos"]) */
   propertyTypes: string[];
-  /** Daftar jenis transaksi yang dipilih (multi-select, e.g. ["sewa", "jual"]) */
   transactionTypes: string[];
-  /** Tingkatan stasiun KRL (Semua, Top AI, Data Lengkap, Data Minim) */
   stationTier: StationTierFilter;
-  /** Hanya tampilkan properti yang memiliki foto tampak depan atau spanduk */
   hasPhotoOnly: boolean;
 }
 

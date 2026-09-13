@@ -1,12 +1,5 @@
 "use client";
 
-/**
- * components/comparison/CompareBar.tsx
- *
- * Clean comparison activation button in the sidebar.
- * Symmetrical and equal in height (h-11) with MapLegend button.
- */
-
 import { useComparison } from "@/hooks/comparison/useComparison";
 
 export default function CompareBar() {

@@ -1,20 +1,5 @@
 "use client";
 
-/**
- * hooks/api/useApiJson.ts
- * Satu mesin state untuk semua hook fetch di hooks/* (useStations, useProperties,
- * useCommunitySentiment, useAllPropertiesSummary). Tahu bentuk envelope API SIGMAPS
- * (CLAUDE.md §6): sukses `{ data: T }`, gagal `{ error }`.
- *
- * Request di-memo per URL (helper/memo-ttl): beberapa komponen yang memanggil hook yang sama
- * untuk URL yang sama berbagi satu request dan satu objek hasil — termasuk pemanggilan ganda
- * React StrictMode di dev. Hanya respons `ok` yang bertahan di cache.
- *
- * `url === null` berarti "belum perlu ambil": tidak ada request, hasilnya kosong. Saat `url`
- * berganti, `data` langsung `null` dan `loading` `true` sampai jawaban URL baru datang; untuk
- * URL yang sudah di-cache jedanya satu frame.
- */
-
 import { useEffect, useState } from "react";
 import { memoTtl } from "@/helper/memo-ttl";
 

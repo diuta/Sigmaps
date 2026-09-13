@@ -1,4 +1,3 @@
-/** Hasil di bawahnya masih milik brief sebelumnya selama rencana sedang disunting. */
 export default function StaleOutputNotice() {
   return (
     <p

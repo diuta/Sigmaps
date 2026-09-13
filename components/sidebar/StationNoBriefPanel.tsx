@@ -13,27 +13,13 @@ interface Props {
   onSelectProperty: (unit: PropertyUnit, stationId: string, stationName: string) => void;
 }
 
-/**
- * Keadaan "kawasan dipilih di peta, rencana belum diisi" — belum ada skor apa pun.
- *
- * Ini gambaran kawasan yang bisa dibaca SEBELUM user menulis rencana usaha, jadi dia bisa
- * memilih kawasan mana yang layak dinilai. Dua blok di atas daftar properti:
- *   - "Kategori yang belum banyak di sini" — masih DUMMY, lihat AreaGapBlock.tsx.
- *   - "Gambaran kawasan" — nyata, dari /api/community-sentiment (sama seperti di ScoredPanel).
- * Blok "Isi kawasan sekarang" (jumlah pedagang per kategori) di mockup sengaja tidak dibuat:
- * tidak ada view/tabel yang menyimpan komposisi pedagang per kawasan.
- */
 export default function StationNoBriefPanel({ onSelectProperty }: Props) {
   const { selectedStation } = useSelectedStation();
 
-  // Sengaja TANPA tab bar: di sini cuma ada satu hal untuk ditampilkan, jadi tab tunggal
-  // hanya jadi derau. Bandingkan dengan ScoredPanel yang punya dua tampilan.
   const { properties, loading } = useProperties(
     selectedStation?.is_rankable ? selectedStation.area_id : null,
   );
 
-  // Klik pertama sebuah stasiun = 1 panggilan Gemini; klik berikutnya dilayani cache server
-  // (lib/sentiment). Lihat docs/api-community-sentiment.md.
   const { sentiment, loading: sentimentLoading } = useCommunitySentiment(
     selectedStation?.is_rankable ? selectedStation.area_id : null,
   );
@@ -56,7 +42,6 @@ export default function StationNoBriefPanel({ onSelectProperty }: Props) {
         <>
           <AreaGapBlock kategori={DUMMY_KATEGORI_JARANG} />
 
-          {/* Gagal ambil ringkasan tidak boleh menghalangi daftar properti — diam saja. */}
           {sentimentLoading ? (
             <AiLoadingBlock judul="Gambaran kawasan" />
           ) : (
