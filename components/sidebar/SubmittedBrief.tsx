@@ -3,9 +3,10 @@
 interface Props {
   value: string;
   onEdit: () => void;
+  onReset: () => void;
 }
 
-export default function SubmittedBrief({ value, onEdit }: Props) {
+export default function SubmittedBrief({ value, onEdit, onReset }: Props) {
   return (
     <section className="flex flex-col gap-[var(--space-md)]">
       <div className="flex flex-col gap-[var(--space-xs)]">
@@ -28,6 +29,14 @@ export default function SubmittedBrief({ value, onEdit }: Props) {
         className="t-button w-full rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] py-[10px] text-[var(--color-text)] transition-all duration-[var(--motion-fast)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] active:translate-y-[1px]"
       >
         Edit rencana
+      </button>
+
+      <button
+        type="button"
+        onClick={onReset}
+        className="t-button w-full rounded-[var(--radius-card)] border border-transparent py-[6px] text-[var(--color-text-sub)] transition-colors duration-[var(--motion-fast)] hover:text-[var(--color-brand)] hover:underline"
+      >
+        Hapus penilaian, jelajahi peta lagi
       </button>
     </section>
   );

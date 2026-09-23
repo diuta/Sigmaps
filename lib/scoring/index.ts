@@ -100,6 +100,18 @@ export function groupFor(tipe3: string): string | null {
   return GROUP_OF_CATEGORY[tipe3] ?? null
 }
 
+/** Kawasan berperingkat milik sebuah stasiun, atau null kalau stasiun itu tidak
+ *  masuk peringkat. Dicocokkan lewat `station_id`, BUKAN `area_id`: keduanya
+ *  kebetulan bernilai sama di data sekarang, tapi `selectedStation.area_id`
+ *  sebenarnya berisi station_id (lihat StationSearchBar), jadi mencocokkannya ke
+ *  `area_id` hanya benar karena kebetulan itu. */
+export function areaForStation<T extends { station_id: string }>(
+  areas: readonly T[],
+  stationId: string | null | undefined
+): T | null {
+  return areas.find((a) => a.station_id === stationId) ?? null
+}
+
 /** Kelompok kuliner yang di kawasan ini jauh lebih jarang daripada rata-rata
  *  jaringan — bahan AreaGapBlock. Bukan bagian dari skor.
  *
