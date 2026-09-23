@@ -81,8 +81,16 @@ function percentile(sorted: number[], p: number): number {
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo)
 }
 
-function competitorCount(area: ScoredAreaRow, group: string): number {
-  if (group === SEMUA) return area.total_restaurants
+/** Bentuk minimum yang dibutuhkan untuk menghitung jumlah pesaing — dipakai
+ *  ScoredAreaRow (punya total_restaurants) maupun GapRow (tidak punya, dan
+ *  tidak butuh karena kelompok SEMUA tidak pernah dinilai sebagai celah). */
+type CountsSource = {
+  competitor_counts: Record<string, number>
+  total_restaurants?: number
+}
+
+function competitorCount(area: CountsSource, group: string): number {
+  if (group === SEMUA) return area.total_restaurants ?? 0
   return (GROUPS[group] ?? []).reduce((n, k) => n + (area.competitor_counts[k] ?? 0), 0)
 }
 
@@ -90,6 +98,59 @@ export function groupFor(tipe3: string): string | null {
   if (tipe3 === SEMUA) return SEMUA
   if (tipe3 in GROUPS) return tipe3
   return GROUP_OF_CATEGORY[tipe3] ?? null
+}
+
+/** Kelompok kuliner yang di kawasan ini jauh lebih jarang daripada rata-rata
+ *  jaringan — bahan AreaGapBlock. Bukan bagian dari skor.
+ *
+ *  Kelompok yang hampir tidak ada di kawasan MANA PUN dilewati: langka di
+ *  mana-mana bukan celah pasar, itu tanda pasarnya memang tidak ada, dan
+ *  menyebutnya peluang akan menyesatkan. Ambangnya jumlah kawasan yang
+ *  memilikinya, bukan median kepadatan — median > 0 sama artinya dengan "ada di
+ *  lebih dari separuh kawasan", dan itu membuang kelompok yang nyata tapi
+ *  mengelompok (kafe ada di 20 dari 43 kawasan) hanya karena sebarannya timpang. */
+export type GapRow = {
+  key: string
+  area_km2: number | null
+  competitor_counts: Record<string, number> | null
+}
+
+const GAP_MAX = 3
+/** Kelompok harus ada di minimal sebanyak ini kawasan untuk dianggap pasar nyata. */
+const GAP_MIN_KAWASAN = 5
+
+export function kategoriJarang(rows: GapRow[], key: string): string[] {
+  // ponytail: seluruh sebaran dihitung ulang tiap panggilan — 14 kelompok x 43
+  // kawasan, tidak terasa. Kalau jumlah kawasan tumbuh jauh, angkat rata-rata
+  // per kelompok ke pipeline batch.
+  const valid = rows.flatMap((r) =>
+    r.area_km2 !== null && r.area_km2 > 0 && r.competitor_counts !== null
+      ? [{ key: r.key, area_km2: r.area_km2, competitor_counts: r.competitor_counts }]
+      : []
+  )
+  const target = valid.find((r) => r.key === key)
+  if (!target) return []
+
+  const jarang: Array<{ kelompok: string; rasio: number; selisih: number }> = []
+
+  for (const kelompok of Object.keys(GROUPS)) {
+    const kepadatan = valid.map((r) => competitorCount(r, kelompok) / r.area_km2)
+    if (kepadatan.filter((d) => d > 0).length < GAP_MIN_KAWASAN) continue
+
+    // Rata-rata, bukan median: median nol untuk setiap kelompok yang ada di
+    // kurang dari separuh kawasan, sehingga "di bawah median" mustahil dan
+    // kelompoknya hilang. Angkanya tidak pernah ditampilkan, hanya diurutkan.
+    const lazim = kepadatan.reduce((a, b) => a + b, 0) / kepadatan.length
+    const disini = competitorCount(target, kelompok) / target.area_km2
+    if (disini >= lazim) continue
+
+    jarang.push({ kelompok, rasio: disini / lazim, selisih: lazim - disini })
+  }
+
+  return jarang
+    .sort((a, b) => a.rasio - b.rasio || b.selisih - a.selisih)
+    .slice(0, GAP_MAX)
+    .map((j) => j.kelompok)
 }
 
 function hitungC(kepadatan: number, lo: number, hi: number): number {

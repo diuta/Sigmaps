@@ -1,8 +1,10 @@
 # app/api/stations/route.ts
 
-Baca seluruh baris tabel `stasiun` (termasuk yang belum berskor) dan balas sebagai GeoJSON
-FeatureCollection. Dipakai frontend saat halaman dibuka untuk menggambar titik stasiun di
-peta (`context/context-mvp.md` §2 Langkah 1).
+Baca seluruh kawasan stasiun (termasuk yang belum berskor) dan balas sebagai GeoJSON
+FeatureCollection: titik stasiun, polygon isokron, penanda `is_rankable`, dan sensus pesaing per
+kategori. Dipakai frontend saat halaman dibuka untuk menggambar titik stasiun di peta
+(`context/context-mvp.md` §2 Langkah 1), dan oleh `AreaGapBlock` untuk menghitung kelompok kuliner
+yang jarang di suatu kawasan.
 
 ## Cara pakai
 
@@ -25,7 +27,11 @@ Respons sukses:
           "nama": "Tanah Abang",
           "tipe_3": "COMMUTER",
           "kecamatan": "Tanah Abang",
-          "kabkot": "Jakarta Pusat"
+          "kabkot": "Jakarta Pusat",
+          "is_rankable": true,
+          "area_km2": 0.97,
+          "isokron": { "type": "Polygon", "coordinates": [[[106.81, -6.18]]] },
+          "competitor_counts": { "CEPAT SAJI": 8, "MIE DAN BAKSO": 3 }
         }
       }
     ]
@@ -45,15 +51,23 @@ Respons gagal (Supabase tidak merespons → `503`):
 - [lib/station/index.ts](../context/lib-stations.md) — transform baris tabel mentah ke FeatureCollection (pure).
 - Tabel `stasiun` sudah diisi ETL (lihat `context/dokumentasi-erd-mvp.md` bagian 1) dan
   `service_role` sudah punya GRANT `SELECT` (lihat bagian GRANT di `supabase/views.sql`).
+- View `stasiun_kawasan` dan tabel `scored_areas` sudah ada, dan `etl/pipeline_scoring.py` sudah
+  jalan minimal sekali — sebelum itu `isokron`, `area_km2`, `is_rankable`, dan
+  `competitor_counts` semuanya `null`, yang merupakan kondisi normal, bukan galat.
 
 ## Batasan/gotcha
 
-- **Query langsung ke tabel `stasiun`, BUKAN lewat SQL view** — beda dari
-  [api-properties.md](../context/api-properties.md) dan [api-community-sentiment.md](../context/api-community-sentiment.md)
-  yang wajib lewat view. `stasiun` menyimpan koordinat sebagai kolom `longitude`/`latitude`
-  biasa (bukan geometry PostGIS) dan tidak butuh spatial join apa pun untuk endpoint ini, jadi
-  penyusunan GeoJSON-nya cukup di JavaScript (`lib/station/index.ts`) — lihat catatan lengkap di
-  `context/lib-stations.md` kenapa kasus ini beda dari dua endpoint lain itu.
+- **Dua query, digabung di JavaScript.** Yang pertama ke view `stasiun_kawasan` (titik stasiun +
+  `isokron` + `area_km2` + `is_rankable`) — butuh view karena `isokron` berasal dari
+  `scored_areas.geom` dan PostgREST membalas kolom geometry sebagai WKB hex. Yang kedua langsung
+  ke tabel `scored_areas` untuk `competitor_counts`, kolom yang sengaja tidak ikut di view itu,
+  digabung per `station_id`. Keduanya dijalankan paralel (`Promise.all`).
+  Catatan: dokumen ini sebelumnya menyatakan route mengambil langsung dari tabel `stasiun` tanpa
+  view — itu sudah tidak benar sejak `isokron` masuk respons.
+- **Kegagalan query kedua tidak fatal.** `competitor_counts` hanya bahan `AreaGapBlock`; kalau
+  query itu gagal, errornya dicatat ke `console.error`, `competitor_counts` bernilai `null`, blok
+  tersebut tidak dirender, dan peta beserta isokron tetap jalan. Hanya kegagalan query stasiun
+  yang membalas `503`.
 - Field `tipe_3` di response ini **memakai nama kolom mentah apa adanya**, sengaja tidak
   dialiaskan — walau namanya membingungkan (di tabel lain, `katalog_restoran`, `tipe_3`
   berarti kategori restoran; di sini cuma tipe layanan transportasi, `COMMUTER`/`KERETA API`,

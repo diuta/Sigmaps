@@ -1,12 +1,15 @@
 "use client";
 
+import { useMemo } from "react";
 import AiLoadingBlock from "@/components/sidebar/AiLoadingBlock";
-import AreaGapBlock, { DUMMY_KATEGORI_JARANG } from "@/components/sidebar/AreaGapBlock";
+import AreaGapBlock from "@/components/sidebar/AreaGapBlock";
 import AreaInsightBlock from "@/components/sidebar/AreaInsightBlock";
 import PropertyList from "@/components/sidebar/PropertyList";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
+import { useStations } from "@/hooks/station/useStations";
 import { useProperties } from "@/hooks/property/useProperties";
 import { useCommunitySentiment } from "@/hooks/sentiment/useCommunitySentiment";
+import { kategoriJarang } from "@/lib/scoring";
 import type { PropertyUnit } from "@/types/property";
 
 interface Props {
@@ -15,6 +18,7 @@ interface Props {
 
 export default function StationNoBriefPanel({ onSelectProperty }: Props) {
   const { selectedStation } = useSelectedStation();
+  const { stations } = useStations();
 
   const { properties, loading } = useProperties(
     selectedStation?.is_rankable ? selectedStation.area_id : null,
@@ -22,6 +26,23 @@ export default function StationNoBriefPanel({ onSelectProperty }: Props) {
 
   const { sentiment, loading: sentimentLoading } = useCommunitySentiment(
     selectedStation?.is_rankable ? selectedStation.area_id : null,
+  );
+
+  // selectedStation.area_id memuat station_id (lihat StationSearchBar), jadi
+  // kawasan dicocokkan lewat station_id — bukan scored_areas.area_id.
+  const kategori = useMemo(
+    () =>
+      selectedStation
+        ? kategoriJarang(
+            (stations?.features ?? []).map((f) => ({
+              key: f.properties.station_id,
+              area_km2: f.properties.area_km2,
+              competitor_counts: f.properties.competitor_counts,
+            })),
+            selectedStation.area_id,
+          )
+        : [],
+    [stations, selectedStation],
   );
 
   if (!selectedStation) return null;
@@ -40,7 +61,7 @@ export default function StationNoBriefPanel({ onSelectProperty }: Props) {
 
       {selectedStation.is_rankable ? (
         <>
-          <AreaGapBlock kategori={DUMMY_KATEGORI_JARANG} />
+          <AreaGapBlock kategori={kategori} />
 
           {sentimentLoading ? (
             <AiLoadingBlock judul="Gambaran kawasan" />

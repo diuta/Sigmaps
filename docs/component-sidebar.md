@@ -19,7 +19,7 @@ Komponen-komponen sidebar, satu file satu tanggung jawab:
 | `RankStrip.tsx` | Deretan tombol angka 1..n untuk pindah peringkat |
 | `ScoreComponentBar.tsx` | Satu bar komponen (D/C/S) + kalimat penjelas |
 | `AreaInsightBlock.tsx` | Ringkasan AI Community Activity |
-| `AreaGapBlock.tsx` | Chip "Kategori yang belum banyak di sini" — **isinya masih dummy** |
+| `AreaGapBlock.tsx` | Chip "Kategori yang belum banyak di sini" — kelompok kuliner yang lebih jarang di kawasan ini daripada rata-rata jaringan |
 | `AiLoadingBlock.tsx` | Skeleton berdenyut selagi menunggu keluaran AI |
 | `PropertyList.tsx` | Kartu unit Properti Go yang bisa diklik — presentational, datanya dari pemanggil |
 | `PropertyDetail.tsx` | Halaman detail satu unit + tombol kembali |
@@ -171,15 +171,17 @@ pun, keputusan itu diambil tanpa dasar.
   [api-community-sentiment.md](../context/api-community-sentiment.md).
 - Blok hanya dirender kalau `ringkasan` tidak kosong; saat `error`, panel **tidak menampilkan apa
   pun** — kegagalan AI tidak boleh menghalangi daftar properti.
-- ⚠️ **`AreaGapBlock` masih dummy.** Isinya `DUMMY_KATEGORI_JARANG` yang diekspor dari file
-  komponennya sendiri, bukan data. Rencana sumber aslinya: field `kategori_jarang` yang menumpang
-  panggilan Gemini yang sudah ada di `/api/community-sentiment` (bukan titik sentuh AI ketiga),
-  divalidasi ke daftar `tipe3_values`. Perubahan itu ada di `app/api/`, `lib/ai/`, dan
-  `types/sentiment/` — di luar zona sidebar, jadi ditunda.
-- Blok **"Isi kawasan sekarang"** (jumlah pedagang per kategori) yang ada di mockup **tidak
-  dibuat**: tidak ada view/tabel yang menyimpan komposisi pedagang per kawasan.
-  `properti_go_by_station` hanya punya `kategori_properti` (jenis properti yang disewakan, bukan
-  jenis pedagang) dan `scored_areas` hanya menyimpan komponen 0–1 + `n_observations`.
+- **`AreaGapBlock` memakai data sensus nyata sejak 23 September 2026.** Isinya dihitung
+  `kategoriJarang()` di [lib/scoring](lib-scoring.md) dari `competitor_counts` — sensus
+  `katalog_restoran` per kawasan — yang ikut menumpang respons `/api/stations` (tanpa endpoint
+  baru, tanpa panggilan AI: blok ini murni hitungan). Rencana lama, menempelkan field
+  `kategori_jarang` ke panggilan Gemini di `/api/community-sentiment`, **dibatalkan** — celah
+  pasar adalah hitungan, bukan pekerjaan model bahasa.
+- Blok **"Isi kawasan sekarang"** (jumlah pedagang per kategori) yang ada di mockup **tetap tidak
+  dibuat**, tapi bukan lagi karena datanya tidak ada: `scored_areas.competitor_counts` menyimpan
+  komposisi pedagang per kategori, dan `AreaGapBlock` sekarang membacanya. Yang belum ada
+  alasannya cuma keputusan produk — menampilkan jumlah mentah per kategori tanpa pembanding
+  kawasan lain memberi angka tanpa makna, dan itulah yang sudah dijawab `AreaGapBlock`.
 
 **Maksimal lima kawasan teratas yang tampil, dan pemotongannya dilakukan server**
 (`app/api/score/route.ts`) — `ScoredPanel` merender apa adanya isi `scoreResult.areas`.
@@ -235,13 +237,21 @@ Catatan implementasi:
 
 - `--color-opportunity` (emerald): **hanya** untuk keluaran deterministik — angka skor dan bar
   D/C/S.
-- `--color-accent` (ultramarine): **hanya** untuk keluaran AI — `AreaInsightBlock`, `AreaGapBlock`,
+- `--color-accent` (ultramarine): **hanya** untuk keluaran AI — `AreaInsightBlock`,
   `AiLoadingBlock`.
 - `--color-warning` (amber): peringatan/keterbatasan data.
 - `--color-pin` (tangerine): properti.
 
 Pemisahan ini yang membuat user bisa tahu, tanpa membaca label, mana angka yang direproduksi
 mesin dan mana kalimat yang ditulis model.
+
+⚠️ **Satu pengecualian yang belum diputuskan: `AreaGapBlock`.** Sejak 23 September 2026 isinya
+deterministik (hitungan `competitor_counts`, bukan AI), tapi warnanya masih `--color-accent`
+warisan versi dummy-nya. Menurut aturan di atas itu keliru — ultramarine menjanjikan "ini tulisan
+model". Emerald juga tidak cocok, karena blok ini bukan bagian dari skor. Pilihannya: beri gaya
+netral (`--color-surface-muted` + border) supaya jelas "deterministik tapi di luar skor", atau
+perluas definisi ultramarine menjadi "informasi di luar skor". Keputusan gaya visual, jadi
+dibiarkan apa adanya sampai dipilih.
 
 ## Dependency/prasyarat
 
