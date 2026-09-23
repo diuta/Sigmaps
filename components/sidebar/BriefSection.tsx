@@ -9,6 +9,7 @@ interface Props {
   submitted: string | null;
   editing: boolean;
   onEdit: () => void;
+  onReset: () => void;
   onSubmit: () => void;
   loading: boolean;
 }
@@ -19,11 +20,12 @@ export default function BriefSection({
   submitted,
   editing,
   onEdit,
+  onReset,
   onSubmit,
   loading,
 }: Props) {
   if (submitted !== null && !editing) {
-    return <SubmittedBrief value={submitted} onEdit={onEdit} />;
+    return <SubmittedBrief value={submitted} onEdit={onEdit} onReset={onReset} />;
   }
 
   return (

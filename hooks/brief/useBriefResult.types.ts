@@ -7,4 +7,6 @@ export interface BriefResultContextValue {
   loading: boolean;
   error: string | null;
   submitBrief: (prompt: string) => Promise<void>;
+  /** Kosongkan hasil penilaian tanpa menyentuh teks rencana yang sudah ditulis. */
+  resetBrief: () => void;
 }

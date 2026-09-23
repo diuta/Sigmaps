@@ -59,8 +59,14 @@ export function BriefResultProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  function resetBrief() {
+    setIntent(null);
+    setScoreResult(null);
+    setError(null);
+  }
+
   return (
-    <BriefResultContext.Provider value={{ intent, scoreResult, loading, error, submitBrief }}>
+    <BriefResultContext.Provider value={{ intent, scoreResult, loading, error, submitBrief, resetBrief }}>
       {children}
     </BriefResultContext.Provider>
   );

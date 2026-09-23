@@ -48,3 +48,6 @@ __pycache__/
 
 # data sumber pipeline batch — arsip berkas mentah, tidak di-commit
 /etl/data/
+
+/.claude
+/.kiro

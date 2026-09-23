@@ -15,6 +15,7 @@ import {
   explainNeutralPull,
   observedRange,
 } from "@/lib/scoring/explanations";
+import { areaForStation } from "@/lib/scoring";
 import { useSelectedStation } from "@/hooks/station/useSelectedStation";
 import { useBriefResult } from "@/hooks/brief/useBriefResult";
 import { useStations } from "@/hooks/station/useStations";
@@ -28,19 +29,18 @@ interface Props {
 }
 
 export default function ScoredPanel({ brief, onSelectProperty }: Props) {
-  const { setSelectedStation } = useSelectedStation();
+  const { selectedStation, setSelectedStation } = useSelectedStation();
   const { intent, scoreResult } = useBriefResult();
   const { stations } = useStations();
 
   const rankedAreas = scoreResult?.areas ?? [];
 
-  const [activeAreaId, setActiveAreaId] = useState<string | null>(rankedAreas[0]?.area_id ?? null);
-
-  const [prevScoreResult, setPrevScoreResult] = useState(scoreResult);
-  if (scoreResult !== prevScoreResult) {
-    setPrevScoreResult(scoreResult);
-    setActiveAreaId(rankedAreas[0]?.area_id ?? null);
-  }
+  // Kawasan aktif dibaca dari `selectedStation`, bukan state lokal. Sebelumnya ada
+  // `activeAreaId` di sini, dan karena peta membaca `selectedStation` sementara
+  // panel membaca state lokalnya sendiri, keduanya bisa menunjuk kawasan berbeda.
+  // OutputSection yang mengarahkan `selectedStation` ke peringkat #1 setiap kali
+  // hasil skor baru datang.
+  const area = areaForStation(rankedAreas, selectedStation?.area_id) ?? rankedAreas[0] ?? null;
 
   const unrankableStations = (stations?.features ?? [])
     .filter((feature) => feature.properties.is_rankable === false)
@@ -51,7 +51,6 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
 
   const demandObservedRange = observedRange(rankedAreas.map((area) => area.komponen.demand));
 
-  const area = rankedAreas.find((a) => a.area_id === activeAreaId) ?? rankedAreas[0] ?? null;
   const { sentiment, loading: sentimentLoading } = useCommunitySentiment(area?.station_id ?? null);
 
   const { properties, loading: propertiesLoading } = useProperties(area?.station_id ?? null);
@@ -72,12 +71,11 @@ export default function ScoredPanel({ brief, onSelectProperty }: Props) {
   const peringkat = rankedAreas.findIndex((a) => a.area_id === area.area_id) + 1;
 
   function selectArea(areaId: string) {
-    setActiveAreaId(areaId);
     const target = rankedAreas.find((a) => a.area_id === areaId);
     const feature = stations?.features.find((f) => f.properties.station_id === target?.station_id);
     if (target && feature?.geometry) {
       setSelectedStation({
-        area_id: target.area_id,
+        area_id: target.station_id,
         station_name: target.station_name,
         lng: feature.geometry.coordinates[0],
         lat: feature.geometry.coordinates[1],

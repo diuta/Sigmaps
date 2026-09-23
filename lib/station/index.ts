@@ -11,6 +11,10 @@ export type StationRow = {
   area_km2: number | null
   is_rankable: boolean | null
   isokron: GeoJSONPolygon | null
+
+  /** Sensus pesaing per kategori di dalam isokron, dari scored_areas. Dipakai
+   *  AreaGapBlock lewat lib/scoring.kategoriJarang, bukan untuk skor. */
+  competitor_counts: Record<string, number> | null
 }
 
 type GeoJSONPoint = { type: 'Point'; coordinates: [number, number] } | null
@@ -32,6 +36,7 @@ export type StationFeatureCollection = {
       area_km2: number | null
 
       isokron: GeoJSONPolygon | null
+      competitor_counts: Record<string, number> | null
     }
   }>
 }
@@ -54,6 +59,7 @@ export function toStationsFeatureCollection(rows: StationRow[]): StationFeatureC
         is_rankable: row.is_rankable,
         area_km2: row.area_km2,
         isokron: row.isokron,
+        competitor_counts: row.competitor_counts,
       },
     })),
   }

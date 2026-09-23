@@ -28,7 +28,7 @@ export default function Sidebar() {
   const [draft, setDraft] = useState("");
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
-  const { scoreResult, loading, error, submitBrief } = useBriefResult();
+  const { scoreResult, loading, error, submitBrief, resetBrief } = useBriefResult();
   const { selectedProperty } = useSelectedProperty();
 
   const isDesktop = useIsDesktop();
@@ -49,6 +49,18 @@ export default function Sidebar() {
   function openEditor() {
     setDraft(submitted ?? "");
     setEditing(true);
+    setOverride(true);
+  }
+
+  // Balik ke keadaan sebelum menilai: hasil dibuang, peta bebas dijelajahi lagi.
+  // Teks rencananya sengaja DITAHAN di `draft` supaya menilai ulang cukup satu klik —
+  // bedanya dengan "Edit rencana" adalah Edit menyisakan hasil lama di layar sebagai
+  // usang, sedangkan ini menghapusnya.
+  function resetToBrowsing() {
+    resetBrief();
+    setDraft(submitted ?? draft);
+    setSubmitted(null);
+    setEditing(false);
     setOverride(true);
   }
 
@@ -73,6 +85,7 @@ export default function Sidebar() {
           submitted={submitted}
           editing={editing}
           onEdit={openEditor}
+          onReset={resetToBrowsing}
           onSubmit={submit}
           loading={loading}
         />
